@@ -525,6 +525,7 @@ abstract class Parser
 			$this->disabled['iurl'] = true;
 			$this->disabled['email'] = true;
 			$this->disabled['flash'] = true;
+			$this->disabled['youtube'] = true;
 
 			// @todo Change maybe?
 			if (!isset($_GET['images'])) {
