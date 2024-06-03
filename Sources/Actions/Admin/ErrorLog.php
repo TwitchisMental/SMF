@@ -318,11 +318,11 @@ class ErrorLog implements ActionInterface
 			} elseif ($this->filter['variable'] == 'url') {
 				Utils::$context['filter']['value']['html'] = '\'' . strtr(Utils::htmlspecialchars((str_starts_with($this->filter['value']['sql'], '?') ? Config::$scripturl : '') . $this->filter['value']['sql']), ['\\_' => '_']) . '\'';
 			} elseif ($this->filter['variable'] == 'message') {
-				Utils::$context['filter']['value']['html'] = '\'' . strtr(Utils::htmlspecialchars($this->filter['value']['sql']), ["\n" => '<br>', '&lt;br /&gt;' => '<br>', "\t" => '&nbsp;&nbsp;&nbsp;', '\\_' => '_', '\\%' => '%', '\\\\' => '\\']) . '\'';
+				Utils::$context['filter']['value']['html'] = '\'' . strtr(Utils::htmlspecialchars($this->filter['value']['sql']), ["\n" => '<br>', '&lt;br /&gt;' => '<br>', "\t" => Utils::TAB_SUBSTITUTE, '\\_' => '_', '\\%' => '%', '\\\\' => '\\']) . '\'';
 
 				Utils::$context['filter']['value']['html'] = preg_replace('~&amp;lt;span class=&amp;quot;remove&amp;quot;&amp;gt;(.+?)&amp;lt;/span&amp;gt;~', '$1', Utils::$context['filter']['value']['html']);
 			} elseif ($this->filter['variable'] == 'error_type') {
-				Utils::$context['filter']['value']['html'] = '\'' . strtr(Utils::htmlspecialchars($this->filter['value']['sql']), ["\n" => '<br>', '&lt;br /&gt;' => '<br>', "\t" => '&nbsp;&nbsp;&nbsp;', '\\_' => '_', '\\%' => '%', '\\\\' => '\\']) . '\'';
+				Utils::$context['filter']['value']['html'] = '\'' . strtr(Utils::htmlspecialchars($this->filter['value']['sql']), ["\n" => '<br>', '&lt;br /&gt;' => '<br>', "\t" => Utils::TAB_SUBSTITUTE, '\\_' => '_', '\\%' => '%', '\\\\' => '\\']) . '\'';
 			} else {
 				Utils::$context['filter']['value']['html'] = &$this->filter['value']['sql'];
 			}

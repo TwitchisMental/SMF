@@ -2648,7 +2648,7 @@ class BBCodeParser
 				// Restore any placeholders
 				$data = strtr($data, $this->placeholders);
 
-				$data = strtr($data, ["\t" => '&nbsp;&nbsp;&nbsp;']);
+				$data = strtr($data, ["\t" => Utils::TAB_SUBSTITUTE]);
 
 				// If it wasn't changed, no copying or other boring stuff has to happen!
 				if ($data != substr($this->message, $this->last_pos, $this->pos - $this->last_pos)) {

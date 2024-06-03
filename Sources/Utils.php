@@ -222,6 +222,13 @@ class Utils
 	 */
 	public const ENT_NBSP = '&(?' . '>nbsp|#(?' . '>x0*A0|0*160));';
 
+	/**
+	 * @var string
+	 *
+	 * Used to force the browser not to collapse tabs.
+	 */
+	public const TAB_SUBSTITUTE = "\u{200B}\u{2007}\u{2007}\u{2007}\u{2007}\u{200B}";
+
 	/**************************
 	 * Public static properties
 	 **************************/
