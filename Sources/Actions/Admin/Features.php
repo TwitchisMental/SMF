@@ -27,6 +27,7 @@ use SMF\Graphics\Image;
 use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Profile;
 use SMF\Sapi;
@@ -165,6 +166,10 @@ class Features implements ActionInterface
 		// Legacy BBC are listed separately, but we use the same info in both cases
 		Config::$modSettings['bbc_disabled_legacyBBC'] = Config::$modSettings['bbc_disabled_disabledBBC'];
 
+		// The Markdown settings for handling line breaks are actually a single bitmask.
+		Config::$modSettings['collapse_blank_lines'] = (int) !((Config::$modSettings['markdown_brs'] ?? 0) & MarkdownParser::BR_LINES);
+		Config::$modSettings['collapse_single_breaks'] = (int) !((Config::$modSettings['markdown_brs'] ?? 0) & MarkdownParser::BR_IN_PARAGRAPHS);
+
 		$extra = '';
 
 		if (isset($_REQUEST['cowsay'])) {
@@ -238,6 +243,12 @@ class Features implements ActionInterface
 					return !isset($config_var[1]) || $config_var[1] != 'legacyBBC';
 				},
 			);
+
+			// Save the Markdown collapse_* settings as a bitmask.
+			$config_vars[] = ['int', 'markdown_brs'];
+			$_POST['markdown_brs'] = (!empty($_POST['collapse_blank_lines']) ? 0 : MarkdownParser::BR_LINES);
+			$_POST['markdown_brs'] |= (!empty($_POST['collapse_single_breaks']) ? 0 : MarkdownParser::BR_IN_PARAGRAPHS);
+			unset($_POST['collapse_blank_lines'], $_POST['collapse_single_breaks']);
 
 			IntegrationHook::call('integrate_save_bbc_settings', [$bbcTags]);
 
@@ -1613,6 +1624,12 @@ class Features implements ActionInterface
 
 			// This one is actually pretend...
 			['bbc', 'legacyBBC', 'help' => 'legacy_bbc'],
+
+			// Markdown settings
+			['title', 'markdown_settings', 'text_label' => Lang::$txt['manageposts_markdown_settings_title']],
+			['check', 'enableMarkdown', 'onchange' => 'document.getElementById(\'collapse_blank_lines\').disabled = !this.checked; document.getElementById(\'collapse_single_breaks\').disabled = !this.checked;'],
+			['check', 'collapse_blank_lines', 'disabled' => empty(Config::$modSettings['enableMarkdown'])],
+			['check', 'collapse_single_breaks', 'disabled' => empty(Config::$modSettings['enableMarkdown'])],
 		];
 
 		// Permissions for restricted BBC

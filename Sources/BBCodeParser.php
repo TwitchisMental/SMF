@@ -443,7 +443,8 @@ class BBCodeParser
 		[
 			'tag' => 'br',
 			'type' => 'closed',
-			'content' => '<br>',
+			// We put a class on this to force the Markdown parser to preserve it.
+			'content' => '<br class="bbc_br">',
 		],
 		[
 			'tag' => 'center',
@@ -584,7 +585,7 @@ class BBCodeParser
 		[
 			'tag' => 'html',
 			'type' => 'unparsed_content',
-			'content' => '<div>$1</div>',
+			'content' => '<div class="bbc_html">$1</div>',
 			'block_level' => true,
 			'disabled_content' => '$1',
 		],

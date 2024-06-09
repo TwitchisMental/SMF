@@ -2690,6 +2690,10 @@ class Theme
 		// And of course, let's load the default CSS file.
 		self::loadCSSFile('index.css', ['minimize' => true, 'order_pos' => 1], 'smf_index');
 
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			self::loadCSSFile('markdown.css', ['minimize' => true, 'order_pos' => 2], 'smf_markdown');
+		}
+
 		// Here is my luvly Responsive CSS
 		self::loadCSSFile('responsive.css', ['force_current' => false, 'validate' => true, 'minimize' => true, 'order_pos' => 9000], 'smf_responsive');
 
