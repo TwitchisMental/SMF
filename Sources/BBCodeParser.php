@@ -2702,6 +2702,14 @@ class BBCodeParser
 			$this->message = strtr($this->message, ["\n" => '']);
 		}
 
+		// Transform the first table row into a table header and wrap the rest
+		// in table body tags.
+		$this->message = preg_replace_callback(
+			'/<table class="bbc_table"><tr>(\X*?)<\/tr>(\X*?)<\/table>/u',
+			fn ($matches) => '<table class="bbc_table"><thead><tr>' . preg_replace('~(</?)td(>)~', '$1th$2', $matches[1]) . '</tr></thead><tbody>' . $matches[2] . '</tbody></table>',
+			$this->message,
+		);
+
 		if ($this->message !== '' && $this->message[0] === ' ') {
 			$this->message = '&nbsp;' . substr($this->message, 1);
 		}

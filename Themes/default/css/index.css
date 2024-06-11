@@ -417,11 +417,15 @@ blockquote cite::before {
 .bbc_table {
 	font: inherit;
 	color: inherit;
+	border: 1px solid #ddd;
+	border-collapse: collapse;
 }
+.bbc_table th,
 .bbc_table td {
-	font: inherit;
 	color: inherit;
 	vertical-align: top;
+	padding: 4px 8px;
+	border: 1px solid #ddd;
 }
 .bbc_list {
 	text-align: left;
