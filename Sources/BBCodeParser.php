@@ -416,8 +416,8 @@ class BBCodeParser
 		],
 		[
 			'tag' => 'b',
-			'before' => '<b>',
-			'after' => '</b>',
+			'before' => '<strong>',
+			'after' => '</strong>',
 		],
 		// Legacy (equivalent to [ltr] or [rtl])
 		[
@@ -557,8 +557,8 @@ class BBCodeParser
 		],
 		[
 			'tag' => 'i',
-			'before' => '<i>',
-			'after' => '</i>',
+			'before' => '<em>',
+			'after' => '</em>',
 		],
 		[
 			'tag' => 'img',
@@ -622,10 +622,21 @@ class BBCodeParser
 		[
 			'tag' => 'list',
 			'parameters' => [
-				'type' => ['match' => '(none|disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman|lower-alpha|upper-alpha|lower-greek|upper-greek|lower-latin|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha)'],
+				'type' => ['match' => '(none|disc|circle|square)'],
 			],
 			'before' => '<ul class="bbc_list" style="list-style-type: {type};">',
 			'after' => '</ul>',
+			'trim' => 'inside',
+			'require_children' => ['li'],
+			'block_level' => true,
+		],
+		[
+			'tag' => 'list',
+			'parameters' => [
+				'type' => ['match' => '(decimal|decimal-leading-zero|lower-roman|upper-roman|lower-alpha|upper-alpha|lower-greek|upper-greek|lower-latin|upper-latin|hebrew|armenian|georgian|cjk-ideographic|hiragana|katakana|hiragana-iroha|katakana-iroha)'],
+			],
+			'before' => '<ol class="bbc_list" style="list-style-type: {type};">',
+			'after' => '</ol>',
 			'trim' => 'inside',
 			'require_children' => ['li'],
 			'block_level' => true,
@@ -674,7 +685,7 @@ class BBCodeParser
 		[
 			'tag' => 'php',
 			'type' => 'unparsed_content',
-			'content' => '<span class="phpcode">$1</span>',
+			'content' => '<code class="phpcode">$1</code>',
 			'validate' => __CLASS__ . '::phpValidate',
 			'block_level' => false,
 			'disabled_content' => '$1',
