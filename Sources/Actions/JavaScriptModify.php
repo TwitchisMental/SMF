@@ -27,6 +27,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\Time;
 use SMF\Topic;
@@ -137,7 +138,13 @@ class JavaScriptModify implements ActionInterface
 
 				Msg::preparsecode($_POST['message']);
 
-				if (Utils::htmlTrim(strip_tags(BBCodeParser::load()->parse($_POST['message'], false), implode('', Utils::$context['allowed_html_tags']))) === '') {
+				$temp = BBCodeParser::load()->parse($_POST['message'], false);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					$temp = MarkdownParser::load()->parse($temp, true);
+				}
+
+				if (Utils::htmlTrim(strip_tags($temp, implode('', Utils::$context['allowed_html_tags']))) === '') {
 					$post_errors[] = 'no_message';
 					unset($_POST['message']);
 				}
@@ -295,6 +302,10 @@ class JavaScriptModify implements ActionInterface
 				Lang::censorText(Utils::$context['message']['body']);
 
 				Utils::$context['message']['body'] = BBCodeParser::load()->parse(Utils::$context['message']['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					Utils::$context['message']['body'] = MarkdownParser::load()->parse(Utils::$context['message']['body'], true);
+				}
 
 				Utils::$context['message']['body'] = Utils::adjustHeadingLevels(Utils::$context['message']['body'], null);
 			}

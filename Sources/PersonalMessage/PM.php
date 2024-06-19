@@ -29,6 +29,7 @@ use SMF\Group;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Mail;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\Security;
@@ -403,6 +404,10 @@ class PM implements \ArrayAccess
 
 		// Run BBC interpreter on the message.
 		$this->formatted['body'] = BBCodeParser::load()->parse($this->formatted['body'], true, 'pm' . $this->id);
+
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$this->formatted['body'] = MarkdownParser::load()->parse($this->formatted['body'], true);
+		}
 
 		return $this->formatted;
 	}
@@ -1001,7 +1006,13 @@ class PM implements \ArrayAccess
 			Msg::preparsecode($message);
 
 			// Make sure there's still some content left without the tags.
-			if (Utils::htmlTrim(strip_tags(BBCodeParser::load()->parse(Utils::htmlspecialchars($message, ENT_QUOTES), false), '<img>')) === '' && (!User::$me->allowedTo('bbc_html') || !str_contains($message, '[html]'))) {
+			$temp = BBCodeParser::load()->parse(Utils::htmlspecialchars($message, ENT_QUOTES), false);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$temp = MarkdownParser::load()->parse($temp, true);
+			}
+
+			if (Utils::htmlTrim(strip_tags($temp, '<img>')) === '' && (!User::$me->allowedTo('bbc_html') || !str_contains($message, '[html]'))) {
 				$post_errors[] = 'no_message';
 			}
 		}
@@ -1030,6 +1041,10 @@ class PM implements \ArrayAccess
 
 			// Parse out the BBC if it is enabled.
 			Utils::$context['preview_message'] = BBCodeParser::load()->parse(Utils::$context['preview_message']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['preview_message'] = MarkdownParser::load()->parse(Utils::$context['preview_message'], true);
+			}
 
 			// Censor, as always.
 			Lang::censorText(Utils::$context['preview_subject']);
@@ -2111,6 +2126,12 @@ class PM implements \ArrayAccess
 			Lang::censorText($row_quoted['subject']);
 			Lang::censorText($row_quoted['body']);
 
+			$row['body'] = BBCodeParser::load()->parse($row_quoted['body'], true, 'pm' . $row_quoted['id_pm']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			Utils::$context['quoted_message'] = [
 				'id' => $row_quoted['id_pm'],
 				'pm_head' => $row_quoted['pm_head'],
@@ -2124,7 +2145,7 @@ class PM implements \ArrayAccess
 				'subject' => $row_quoted['subject'],
 				'time' => Time::create('@' . $row_quoted['msgtime'])->format(),
 				'timestamp' => $row_quoted['msgtime'],
-				'body' => BBCodeParser::load()->parse($row_quoted['body'], true, 'pm' . $row_quoted['id_pm']),
+				'body' => $row['body'],
 			];
 		}
 

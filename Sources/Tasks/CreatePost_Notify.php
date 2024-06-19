@@ -23,6 +23,7 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
 use SMF\Mail;
+use SMF\MarkdownParser;
 use SMF\Mentions;
 use SMF\TaskRunner;
 use SMF\Theme;
@@ -567,6 +568,11 @@ class CreatePost_Notify extends BackgroundTask
 
 				Lang::censorText($parsed_message[$localization]['subject']);
 				Lang::censorText($parsed_message[$localization]['body']);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					$parsed_message[$localization]['subject'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($parsed_message[$localization]['subject'], false);
+					$parsed_message[$localization]['body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($parsed_message[$localization]['body'], false);
+				}
 
 				$parsed_message[$localization]['subject'] = Utils::htmlspecialcharsDecode($parsed_message[$localization]['subject']);
 				$parsed_message[$localization]['body'] = trim(Utils::htmlspecialcharsDecode(strip_tags(strtr($bbcparser->parse($parsed_message[$localization]['body'], false), ['<br>' => "\n", '</div>' => "\n", '</li>' => "\n", '&#91;' => '[', '&#93;' => ']', '&#39;' => '\'', '</tr>' => "\n", '</td>' => "\t", '<hr>' => "\n---------------------------------------------------------------\n"]))));

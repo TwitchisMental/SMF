@@ -25,6 +25,7 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\PageIndex;
 use SMF\Theme;
@@ -173,6 +174,10 @@ class Recent implements ActionInterface
 		// Censor the subject and post...
 		Lang::censorText($row['subject']);
 		Lang::censorText($row['body']);
+
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$row['body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($row['body']);
+		}
 
 		$row['body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled']), ['<br>' => '&#10;']));
 

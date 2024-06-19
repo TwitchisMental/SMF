@@ -21,6 +21,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\Sapi;
 use SMF\Search\SearchApi;
@@ -1046,6 +1047,11 @@ class Parsed extends SearchApi implements SearchApiInterface
 
 		// Parse the BBCode.
 		$string = $this->bbcparser->parse($string, false);
+
+		// Parse the Markdown.
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$string = MarkdownParser::load()->parse($string, true);
+		}
 
 		// Put stuff back the way we found it.
 		Config::$image_proxy_enabled = $image_proxy_enabled;

@@ -452,6 +452,11 @@ class Msg implements \ArrayAccess
 		// Run BBC interpreter on the message.
 		$this->formatted['body'] = BBCodeParser::load()->parse($this->formatted['body'], $this->smileys_enabled, $this->id);
 
+		// Run the Markdown interpreter on the message.
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$this->formatted['body'] = MarkdownParser::load()->parse($this->formatted['body'], true);
+		}
+
 		$this->formatted['link'] = '<a href="' . $this->formatted['href'] . '" rel="nofollow">' . $this->formatted['subject'] . '</a>';
 
 		// Make a preview?

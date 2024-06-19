@@ -20,6 +20,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\Draft;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\PageIndex;
 use SMF\Theme;
 use SMF\Time;
@@ -273,6 +274,10 @@ class DraftPM extends Draft
 
 			// BBC-ilize the message.
 			$row['body'] = BBCodeParser::load()->parse($row['body'], true, 'draft' . $row['id_draft']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
 
 			// Have they provide who this will go to?
 			$recipients = [

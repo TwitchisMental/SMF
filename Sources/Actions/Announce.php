@@ -27,6 +27,7 @@ use SMF\Group;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Mail;
+use SMF\MarkdownParser;
 use SMF\Theme;
 use SMF\Topic;
 use SMF\User;
@@ -167,7 +168,13 @@ class Announce implements ActionInterface
 		Lang::censorText(Utils::$context['topic_subject']);
 		Lang::censorText($message);
 
-		$message = trim(Utils::htmlspecialcharsDecode(strip_tags(strtr(BBCodeParser::load()->parse($message, false, $id_msg), ['<br>' => "\n", '</div>' => "\n", '</li>' => "\n", '&#91;' => '[', '&#93;' => ']']))));
+		$message = BBCodeParser::load()->parse($message, false, $id_msg);
+
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$message = MarkdownParser::load()->parse($message, true);
+		}
+
+		$message = trim(Utils::htmlspecialcharsDecode(strip_tags(strtr($message, ['<br>' => "\n", '</div>' => "\n", '</li>' => "\n", '<p>' => '', '</p>' => "\n\n", '&#91;' => '[', '&#93;' => ']']))));
 
 		// Select the email addresses for this batch.
 		$announcements = [];

@@ -21,6 +21,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\IP;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -209,6 +210,10 @@ class SearchResult extends \SMF\Msg
 			// Set the number of characters before and after the searched keyword.
 			$charLimit = 50;
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$this->body = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($this->body);
+			}
+
 			$this->body = strtr($this->body, ["\n" => ' ', '<br>' => "\n", '<br/>' => "\n", '<br />' => "\n"]);
 			$this->body = BBCodeParser::load()->parse($this->body, $this->smileys_enabled, $this->id_msg);
 			$this->body = strip_tags(strtr($this->body, ['</div>' => '<br>', '</li>' => '<br>']), '<br>');
@@ -255,6 +260,10 @@ class SearchResult extends \SMF\Msg
 		} else {
 			// Run BBC interpreter on the message.
 			$this->body = BBCodeParser::load()->parse($this->body, $this->smileys_enabled, $this->id_msg);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$this->body = MarkdownParser::load()->parse($this->body, true);
+			}
 
 			$this->subject_highlighted = self::highlight($this->subject, SearchApi::$loadedApi->searchArray);
 			$this->body_highlighted = self::highlight($this->body, SearchApi::$loadedApi->searchArray);

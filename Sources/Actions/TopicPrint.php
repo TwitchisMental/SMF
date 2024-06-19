@@ -24,6 +24,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Poll;
 use SMF\Theme;
 use SMF\Time;
@@ -103,6 +104,10 @@ class TopicPrint implements ActionInterface
 		// Set the BBCodeParser to print mode.
 		$bbcparser->for_print = true;
 
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			$markdown_parser = new MarkdownParser();
+		}
+
 		// Lets "output" all that info.
 		Theme::loadTemplate('Printpage');
 		Utils::$context['template_layers'] = ['print'];
@@ -138,12 +143,18 @@ class TopicPrint implements ActionInterface
 			Lang::censorText($row['subject']);
 			Lang::censorText($row['body']);
 
+			$row['body'] = $bbcparser->parse($row['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = $markdown_parser->parse($row['body'], true);
+			}
+
 			Utils::$context['posts'][] = [
 				'subject' => $row['subject'],
 				'member' => $row['poster_name'],
 				'time' => Time::create('@' . $row['poster_time'])->format(null, false),
 				'timestamp' => $row['poster_time'],
-				'body' => $bbcparser->parse($row['body']),
+				'body' => $row['body'],
 				'id_msg' => $row['id_msg'],
 			];
 

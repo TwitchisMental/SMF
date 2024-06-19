@@ -29,6 +29,7 @@ use SMF\Editor;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\Poll;
 use SMF\Security;
@@ -454,6 +455,10 @@ class Post implements ActionInterface
 			Lang::censorText($row['body']);
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
 
 			IntegrationHook::call('integrate_getTopic_previous_post', [&$row]);
 
@@ -954,6 +959,11 @@ class Post implements ActionInterface
 
 			// Do all bulletin board code tags, with or without smileys.
 			Utils::$context['preview_message'] = BBCodeParser::load()->parse(Utils::$context['preview_message'], !isset($_REQUEST['ns']));
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['preview_message'] = MarkdownParser::load()->parse(Utils::$context['preview_message'], true);
+			}
+
 			Lang::censorText(Utils::$context['preview_message']);
 
 			if ($this->form_subject != '') {

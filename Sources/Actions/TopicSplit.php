@@ -29,6 +29,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Mail;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\PageIndex;
 use SMF\Search\SearchApi;
@@ -460,6 +461,10 @@ class TopicSplit implements ActionInterface
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			Utils::$context['not_selected']['messages'][$row['id_msg']] = [
 				'id' => $row['id_msg'],
 				'subject' => $row['subject'],
@@ -504,6 +509,10 @@ class TopicSplit implements ActionInterface
 				}
 
 				$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+				}
 
 				Utils::$context['selected']['messages'][$row['id_msg']] = [
 					'id' => $row['id_msg'],

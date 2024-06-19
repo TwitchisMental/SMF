@@ -22,6 +22,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ItemList;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\Theme;
@@ -427,12 +428,18 @@ class WatchedUsers implements ActionInterface
 			$row['subject'] = Lang::censorText($row['subject']);
 			$row['body'] = Lang::censorText($row['body']);
 
+			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			$member_posts[$row['id_msg']] = [
 				'id' => $row['id_msg'],
 				'id_topic' => $row['id_topic'],
 				'author_link' => '<a href="' . Config::$scripturl . '?action=profile;u=' . $row['id_member'] . '">' . $row['real_name'] . '</a>',
 				'subject' => $row['subject'],
-				'body' => BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']),
+				'body' => $row['body'],
 				'poster_time' => Time::create('@' . $row['poster_time'])->format(),
 				'approved' => $row['approved'],
 				'can_delete' => $delete_boards == [0] || in_array($row['id_board'], $delete_boards),

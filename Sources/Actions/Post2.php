@@ -30,6 +30,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\Poll;
 use SMF\Search\SearchApi;
@@ -268,7 +269,13 @@ class Post2 extends Post
 			Msg::preparsecode($_POST['message']);
 
 			// Let's see if there's still some content left without the tags.
-			if (Utils::htmlTrim(strip_tags(BBCodeParser::load()->parse($_POST['message'], false), implode('', Utils::$context['allowed_html_tags']))) === '' && (!User::$me->allowedTo('bbc_html') || !str_contains($_POST['message'], '[html]'))) {
+			$temp = BBCodeParser::load()->parse($_POST['message'], false);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$temp = MarkdownParser::load()->parse($temp, true);
+			}
+
+			if (Utils::htmlTrim(strip_tags($temp, implode('', Utils::$context['allowed_html_tags']))) === '' && (!User::$me->allowedTo('bbc_html') || !str_contains($_POST['message'], '[html]'))) {
 				$this->errors[] = 'no_message';
 			}
 		}

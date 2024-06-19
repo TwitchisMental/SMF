@@ -29,6 +29,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\IP;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Sapi;
 use SMF\Theme;
 use SMF\Time;
@@ -780,6 +781,10 @@ class Feed implements ActionInterface
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			Lang::censorText($row['body']);
 			Lang::censorText($row['subject']);
 
@@ -1219,6 +1224,10 @@ class Feed implements ActionInterface
 			}
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
 
 			Lang::censorText($row['body']);
 			Lang::censorText($row['subject']);
@@ -1984,6 +1993,10 @@ class Feed implements ActionInterface
 			// If using our own format, we want both the raw and the parsed content.
 			$row[$this->format === 'smf' ? 'body_html' : 'body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row[$this->format === 'smf' ? 'body_html' : 'body'] = MarkdownParser::load()->parse($row[$this->format === 'smf' ? 'body_html' : 'body'], true);
+			}
+
 			// Do we want to include any attachments?
 			if (!empty(Config::$modSettings['attachmentEnable']) && !empty(Config::$modSettings['xmlnews_attachments'])) {
 				$loaded_attachments = Attachment::loadByMsg($row['id_msg'], Attachment::APPROVED_TRUE);
@@ -2434,6 +2447,10 @@ class Feed implements ActionInterface
 
 			// If using our own format, we want both the raw and the parsed content.
 			$row[$this->format === 'smf' ? 'body_html' : 'body'] = BBCodeParser::load()->parse($row['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row[$this->format === 'smf' ? 'body_html' : 'body'] = MarkdownParser::load()->parse($row[$this->format === 'smf' ? 'body_html' : 'body'], true);
+			}
 
 			$recipients = array_combine(explode(',', $row['id_members_to']), explode($separator, $row['to_names']));
 

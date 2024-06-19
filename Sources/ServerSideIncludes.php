@@ -524,13 +524,17 @@ class ServerSideIncludes
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
 
 			// Censor it!
 			Lang::censorText($row['subject']);
 			Lang::censorText($row['body']);
 
-			$preview = strip_tags(strtr($row['body'], ['<br>' => '&#10;']));
+			$preview = strip_tags(strtr($row['body'], ['<br>' => '&#10;', '<p>' => '', '</p>' => '&#10;&#10;']));
 
 			// Build the array.
 			$posts[$row['id_msg']] = [
@@ -704,6 +708,10 @@ class ServerSideIncludes
 		$posts = [];
 
 		while ($row = Db::$db->fetch_assoc($request)) {
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($row['body']);
+			}
+
 			$row['body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']), ['<br>' => '&#10;', Utils::TAB_SUBSTITUTE => '&#9;']));
 
 			if (Utils::entityStrlen($row['body']) > 128) {
@@ -2242,6 +2250,10 @@ class ServerSideIncludes
 			}
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
 
 			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
 

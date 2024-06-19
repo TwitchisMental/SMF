@@ -28,6 +28,7 @@ use SMF\IP;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Logging;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\PageIndex;
 use SMF\SecurityToken;
@@ -252,6 +253,12 @@ class ReportedContent implements ActionInterface
 				],
 			];
 		} else {
+			$report['body'] = BBCodeParser::load()->parse($report['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$report['body'] = MarkdownParser::load()->parse($report['body'], true);
+			}
+
 			$extraDetails = [
 				'topic_id' => $report['id_topic'],
 				'board_id' => $report['id_board'],
@@ -265,7 +272,7 @@ class ReportedContent implements ActionInterface
 					'href' => Config::$scripturl . '?action=profile;u=' . $report['id_author'],
 				],
 				'subject' => $report['subject'],
-				'body' => BBCodeParser::load()->parse($report['body']),
+				'body' => $report['body'],
 			];
 		}
 
@@ -929,6 +936,13 @@ class ReportedContent implements ActionInterface
 				];
 			} else {
 				$report_boards_ids[] = $row['id_board'];
+
+				$row['body'] = BBCodeParser::load()->parse($row['body']);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+				}
+
 				$extraDetails = [
 					'topic' => [
 						'id' => $row['id_topic'],
@@ -943,7 +957,7 @@ class ReportedContent implements ActionInterface
 						'href' => Config::$scripturl . '?action=profile;u=' . $row['id_author'],
 					],
 					'subject' => $row['subject'],
-					'body' => BBCodeParser::load()->parse($row['body']),
+					'body' => $row['body'],
 				];
 			}
 
@@ -1135,9 +1149,15 @@ class ReportedContent implements ActionInterface
 		);
 
 		while ($row = Db::$db->fetch_assoc($request)) {
+			$row['body'] = BBCodeParser::load()->parse($row['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			$report['mod_comments'][] = [
 				'id' => $row['id_comment'],
-				'message' => BBCodeParser::load()->parse($row['body']),
+				'message' => $row['body'],
 				'time' => Time::create('@' . $row['log_time'])->format(),
 				'can_edit' => User::$me->allowedTo('admin_forum') || ((User::$me->id == $row['id_member'])),
 				'member' => [

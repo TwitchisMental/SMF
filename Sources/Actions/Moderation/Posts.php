@@ -27,6 +27,7 @@ use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Logging;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\PageIndex;
@@ -379,13 +380,19 @@ class Posts implements ActionInterface
 				$can_delete = false;
 			}
 
+			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			Utils::$context['unapproved_items'][] = [
 				'id' => $row['id_msg'],
 				'counter' => Utils::$context['start'] + $i,
 				'href' => Config::$scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg'],
 				'link' => '<a href="' . Config::$scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg'] . '">' . $row['subject'] . '</a>',
 				'subject' => $row['subject'],
-				'body' => BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']),
+				'body' => $row['body'],
 				'time' => Time::create('@' . $row['poster_time'])->format(),
 				'poster' => [
 					'id' => $row['id_member'],
@@ -777,6 +784,12 @@ class Posts implements ActionInterface
 		);
 
 		while ($row = Db::$db->fetch_assoc($request)) {
+			$row['body'] = BBCodeParser::load()->parse($row['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
+
 			$unapproved_items[] = [
 				'id' => $row['id_attach'],
 				'filename' => $row['filename'],
@@ -791,7 +804,7 @@ class Posts implements ActionInterface
 				'message' => [
 					'id' => $row['id_msg'],
 					'subject' => $row['subject'],
-					'body' => BBCodeParser::load()->parse($row['body']),
+					'body' => $row['body'],
 					'time' => Time::create('@' . $row['poster_time'])->format(),
 					'href' => Config::$scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg'],
 				],

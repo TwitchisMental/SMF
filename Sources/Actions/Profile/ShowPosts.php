@@ -27,6 +27,7 @@ use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Logging;
+use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\PageIndex;
@@ -839,6 +840,10 @@ class ShowPosts implements ActionInterface
 
 			// Do the code.
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
+			}
 
 			// And the array...
 			Utils::$context['posts'][$counter += $reverse ? -1 : 1] = [
