@@ -542,6 +542,45 @@ class BBCodeParser
 			'before' => '<span style="color: green;" class="bbc_color">',
 			'after' => '</span>',
 		],
+		// For the h1-h6 tags, the element name will often change in the final
+		// output, but the class will not. For example, `<h1 class="bbc_h1">`
+		// might become `<h5 class="bbc_h1">` in the final output.
+		[
+			'tag' => 'h1',
+			'before' => '<h1 class="bbc_h1">',
+			'after' => '</h1>',
+			'block_level' => true,
+		],
+		[
+			'tag' => 'h2',
+			'before' => '<h2 class="bbc_h2">',
+			'after' => '</h2>',
+			'block_level' => true,
+		],
+		[
+			'tag' => 'h3',
+			'before' => '<h3 class="bbc_h3">',
+			'after' => '</h3>',
+			'block_level' => true,
+		],
+		[
+			'tag' => 'h4',
+			'before' => '<h4 class="bbc_h4">',
+			'after' => '</h4>',
+			'block_level' => true,
+		],
+		[
+			'tag' => 'h5',
+			'before' => '<h5 class="bbc_h5">',
+			'after' => '</h5>',
+			'block_level' => true,
+		],
+		[
+			'tag' => 'h6',
+			'before' => '<h6 class="bbc_h6">',
+			'after' => '</h6>',
+			'block_level' => true,
+		],
 		[
 			'tag' => 'html',
 			'type' => 'unparsed_content',
@@ -3506,7 +3545,7 @@ class BBCodeParser
 			$this->open_tags[] = $tag;
 
 			// There's no data to change, but maybe do something based on params?
-			$data = null;
+			$data = [];
 
 			if (isset($tag['validate'])) {
 				call_user_func_array($tag['validate'], [&$tag, &$data, $this->disabled, $params]);

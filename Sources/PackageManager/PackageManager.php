@@ -2776,7 +2776,7 @@ class PackageManager
 					if ($package['description'] == '') {
 						$package['description'] = Lang::$txt['package_no_description'];
 					} else {
-						$package['description'] = BBCodeParser::load()->parse(preg_replace('~\[[/]?html\]~i', '', Utils::htmlspecialchars($package['description'])));
+						$package['description'] = Utils::adjustHeadingLevels(BBCodeParser::load()->parse(preg_replace('~\[[/]?html\]~i', '', Utils::htmlspecialchars($package['description']))), null);
 					}
 
 					$package['is_installed'] = isset($installed_mods[$package['id']]);

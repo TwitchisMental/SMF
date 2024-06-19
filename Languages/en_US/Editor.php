@@ -61,5 +61,6 @@ $editortxt['float_left'] = 'Float left';
 $editortxt['float_right'] = 'Float right';
 $editortxt['maximize'] = 'Maximize';
 $editortxt['dateformat'] = 'month/day/year';
+$editortxt['heading'] = 'Heading';
 
 ?>

@@ -774,7 +774,7 @@ class Theme
 			}
 
 			// Clean it up for presentation ;).
-			Utils::$context['news_lines'][$i] = BBCodeParser::load()->parse(stripslashes(trim(Utils::$context['news_lines'][$i])), true, 'news' . $i);
+			Utils::$context['news_lines'][$i] = Utils::adjustHeadingLevels(BBCodeParser::load()->parse(stripslashes(trim(Utils::$context['news_lines'][$i])), true, 'news' . $i), null);
 		}
 
 		if (!empty(Utils::$context['news_lines']) && (!empty(Config::$modSettings['allow_guestAccess']) || User::$me->is_logged)) {

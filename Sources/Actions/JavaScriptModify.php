@@ -295,6 +295,8 @@ class JavaScriptModify implements ActionInterface
 				Lang::censorText(Utils::$context['message']['body']);
 
 				Utils::$context['message']['body'] = BBCodeParser::load()->parse(Utils::$context['message']['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+
+				Utils::$context['message']['body'] = Utils::adjustHeadingLevels(Utils::$context['message']['body'], null);
 			}
 			// Topic?
 			elseif (empty($post_errors)) {

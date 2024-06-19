@@ -167,7 +167,7 @@ class XmlHttp implements ActionInterface
 				'identifier' => 'parsedNews',
 				'children' => [
 					[
-						'value' => BBCodeParser::load()->parse($news),
+						'value' => Utils::adjustHeadingLevels(BBCodeParser::load()->parse($news), null),
 					],
 				],
 			],
@@ -241,6 +241,9 @@ class XmlHttp implements ActionInterface
 
 			$current_signature = !empty($current_signature) ? BBCodeParser::load()->parse($current_signature, true, 'sig' . $user, $allowedTags) : Lang::$txt['no_signature_set'];
 
+
+			$current_signature = Utils::adjustHeadingLevels($current_signature, null);
+
 			$preview_signature = !empty($_POST['signature']) ? Utils::htmlspecialchars($_POST['signature']) : Lang::$txt['no_signature_preview'];
 
 			$validation = Profile::validateSignature($preview_signature);
@@ -252,6 +255,8 @@ class XmlHttp implements ActionInterface
 			Lang::censorText($preview_signature);
 
 			$preview_signature = BBCodeParser::load()->parse($preview_signature, true, 'sig' . $user, $allowedTags);
+
+			$preview_signature = Utils::adjustHeadingLevels($preview_signature, null);
 		} elseif (!$can_change) {
 			if ($is_owner) {
 				$errors[] = ['value' => Lang::$txt['cannot_profile_extra_own'], 'attributes' => ['type' => 'error']];
@@ -355,6 +360,8 @@ class XmlHttp implements ActionInterface
 				Msg::preparsecode($warning_body, false, !empty(Config::$modSettings['autoLinkUrls']));
 
 				$warning_body = BBCodeParser::load()->parse($warning_body);
+
+				$warning_body = Utils::adjustHeadingLevels($warning_body, null);
 			}
 
 			Utils::$context['preview_message'] = $warning_body;

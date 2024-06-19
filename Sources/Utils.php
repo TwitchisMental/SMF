@@ -1178,6 +1178,50 @@ class Utils
 	}
 
 	/**
+	 * Adjusts the heading levels of h1-h6 elements in a string in order to
+	 * fit the needs of a particular location in the output HTML.
+	 *
+	 * For example, setting $modifier to 1 will change h1 into h2, h5 into h6,
+	 * etc.
+	 *
+	 * If the adjusted tag for the heading would be invalid (e.g. h7 or h0),
+	 * then the tag will be changed to a simple div.
+	 *
+	 * Any attributes of the adjusted elements will be preserved unchanged.
+	 * For example, `<h1 class="bbc_h1">` might become `<h5 class="bbc_h1">`.
+	 *
+	 * As a general rule, this method should be called from theme templates
+	 * rather than source files, since only the template really knows what level
+	 * of adjustment is necessary.
+	 *
+	 * @param mixed $str The string in which to adjust heading levels.
+	 *    If a non-string value is given, it will be returned unchanged.
+	 * @param ?int $modifier The amount by which to adjust heading levels.
+	 *    If null, all headings will be converted to div elements. Default: 0.
+	 * @return mixed The adjusted version of $str.
+	 */
+	public static function adjustHeadingLevels(mixed $str, ?int $modifier = 0): mixed
+	{
+		if (!is_string($str)) {
+			return $str;
+		}
+
+		return preg_replace_callback(
+			'/<(\/?)h(\d)([^>]*)>/u',
+			function ($matches) use ($modifier) {
+				$l = (int) $matches[2] + (int) $modifier;
+
+				if (!is_null($modifier) && $l >= 1 && $l <= 6) {
+					return '<' . $matches[1] . 'h' . $l . $matches[3] . '>';
+				}
+
+				return '<' . $matches[1] . 'div' . $matches[3] . '>';
+			},
+			$str,
+		);
+	}
+
+	/**
 	 * Clean up the XML to make sure it doesn't contain invalid characters.
 	 *
 	 * See https://www.w3.org/TR/xml/#charsets

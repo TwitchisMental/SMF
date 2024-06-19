@@ -197,7 +197,7 @@ class News implements ActionInterface
 
 						' + last_preview + ' .
 
-						'{js_escape:" style="overflow: auto; width: 100%; height: 10ex;"></div>
+						'{js_escape:" style="overflow: auto; width: 100%; min-height: 10ex;"></div>
 					</td>
 					<td></td>
 				</tr>}' .
@@ -1141,7 +1141,7 @@ class News implements ActionInterface
 	 */
 	public static function list_getNewsPreview(array $news): string
 	{
-		return '<div id="box_preview_' . $news['id'] . '" style="overflow: auto; width: 100%; height: 10ex;">' . $news['parsed'] . '</div>';
+		return '<div id="box_preview_' . $news['id'] . '" style="overflow: auto; width: 100%; min-height: 10ex;">' . Utils::adjustHeadingLevels($news['parsed'], null) . '</div>';
 	}
 
 	/**

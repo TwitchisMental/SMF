@@ -1219,6 +1219,8 @@ class User implements \ArrayAccess
 			Lang::censorText($this->formatted['signature']);
 
 			$this->formatted['signature'] = BBCodeParser::load()->parse(str_replace(["\n", "\r"], ['<br>', ''], $this->formatted['signature']), true, 'sig' . $this->id, BBCodeParser::getSigTags());
+
+			$this->formatted['signature'] = Utils::adjustHeadingLevels($this->formatted['signature'], null);
 		}
 
 		// Are we also loading the member's custom fields?
@@ -1252,7 +1254,7 @@ class User implements \ArrayAccess
 
 				// BBC?
 				if ($custom['bbc']) {
-					$value = BBCodeParser::load()->parse($value);
+					$value = Utils::adjustHeadingLevels(BBCodeParser::load()->parse($value), null);
 				}
 				// ... or checkbox?
 				elseif (isset($custom['type']) && $custom['type'] == 'check') {

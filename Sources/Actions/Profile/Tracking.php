@@ -745,8 +745,8 @@ class Tracking implements ActionInterface
 				'member_link' => Lang::$txt['trackEdit_deleted_member'],
 				'action' => $row['action'],
 				'action_text' => $action_text,
-				'before' => !empty($extra['previous']) ? ($parse_bbc ? BBCodeParser::load()->parse($extra['previous']) : $extra['previous']) : '',
-				'after' => !empty($extra['new']) ? ($parse_bbc ? BBCodeParser::load()->parse($extra['new']) : $extra['new']) : '',
+				'before' => !empty($extra['previous']) ? ($parse_bbc ? Utils::adjustHeadingLevels(BBCodeParser::load()->parse($extra['previous']), null) : $extra['previous']) : '',
+				'after' => !empty($extra['new']) ? ($parse_bbc ? Utils::adjustHeadingLevels(BBCodeParser::load()->parse($extra['new']), null) : $extra['new']) : '',
 				'time' => Time::create('@' . $row['log_time'])->format(),
 			];
 		}

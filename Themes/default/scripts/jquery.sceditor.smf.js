@@ -852,6 +852,83 @@ sceditor.command.set(
 );
 
 sceditor.command.set(
+	'heading', {
+		_dropDown: function (editor, caller, callback) {
+			var	content = document.createElement('div');
+
+			for (var i = 1; i <= 6; i++) {
+				let opt = document.createElement('a');
+				opt.href = '#',
+				opt.dataset.tag = 'h' + i;
+				opt.innerText = 'H' + i;
+				opt.style.display = 'block';
+				opt.classList.add('bbc_h' + i);
+				content.appendChild(opt);
+			}
+
+			if (!editor.sourceMode()) {
+				let opt = document.createElement('a');
+				opt.href = '#',
+				opt.dataset.tag = '';
+				opt.innerText = "\u2014";
+				opt.style.display = 'block';
+				content.appendChild(opt);
+			}
+
+			for (const elem of content.querySelectorAll("a")) {
+				elem.addEventListener("click", function (e) {
+					callback(elem.dataset.tag);
+					editor.closeDropDown(true);
+					e.preventDefault();
+				});
+			}
+
+			editor.createDropDown(caller, 'heading-picker', content);
+		},
+		state: function (parent, firstBlock) {
+			return sceditor.dom.closest(this.currentNode(), 'h1, h2, h3, h4, h5, h6') ? 1 : 0;
+		},
+		txtExec: function (caller) {
+			var editor = this;
+
+			editor.commands.heading._dropDown(editor, caller, function (tag) {
+				let caretPos = editor.sourceEditorCaret().start;
+
+				if (tag.match(/h[1-6]/)) {
+					editor.insert('[' + tag + ']', '[/' + tag + ']');
+					editor.toggleSourceMode();
+					editor.toggleSourceMode();
+					editor.sourceEditorCaret({start: caretPos, end: caretPos});
+				}
+			});
+		},
+		exec: function (caller) {
+			var editor = this;
+
+			editor.commands.heading._dropDown(editor, caller, function (tag) {
+				const rangeHelper = editor.getRangeHelper()
+				const container = rangeHelper.parentNode().parentNode;
+				const containerParent = container.parentNode;
+				const content = container.innerHTML;
+
+				if (
+					container.nodeType === Node.ELEMENT_NODE
+					&& container.nodeName.match(/H[1-6]/)
+				) {
+					let newElement = document.createElement(tag.match(/h[1-6]/) ? tag : 'p');
+					newElement.innerHTML = content;
+					container.replaceWith(newElement);
+					containerParent.normalize();
+					rangeHelper.selectOuterText(0, content.length);
+				} else if (tag.match(/h[1-6]/)) {
+					editor.insert('[' + tag + ']', '[/' + tag + ']');
+				}
+			});
+		},
+	}
+);
+
+sceditor.command.set(
 	'maximize', {
 		shortcut: ''
 	}
@@ -1641,5 +1718,72 @@ sceditor.formats.bbcode.set(
 				return content;
 		},
 		html: '<div class="videocontainer"><div><iframe frameborder="0" src="https://www.youtube-nocookie.com/embed/{0}?wmode=opaque" data-youtube-id="{0}" loading="lazy" allowfullscreen></iframe></div></div>'
+	}
+);
+
+sceditor.formats.bbcode.set(
+	'h1', {
+		tags: {
+			h1: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h1]{0}[/h1]',
+		html: '<h1>{0}</h1>'
+	}
+);
+sceditor.formats.bbcode.set(
+	'h2', {
+		tags: {
+			h2: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h2]{0}[/h2]',
+		html: '<h2>{0}</h2>'
+	}
+);
+sceditor.formats.bbcode.set(
+	'h3', {
+		tags: {
+			h3: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h3]{0}[/h3]',
+		html: '<h3>{0}</h3>'
+	}
+);
+sceditor.formats.bbcode.set(
+	'h4', {
+		tags: {
+			h4: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h4]{0}[/h4]',
+		html: '<h4>{0}</h4>'
+	}
+);
+sceditor.formats.bbcode.set(
+	'h5', {
+		tags: {
+			h5: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h5]{0}[/h5]',
+		html: '<h5>{0}</h5>'
+	}
+);
+sceditor.formats.bbcode.set(
+	'h6', {
+		tags: {
+			h6: null,
+		},
+		isInline: false,
+		skipLastLineBreak: true,
+		format: '[h6]{0}[/h6]',
+		html: '<h6>{0}</h6>'
 	}
 );

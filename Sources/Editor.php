@@ -610,6 +610,11 @@ class Editor implements \ArrayAccess
 				'code' => 'horizontalrule',
 				'description' => Lang::$editortxt['insert_horizontal_rule'],
 			],
+			[
+				'image' => 'heading',
+				'code' => 'heading',
+				'description' => Lang::$editortxt['heading'],
+			],
 			[],
 			[
 				'code' => 'maximize',

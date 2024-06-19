@@ -2308,7 +2308,7 @@ class ServerSideIncludes
 						<a href="', $news['href'], '">', $news['subject'], '</a>
 					</h3>
 					<div class="news_timestamp">', $news['time'], ' ', Lang::$txt['by'], ' ', $news['poster']['link'], '</div>
-					<div class="news_body" style="padding: 2ex 0;">', $news['body'], '</div>
+					<div class="news_body" style="padding: 2ex 0;">', Utils::adjustHeadingLevels($news['body'], 3), '</div>
 					', $news['link'], $news['locked'] ? '' : ' | ' . $news['comment_link'], '';
 
 			// Is there any likes to show?

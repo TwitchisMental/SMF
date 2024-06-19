@@ -1671,7 +1671,7 @@ class Smileys implements ActionInterface
 			Utils::$context['is_installed'] = false;
 			Utils::$context['package_name'] = $smileyInfo['name'];
 
-			loadTemplate('Packages');
+			Theme::loadTemplate('Packages');
 		}
 		// Do the actual install
 		else {
@@ -2248,7 +2248,7 @@ class Smileys implements ActionInterface
 		User::$me->isAllowedTo('manage_smileys');
 
 		Lang::load('ManageSmileys');
-		loadTemplate('ManageSmileys');
+		Theme::loadTemplate('ManageSmileys');
 
 		// If customized smileys is disabled don't show the setting page
 		if (empty(Config::$modSettings['smiley_enable'])) {
