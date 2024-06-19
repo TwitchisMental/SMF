@@ -295,13 +295,19 @@ class Home implements ActionInterface
 		Utils::$context['notes'] = [];
 
 		foreach ($moderator_notes as $note) {
+			$note['body'] = BBCodeParser::load()->parse($note['body']);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$note['body'] = MarkdownParser::load()->parse($note['body'], true);
+			}
+
 			Utils::$context['notes'][] = [
 				'author' => [
 					'id' => $note['id_member'],
 					'link' => $note['id_member'] ? ('<a href="' . Config::$scripturl . '?action=profile;u=' . $note['id_member'] . '">' . $note['member_name'] . '</a>') : $note['member_name'],
 				],
 				'time' => Time::create('@' . $note['log_time'])->format(),
-				'text' => BBCodeParser::load()->parse($note['body']),
+				'text' => $note['body'],
 				'delete_href' => Config::$scripturl . '?action=moderate;area=index;notes;delete=' . $note['id_note'] . ';' . Utils::$context['session_var'] . '=' . Utils::$context['session_id'],
 				'can_delete' => User::$me->allowedTo('admin_forum') || $note['id_member'] == User::$me->id,
 			];
