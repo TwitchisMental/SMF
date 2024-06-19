@@ -589,6 +589,11 @@ class Editor implements \ArrayAccess
 				'description' => Lang::$editortxt['code'],
 			],
 			[
+				'image' => 'tt',
+				'code' => 'tt',
+				'description' => Lang::$editortxt['tt'],
+			],
+			[
 				'code' => 'quote',
 				'description' => Lang::$editortxt['insert_quote'],
 			],

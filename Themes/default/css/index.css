@@ -93,7 +93,7 @@ textarea {
 }
 
 /* Use a consistent monospace font everywhere */
-.monospace, .bbc_code, .phpcode, pre {
+.monospace, .bbc_code, .bbc_tt, .phpcode, pre {
 	font-family: "DejaVu Sans Mono", Menlo, Monaco, Consolas, monospace;
 }
 
@@ -394,6 +394,11 @@ blockquote cite::before {
 /* Expand code bbc */
 .expand_code {
 	max-height: none;
+}
+/* Inline code */
+.bbc_tt {
+	background-color: rgba(127, 127, 127, 0.15);
+	padding: 0 0.2ch;
 }
 /* Styling for BBC tags */
 .bbc_link {

@@ -271,7 +271,7 @@ class Utils
 		// Even when enabled, they'll only work in old posts and not new ones.
 		'legacy_bbc' => [
 			'acronym', 'bdo', 'black', 'blue', 'flash', 'ftp', 'glow',
-			'green', 'move', 'red', 'shadow', 'tt', 'white',
+			'green', 'move', 'red', 'shadow', 'white',
 		],
 		// Define a list of BBC tags that require permissions to use.
 		'restricted_bbc' => [

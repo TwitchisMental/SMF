@@ -837,11 +837,10 @@ class BBCodeParser
 			'disabled_before' => '',
 			'disabled_after' => '',
 		],
-		// Legacy (the <tt> element is dead)
 		[
 			'tag' => 'tt',
-			'before' => '<span class="monospace">',
-			'after' => '</span>',
+			'before' => '<code class="bbc_tt">',
+			'after' => '</code>',
 		],
 		[
 			'tag' => 'u',

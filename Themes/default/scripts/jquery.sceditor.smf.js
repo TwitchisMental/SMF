@@ -935,6 +935,44 @@ sceditor.command.set(
 	}
 );
 
+sceditor.command.set(
+	'tt', {
+		state: function (parent, firstBlock) {
+			if (this.inSourceMode()) {
+				return 0;
+			}
+
+			let currNode = sceditor.dom.closest(this.currentNode(), 'font');
+
+			if (!currNode) {
+				return 0;
+			}
+
+			let font = currNode.getAttribute('face');
+
+			return (font === 'monospace') ? 1 : 0;
+		},
+		exec: function(caller) {
+			let currNode = sceditor.dom.closest(this.currentNode(), 'font');
+
+			if (!currNode) {
+				this.execCommand('fontname', 'monospace');
+			} else {
+				let font = currNode.getAttribute('face');
+
+				if (font === 'monospace') {
+					this.execCommand('removeFormat');
+				} else {
+					this.execCommand('fontname', 'monospace');
+				}
+			}
+		},
+		txtExec: function(caller) {
+			this.insert('[tt]', '[/tt]');
+		}
+	}
+);
+
 sceditor.formats.bbcode.set(
 	'abbr', {
 		tags: {
@@ -1400,9 +1438,26 @@ sceditor.formats.bbcode.set(
 
 sceditor.formats.bbcode.set(
 	'php', {
-		isInline: false,
-		format: "[php]{0}[/php]",
-		html: '<code class="php">{0}</code>'
+		tags: {
+			span: {
+				'class': 'phpcode'
+			}
+		},
+		isInline: true,
+		format: '[php]{0}[/php]',
+		html: '<span class="phpcode">{0}</span>'
+	}
+);
+
+sceditor.formats.bbcode.set(
+	'tt', {
+		tags: {
+			font: {
+				'face': 'monospace'
+			}
+		},
+		format: '[tt]{0}[/tt]',
+		html: '<font face="monospace">{0}</font>'
 	}
 );
 
@@ -1414,9 +1469,6 @@ sceditor.formats.bbcode.set(
 		isInline: false,
 		allowedChildren: ['#', '#newline'],
 		format: function (element, content) {
-			if ($(element).hasClass('php'))
-				return '[php]' + content.replace('&#91;', '[') + '[/php]';
-
 			var
 				dom = sceditor.dom,
 				attr = dom.attr,
@@ -1508,6 +1560,11 @@ sceditor.formats.bbcode.set(
 
 			// Strip all quotes
 			font = font.replace(/['"]/g, '');
+
+			// To make [tt] work, we need to add an exception to the [font] BBC.
+			if (font === 'monospace') {
+				return content;
+			}
 
 			return '[font=' + font + ']' + content + '[/font]';
 		}
