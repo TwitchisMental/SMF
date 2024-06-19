@@ -23,6 +23,7 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\ItemList;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\PersonalMessage\PM;
 use SMF\Profile;
@@ -538,6 +539,10 @@ class IssueWarning implements ActionInterface
 		if (!empty($_POST['warn_body'])) {
 			Msg::preparsecode($warning_body, false, !empty(Config::$modSettings['autoLinkUrls']));
 			$warning_body = BBCodeParser::load()->parse($warning_body);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$warning_body = MarkdownParser::load()->parse($warning_body, true);
+			}
 		}
 
 		// Try to remember some bits.

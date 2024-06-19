@@ -21,6 +21,7 @@ use SMF\BBCodeParser;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -60,6 +61,10 @@ class ShowNotice implements ActionInterface
 		Db::$db->free_result($request);
 
 		Utils::$context['notice_body'] = BBCodeParser::load()->parse(Utils::$context['notice_body'], false);
+
+		if (!empty(Config::$modSettings['enableMarkdown'])) {
+			Utils::$context['notice_body'] = MarkdownParser::load()->parse(Utils::$context['notice_body'], true);
+		}
 	}
 
 	/******************

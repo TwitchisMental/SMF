@@ -26,6 +26,7 @@ use SMF\Editor;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Msg;
 use SMF\Profile;
 use SMF\Theme;
@@ -360,6 +361,10 @@ class XmlHttp implements ActionInterface
 				Msg::preparsecode($warning_body, false, !empty(Config::$modSettings['autoLinkUrls']));
 
 				$warning_body = BBCodeParser::load()->parse($warning_body);
+
+				if (!empty(Config::$modSettings['enableMarkdown'])) {
+					$warning_body = MarkdownParser::load()->parse($warning_body, true);
+				}
 
 				$warning_body = Utils::adjustHeadingLevels($warning_body, null);
 			}
