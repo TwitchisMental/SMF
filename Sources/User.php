@@ -1220,6 +1220,10 @@ class User implements \ArrayAccess
 
 			$this->formatted['signature'] = BBCodeParser::load()->parse(str_replace(["\n", "\r"], ['<br>', ''], $this->formatted['signature']), true, 'sig' . $this->id, BBCodeParser::getSigTags());
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$this->formatted['signature'] = MarkdownParser::load()->parse($this->formatted['signature'], true);
+			}
+
 			$this->formatted['signature'] = Utils::adjustHeadingLevels($this->formatted['signature'], null);
 		}
 

@@ -1352,6 +1352,10 @@ class Profile extends User implements \ArrayAccess
 
 			Utils::$context['member']['signature_preview'] = Utils::adjustHeadingLevels(BBCodeParser::load()->parse($signature, true, 'sig' . $this->id, BBCodeParser::getSigTags()), null);
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['member']['signature_preview'] = MarkdownParser::load()->parse(Utils::$context['member']['signature_preview'], true);
+			}
+
 			Utils::$context['member']['signature'] = $_POST['signature'];
 		}
 

@@ -242,6 +242,9 @@ class XmlHttp implements ActionInterface
 
 			$current_signature = !empty($current_signature) ? BBCodeParser::load()->parse($current_signature, true, 'sig' . $user, $allowedTags) : Lang::$txt['no_signature_set'];
 
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$current_signature = MarkdownParser::load()->parse($current_signature, true);
+			}
 
 			$current_signature = Utils::adjustHeadingLevels($current_signature, null);
 
@@ -256,6 +259,10 @@ class XmlHttp implements ActionInterface
 			Lang::censorText($preview_signature);
 
 			$preview_signature = BBCodeParser::load()->parse($preview_signature, true, 'sig' . $user, $allowedTags);
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				$preview_signature = MarkdownParser::load()->parse($preview_signature, true);
+			}
 
 			$preview_signature = Utils::adjustHeadingLevels($preview_signature, null);
 		} elseif (!$can_change) {
