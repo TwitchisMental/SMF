@@ -21,6 +21,7 @@ use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -152,6 +153,10 @@ class Agreement implements ActionInterface
 			} elseif (Utils::$context['can_accept_agreement']) {
 				ErrorHandler::fatalLang('error_no_agreement', false);
 			}
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['agreement'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['agreement'], true);
+			}
 		}
 
 		if (!Utils::$context['accept_doc'] || Utils::$context['can_accept_privacy_policy']) {
@@ -164,6 +169,10 @@ class Agreement implements ActionInterface
 			// Then I guess we've got nothing
 			elseif (Utils::$context['can_accept_privacy_policy']) {
 				ErrorHandler::fatalLang('error_no_privacy_policy', false);
+			}
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['privacy_policy'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['privacy_policy'], true);
 			}
 		}
 	}

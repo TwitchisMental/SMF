@@ -21,6 +21,7 @@ use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\MarkdownParser;
 use SMF\Profile;
 use SMF\SecurityToken;
 use SMF\Theme;
@@ -196,6 +197,10 @@ class Register implements ActionInterface
 				ErrorHandler::log(Lang::$txt['registration_agreement_missing'], 'critical');
 				ErrorHandler::fatalLang('registration_disabled', false);
 			}
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['agreement'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['agreement'], true);
+			}
 		}
 
 		$prefs = Notify::getNotifyPrefs(0, 'announcements');
@@ -231,6 +236,10 @@ class Register implements ActionInterface
 				// None was found; log the error so the admin knows there is a problem!
 				ErrorHandler::log(Lang::$txt['registration_policy_missing'], 'critical');
 				ErrorHandler::fatalLang('registration_disabled', false);
+			}
+
+			if (!empty(Config::$modSettings['enableMarkdown'])) {
+				Utils::$context['privacy_policy'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['privacy_policy'], true);
 			}
 		}
 
