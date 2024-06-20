@@ -524,6 +524,8 @@ class ServerSideIncludes
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
 
+			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
+
 			// Censor it!
 			Lang::censorText($row['subject']);
 			Lang::censorText($row['body']);
@@ -702,7 +704,7 @@ class ServerSideIncludes
 		$posts = [];
 
 		while ($row = Db::$db->fetch_assoc($request)) {
-			$row['body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']), ['<br>' => '&#10;']));
+			$row['body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']), ['<br>' => '&#10;', Utils::TAB_SUBSTITUTE => '&#9;']));
 
 			if (Utils::entityStrlen($row['body']) > 128) {
 				$row['body'] = Utils::entitySubstr($row['body'], 0, 128) . '...';
@@ -2240,6 +2242,8 @@ class ServerSideIncludes
 			}
 
 			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
+
+			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
 
 			if (!empty($recycle_board) && $row['id_board'] == $recycle_board) {
 				$row['icon'] = 'recycled';
