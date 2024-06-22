@@ -576,13 +576,21 @@
 	var isPatched = false;
 
 	sceditor.create = function (textarea, options) {
+		textarea.value = textarea.value.replaceAll(/\t/, '[tab]');
+
 		// Call the original create function
 		createFn(textarea, options);
+
+		textarea.value = textarea.value.replaceAll(/\[tab\]/, '\t');
 
 		// Constructor isn't exposed so get reference to it when
 		// creating the first instance and extend it then
 		var instance = sceditor.instance(textarea);
 		if (!isPatched && instance) {
+			const wysiwygEditor = instance.getContentAreaContainer();
+			const editorContainer = wysiwygEditor.parentElement;
+			const sourceEditor = editorContainer.querySelector("textarea");
+
 			sceditor.utils.extend(instance.constructor.prototype, extensionMethods);
 			window.addEventListener('beforeunload', instance.updateOriginal, false);
 
@@ -591,9 +599,26 @@
 			 * toolbars and tons of smilies play havoc with this.
 			 * Only resize the text areas instead.
 			 */
-			document.querySelector(".sceditor-container").removeAttribute("style");
-			document.querySelector(".sceditor-container textarea").style.height = options.height;
-			document.querySelector(".sceditor-container textarea").style.flexBasis = options.height;
+			editorContainer.removeAttribute("style");
+			sourceEditor.style.height = options.height;
+			sourceEditor.style.flexBasis = options.height;
+
+			// Override these functions in order to convince SCEditor not to
+			// delete tabs. Supporting Markdown means we need to keep them.
+			const getSourceVal = instance.getSourceEditorValue;
+			const setSourceVal = instance.setSourceEditorValue;
+
+			instance.getSourceEditorValue = function (filter) {
+				if (filter !== false) {
+					sourceEditor.value = sourceEditor.value.replaceAll(/\t/, '[tab]');
+				}
+
+				return getSourceVal(filter);
+			};
+
+			instance.setSourceEditorValue = function (value) {
+				setSourceVal(value.replaceAll(/\[tab\]/, '\t'));
+			};
 
 			isPatched = true;
 		}
@@ -1047,6 +1072,22 @@ sceditor.command.set(
 		txtExec: function(caller) {
 			this.insert('[tt]', '[/tt]');
 		}
+	}
+);
+
+// This pseudo-BBCode exists solely to convince SCEditor not to delete tab characters.
+sceditor.formats.bbcode.set(
+	'tab', {
+		tags: {
+			span: {
+				class: 'tab'
+			}
+		},
+		allowsEmpty: true,
+		isSelfClosing: true,
+		isInline: true,
+		format: '\t',
+		html: '<span style="white-space: pre-wrap;" class="tab">\t</span>'
 	}
 );
 

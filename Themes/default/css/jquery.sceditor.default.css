@@ -7,6 +7,7 @@ html, p, code::before, table {
 	color: #111;
 	line-height: 1.25;
 	overflow: visible;
+	tab-size: 4ch;
 }
 html {
 	height: 100%;
