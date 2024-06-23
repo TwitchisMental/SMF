@@ -996,6 +996,8 @@ class BBCodeParser
 				$this->message = $this->parseSmileys($this->message);
 			}
 
+			$this->message = $this->fixHtml($this->message);
+
 			return $this->message;
 		}
 
@@ -2951,7 +2953,21 @@ class BBCodeParser
 			return $data;
 		}
 
-		$data = preg_replace('~&lt;a\s+href=((?:&quot;)?)((?:https?://|ftps?://|mailto:|tel:)\S+?)\1&gt;(.*?)&lt;/a&gt;~i', '[url=&quot;$2&quot;]$3[/url]', $data);
+		$data = preg_replace_callback(
+			'~&lt;a\b\X+?href=((?:&quot;|")?)(\X*?)\1\X*?&gt;(\X*?)&lt;/a&gt;~ui',
+			function ($matches) {
+				if ([$matches[2]] !== Autolinker::load()->detectUrls($matches[2])) {
+					return $matches[0];
+				}
+
+				if (str_starts_with($matches[2], Config::$boardurl)) {
+					return $this->enable_bbc ? '[iurl=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/iurl]' : '<a href="' . $matches[2] . '" class="bbc_link">' . $matches[3] . '</a>';
+				}
+
+				return $this->enable_bbc ? '[url=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/url]' : '<a href="' . $matches[2] . '" class="bbc_link" target="_blank" rel="noopener">' . $matches[3] . '</a>';
+			},
+			$data,
+		);
 
 		// <br> should be empty.
 		$empty_tags = ['br', 'hr'];
