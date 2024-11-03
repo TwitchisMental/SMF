@@ -80,7 +80,8 @@ class Autolinker
 	 *
 	 * URI schemes that require some sort of special handling.
 	 *
-	 * Mods can add to this list using the integrate_autolinker_schemes hook.
+	 * Mods can add to this list using the integrate_autolinker_schemes hook in
+	 * Autolinker::__construct().
 	 */
 	public static array $schemes = [
 		// Schemes whose URI definitions require a domain name in the
@@ -122,7 +123,8 @@ class Autolinker
 	 *
 	 * BBCodes whose content should be skipped when autolinking URLs.
 	 *
-	 * Mods can add to this list using the integrate_bbc_codes hook.
+	 * Mods can add to this list using the integrate_bbc_codes hook in
+	 * BBCodeParser::integrateBBC()
 	 */
 	public static array $no_autolink_tags = [
 		'url',
@@ -145,7 +147,8 @@ class Autolinker
 	 *
 	 * BBCodes in which to fix URL strings.
 	 *
-	 * Mods can add to this list using the integrate_autolinker_fix_tags hook.
+	 * Mods can add to this list using the integrate_autolinker_fix_tags hook in
+	 * Autolinker::fixUrlsInBBC().
 	 */
 	public static array $tags_to_fix = [
 		'url',
@@ -282,8 +285,10 @@ class Autolinker
 			self::$integrate_autolinker_schemes_done = true;
 		}
 
-		// For historical reasons, integrate_bbc_hook is used to give mods access to $no_autolink_tags.
-		BBCodeParser::integrateBBC();
+		// For historical reasons, the integrate_bbc_codes hook is used to give
+		// mods access to Autolinker::$no_autolink_tags. The easiest way to
+		// trigger a call to that hook is to call BBCodeParser::getCodes().
+		BBCodeParser::getCodes();
 	}
 
 	/**
