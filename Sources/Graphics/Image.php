@@ -979,8 +979,8 @@ class Image
 			$height = INF;
 		}
 
-		$this->width = round($width);
-		$this->height = round($height);
+		$this->width = round((float) $width);
+		$this->height = round((float) $height);
 	}
 
 	/**
