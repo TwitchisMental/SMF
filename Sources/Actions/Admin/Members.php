@@ -1519,15 +1519,15 @@ class Members implements ActionInterface
 				'name' => $row['member_name'],
 				'email' => $row['email_address'],
 				'is_banned' => $row['is_activated'] >= User::BANNED,
-				'ip' => $row['member_ip'],
-				'ip2' => $row['member_ip2'],
+				'ip' => $row['member_ip']->__toString(),
+				'ip2' => $row['member_ip2']->__toString(),
 			];
 
-			if (in_array($row['member_ip'], $ips)) {
+			if (in_array($row['member_ip']->__toString(), $ips)) {
 				$duplicate_members[$row['member_ip']->__toString()][] = $member_context;
 			}
 
-			if ($row['member_ip'] != $row['member_ip2'] && in_array($row['member_ip2'], $ips)) {
+			if ($row['member_ip']->__toString() != $row['member_ip2']->__toString() && in_array($row['member_ip2']->__toString(), $ips)) {
 			    $duplicate_members[$row['member_ip2']->__toString()][] = $member_context;
 			}
 		}
@@ -1555,19 +1555,19 @@ class Members implements ActionInterface
 			$row['poster_ip'] = new IP($row['poster_ip']);
 
 			// Don't collect lots of the same.
-			if (isset($had_ips[$row['poster_ip']]) && in_array($row['id_member'], $had_ips[$row['poster_ip']])) {
+			if (isset($had_ips[$row['poster_ip']->__toString()]) && in_array($row['id_member']->__toString(), $had_ips[$row['poster_ip']->__toString()])) {
 				continue;
 			}
 
-			$had_ips[$row['poster_ip']][] = $row['id_member'];
+			$had_ips[$row['poster_ip']->__toString()][] = $row['id_member'];
 
 			$duplicate_members[$row['poster_ip']->__toString()][] = [
 				'id' => $row['id_member'],
 				'name' => $row['member_name'],
 				'email' => $row['email_address'],
 				'is_banned' => $row['is_activated'] >= User::BANNED,
-				'ip' => $row['poster_ip'],
-				'ip2' => $row['poster_ip'],
+				'ip' => $row['poster_ip']->__toString(),
+				'ip2' => $row['poster_ip']->__toString(),
 			];
 		}
 		Db::$db->free_result($request);
