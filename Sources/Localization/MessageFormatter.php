@@ -540,6 +540,8 @@ class MessageFormatter
 					if (strlen($matches[3]) > 1) {
 						$long_form .= '/*' . str_repeat('e', strlen($matches[3]));
 					}
+
+					return $long_form;
 				},
 				'/(?<=\s|^)0+(?=\s|$)/' => fn ($matches) => 'integer-width/*' . $matches[0],
 			],
