@@ -125,7 +125,7 @@ abstract class WebFetchApi implements WebFetchApiInterface
 			$class = __NAMESPACE__ . '\\APIs\\' . $class;
 
 			$fetcher = new $class();
-			$fetcher->request($url);
+			$fetcher->request($url, $post_data);
 
 			if ($fetcher->result('success')) {
 				break;
