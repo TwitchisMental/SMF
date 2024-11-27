@@ -151,9 +151,6 @@ class CurlFetcher extends WebFetchApi
 		// A page should load in this amount of time.
 		CURLOPT_TIMEOUT         => 90,
 
-		// Stop after this many redirects.
-		CURLOPT_MAXREDIRS       => 5,
-
 		// Accept gzip and decode it.
 		CURLOPT_ENCODING        => 'gzip,deflate',
 
@@ -184,6 +181,17 @@ class CurlFetcher extends WebFetchApi
 		// Initialize class variables
 		$this->max_redirect = intval($max_redirect);
 		$this->user_options = $options;
+
+		// This class handles redirections itself.
+		if (!empty($this->user_options[CURLOPT_MAXREDIRS])) {
+			$this->max_redirect = $this->user_options[CURLOPT_MAXREDIRS];
+			unset($this->user_options[CURLOPT_MAXREDIRS]);
+		}
+
+		if (!empty($this->user_options[CURLOPT_FOLLOWLOCATION])) {
+			$this->max_redirect = max(3, $this->max_redirect);
+			$this->user_options[CURLOPT_FOLLOWLOCATION] = false;
+		}
 	}
 
 	/**
