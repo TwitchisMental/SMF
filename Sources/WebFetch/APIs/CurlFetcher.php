@@ -133,14 +133,14 @@ class CurlFetcher extends WebFetchApi
 	 */
 	private $default_options = [
 		// Get returned value as a string (don't output it).
-		CURLOPT_RETURNTRANSFER  => 1,
+		CURLOPT_RETURNTRANSFER  => true,
 
 		// We need the headers to do our own redirect.
-		CURLOPT_HEADER          => 1,
+		CURLOPT_HEADER          => true,
 
 		// Don't follow. We will do it ourselves so safe mode and open_basedir
 		// will dig it.
-		CURLOPT_FOLLOWLOCATION  => 0,
+		CURLOPT_FOLLOWLOCATION  => false,
 
 		// Set a normal looking user agent.
 		CURLOPT_USERAGENT       => SMF_USER_AGENT,
@@ -158,13 +158,13 @@ class CurlFetcher extends WebFetchApi
 		CURLOPT_ENCODING        => 'gzip,deflate',
 
 		// Stop curl from verifying the peer's certificate.
-		CURLOPT_SSL_VERIFYPEER  => 0,
+		CURLOPT_SSL_VERIFYPEER  => false,
 
 		// Stop curl from verifying the peer's host.
 		CURLOPT_SSL_VERIFYHOST  => 0,
 
 		// No post data. This will change if some is passed to request().
-		CURLOPT_POST            => 0,
+		CURLOPT_POST            => false,
 	];
 
 	/****************
@@ -393,7 +393,7 @@ class CurlFetcher extends WebFetchApi
 
 		// POST data options, here we don't allow any override.
 		if (isset($this->post_data)) {
-			$this->options[CURLOPT_POST] = 1;
+			$this->options[CURLOPT_POST] = true;
 			$this->options[CURLOPT_POSTFIELDS] = $this->post_data;
 		}
 	}
