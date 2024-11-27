@@ -122,6 +122,13 @@ class CurlFetcher extends WebFetchApi
 	 */
 	public $headers;
 
+	/**
+	 * @var bool
+	 *
+	 * Whether to keep the connection open after the initial request.
+	 */
+	public bool $keep_alive = false;
+
 	/*********************
 	 * Internal properties
 	 *********************/
@@ -192,6 +199,14 @@ class CurlFetcher extends WebFetchApi
 			$this->max_redirect = max(3, $this->max_redirect);
 			$this->user_options[CURLOPT_FOLLOWLOCATION] = false;
 		}
+
+		// Do we want to keep the connection open after the initial request?
+		if (
+			version_compare(curl_version()['version'], '7.25.0', '>=')
+			&& !empty($this->user_options[CURLOPT_TCP_KEEPALIVE])
+		) {
+			$this->keep_alive = true;
+		}
 	}
 
 	/**
@@ -243,6 +258,12 @@ class CurlFetcher extends WebFetchApi
 		}
 
 		// Set the options and get it.
+		if (version_compare(curl_version()['version'], '7.25.0', '>=')) {
+			$this->user_options[CURLOPT_TCP_KEEPALIVE] = (int) $this->keep_alive;
+		} else {
+			$this->keep_alive = false;
+		}
+
 		$this->setOptions();
 		$this->sendRequest(str_replace(' ', '%20', strval($url)));
 
