@@ -17,7 +17,6 @@ namespace SMF\Actions;
 
 use SMF\ActionInterface;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\Category;
 use SMF\Config;
@@ -25,8 +24,8 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
-use SMF\MarkdownParser;
 use SMF\PageIndex;
+use SMF\Parser;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -244,13 +243,14 @@ class MessageIndex implements ActionInterface
 
 		// Does the theme support message previews?
 		if (!empty(Config::$modSettings['preview_characters'])) {
+			$row['first_body'] = Parser::transform(
+				string: $row['first_body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['first_smileys'] ? Parser::INPUT_SMILEYS : 0),
+				output_type: Parser::OUTPUT_TEXT,
+				options: ['str_replace' => ['<br>' => '&#10;']],
+			);
+
 			// Limit them to Config::$modSettings['preview_characters'] characters
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['first_body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($row['first_body']);
-			}
-
-			$row['first_body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['first_body'], (bool) $row['first_smileys'], (int) $row['id_first_msg']), ['<br>' => '&#10;']));
-
 			if (Utils::entityStrlen($row['first_body']) > Config::$modSettings['preview_characters']) {
 				$row['first_body'] = Utils::entitySubstr($row['first_body'], 0, (int) Config::$modSettings['preview_characters']) . '...';
 			}
@@ -264,11 +264,12 @@ class MessageIndex implements ActionInterface
 				$row['last_subject'] = $row['first_subject'];
 				$row['last_body'] = $row['first_body'];
 			} else {
-				if (!empty(Config::$modSettings['enableMarkdown'])) {
-					$row['last_body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($row['last_body']);
-				}
-
-				$row['last_body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['last_body'], (bool) $row['last_smileys'], (int) $row['id_last_msg']), ['<br>' => '&#10;']));
+				$row['last_body'] = Parser::transform(
+					string: $row['last_body'],
+					input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['last_smileys'] ? Parser::INPUT_SMILEYS : 0),
+					output_type: Parser::OUTPUT_TEXT,
+					options: ['str_replace' => ['<br>' => '&#10;']],
+				);
 
 				if (Utils::entityStrlen($row['last_body']) > Config::$modSettings['preview_characters']) {
 					$row['last_body'] = Utils::entitySubstr($row['last_body'], 0, (int) Config::$modSettings['preview_characters']) . '...';

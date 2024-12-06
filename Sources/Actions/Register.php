@@ -17,11 +17,10 @@ namespace SMF\Actions;
 
 use SMF\ActionInterface;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
-use SMF\MarkdownParser;
+use SMF\Parser;
 use SMF\Profile;
 use SMF\SecurityToken;
 use SMF\Theme;
@@ -184,9 +183,21 @@ class Register implements ActionInterface
 		if (!empty(Config::$modSettings['requireAgreement'])) {
 			// Have we got a localized one?
 			if (file_exists(Config::$languagesdir . '/' . User::$me->language . '/agreement.txt')) {
-				Utils::$context['agreement'] = BBCodeParser::load()->parse(file_get_contents(Config::$languagesdir . '/' . User::$me->language . '/agreement.txt'), true, 'agreement_' . User::$me->language);
+				Utils::$context['privacy_policy'] = Parser::transform(
+					string: file_get_contents(Config::$languagesdir . '/' . User::$me->language . '/agreement.txt'),
+					options: [
+						'cache_id' => 'agreement_' . User::$me->language,
+						'hard_breaks' => 0,
+					],
+				);
 			} elseif (file_exists(Config::$languagesdir . '/en_US/agreement.txt')) {
-				Utils::$context['agreement'] = BBCodeParser::load()->parse(file_get_contents(Config::$languagesdir . '/en_US/agreement.txt'), true, 'agreement');
+				Utils::$context['privacy_policy'] = Parser::transform(
+					string: file_get_contents(Config::$languagesdir . '/en_US/agreement.txt'),
+					options: [
+						'cache_id' => 'agreement',
+						'hard_breaks' => 0,
+					],
+				);
 			} else {
 				Utils::$context['agreement'] = '';
 			}
@@ -196,10 +207,6 @@ class Register implements ActionInterface
 				// No file found or a blank file, log the error so the admin knows there is a problem!
 				ErrorHandler::log(Lang::$txt['registration_agreement_missing'], 'critical');
 				ErrorHandler::fatalLang('registration_disabled', false);
-			}
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				Utils::$context['agreement'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['agreement'], true);
 			}
 		}
 
@@ -229,17 +236,19 @@ class Register implements ActionInterface
 		if (!empty(Config::$modSettings['requirePolicyAgreement'])) {
 			// Have we got a localized one?
 			if (!empty(Config::$modSettings['policy_' . User::$me->language])) {
-				Utils::$context['privacy_policy'] = BBCodeParser::load()->parse(Config::$modSettings['policy_' . User::$me->language]);
+				Utils::$context['privacy_policy'] = Parser::transform(
+					string: Config::$modSettings['policy_' . User::$me->language],
+					options: ['hard_breaks' => 0],
+				);
 			} elseif (!empty(Config::$modSettings['policy_' . Lang::$default])) {
-				Utils::$context['privacy_policy'] = BBCodeParser::load()->parse(Config::$modSettings['policy_' . Lang::$default]);
+				Utils::$context['privacy_policy'] = Parser::transform(
+					string: Config::$modSettings['policy_' . Lang::$default],
+					options: ['hard_breaks' => 0],
+				);
 			} else {
 				// None was found; log the error so the admin knows there is a problem!
 				ErrorHandler::log(Lang::$txt['registration_policy_missing'], 'critical');
 				ErrorHandler::fatalLang('registration_disabled', false);
-			}
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				Utils::$context['privacy_policy'] = MarkdownParser::load(MarkdownParser::OUTPUT_HTML, 0)->parse(Utils::$context['privacy_policy'], true);
 			}
 		}
 

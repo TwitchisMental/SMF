@@ -17,7 +17,6 @@ namespace SMF\Actions\Moderation;
 
 use SMF\ActionInterface;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Cache\CacheApi;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -25,6 +24,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\PageIndex;
+use SMF\Parser;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\Time;
@@ -295,11 +295,7 @@ class Home implements ActionInterface
 		Utils::$context['notes'] = [];
 
 		foreach ($moderator_notes as $note) {
-			$note['body'] = BBCodeParser::load()->parse($note['body']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$note['body'] = MarkdownParser::load()->parse($note['body'], true);
-			}
+			$note['body'] = Parser::transform($note['body']);
 
 			Utils::$context['notes'][] = [
 				'author' => [

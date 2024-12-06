@@ -362,16 +362,10 @@ class Poll implements \ArrayAccess
 
 		Lang::censorText($this->question);
 
-		$question = BBCodeParser::load()->parse($option->question);
-
-		if (!empty(Config::$modSettings['enableMarkdown'])) {
-			$question = MarkdownParser::load()->parse($question, true);
-		}
-
 		$this->formatted = [
 			'id' => $this->id ?? 0,
 			'image' => 'normal_' . (empty($this->voting_locked) ? 'poll' : 'locked_poll'),
-			'question' => $question,
+			'question' => Parser::transform($this->question),
 			'max_votes' => $this->max_votes,
 			'total_votes' => $this->total_voters,
 			'guest_vote' => $this->guest_vote,
@@ -428,11 +422,7 @@ class Poll implements \ArrayAccess
 			$bar = round(($option->votes * 100) / $divisor, $precision);
 			$barWide = $bar == 0 ? 1 : floor(($bar * 8) / 3);
 
-			$label = BBCodeParser::load()->parse($option->label);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$label = MarkdownParser::load()->parse($label, true);
-			}
+			$label = Parser::transform($option->label);
 
 			// Now add it to the poll's contextual theme data.
 			$this->formatted['choices'][$i] = [

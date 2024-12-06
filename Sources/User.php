@@ -1218,11 +1218,13 @@ class User implements \ArrayAccess
 			Lang::censorText($this->formatted['blurb']);
 			Lang::censorText($this->formatted['signature']);
 
-			$this->formatted['signature'] = BBCodeParser::load()->parse(str_replace(["\n", "\r"], ['<br>', ''], $this->formatted['signature']), true, 'sig' . $this->id, BBCodeParser::getSigTags());
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$this->formatted['signature'] = MarkdownParser::load()->parse($this->formatted['signature'], true);
-			}
+			$this->formatted['signature'] = Parser::transform(
+				string: str_replace(["\n", "\r"], ['<br>', ''], $this->formatted['signature']),
+				options: [
+					'cache_id' => 'sig' . $this->id,
+					'parse_tags' => Parser::getSigTags(),
+				],
+			);
 
 			$this->formatted['signature'] = Utils::adjustHeadingLevels($this->formatted['signature'], null);
 		}
@@ -1258,7 +1260,7 @@ class User implements \ArrayAccess
 
 				// BBC?
 				if ($custom['bbc']) {
-					$value = Utils::adjustHeadingLevels(BBCodeParser::load()->parse($value), null);
+					$value = Utils::adjustHeadingLevels(Parser::transform($value), null);
 				}
 				// ... or checkbox?
 				elseif (isset($custom['type']) && $custom['type'] == 'check') {
@@ -3017,7 +3019,7 @@ class User implements \ArrayAccess
 
 		foreach ($data as $var => $val) {
 			switch ($var) {
-				case  'birthdate':
+				case 'birthdate':
 					$type = 'date';
 					break;
 

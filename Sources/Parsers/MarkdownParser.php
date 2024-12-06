@@ -13,7 +13,14 @@
 
 declare(strict_types=1);
 
-namespace SMF;
+namespace SMF\Parsers;
+
+use SMF\Autolinker;
+use SMF\Config;
+use SMF\IntegrationHook;
+use SMF\Lang;
+use SMF\Parser;
+use SMF\Utils;
 
 /**
  * Converts Markdown to BBCode or HTML.
@@ -33,7 +40,7 @@ namespace SMF;
  *
  *    SMF is capable of much more robust URI validation, so we use it.
  */
-class MarkdownParser
+class MarkdownParser extends Parser
 {
 	/*****************
 	 * Class constants
@@ -47,26 +54,7 @@ class MarkdownParser
 	 * Used to set the output to HTML rendered the same way that the reference
 	 * implementation of CommonMark would.
 	 */
-	public const OUTPUT_HTML_STRICT = 0;
-
-	/**
-	 * @var int
-	 *
-	 * Possible value for $this->output_type.
-	 *
-	 * Used to set the output to HTML rendered like the equivalent BBCode.
-	 * This is the default output type.
-	 */
-	public const OUTPUT_HTML = 1;
-
-	/**
-	 * @var int
-	 *
-	 * Possible value for $this->output_type.
-	 *
-	 * Used to convert Markdown into BBCode.
-	 */
-	public const OUTPUT_BBC = 2;
+	public const OUTPUT_HTML_STRICT = 3;
 
 	/**
 	 * @var int
@@ -725,8 +713,8 @@ class MarkdownParser
 	 * Constructor.
 	 *
 	 * @param int $output_type The type of output to generate.
-	 *    Value must be one of this class's OUTPUT_* constants.
-	 *    Default: self::OUTPUT_HTML.
+	 *    Value must be one of this class's or its parent class's OUTPUT_*
+	 *    constants. Default: self::OUTPUT_HTML.
 	 * @param ?int $hard_breaks How to handle line breaks in HTML output.
 	 *    Value should be a bitmask of this class's BR_* constants.
 	 *    If null, uses the value of Config::$modSettings['markdown_brs'].
@@ -735,13 +723,18 @@ class MarkdownParser
 	 */
 	public function __construct(int $output_type = self::OUTPUT_HTML, ?int $hard_breaks = null)
 	{
+		if ($output_type === self::OUTPUT_TEXT) {
+			$output_type === self::OUTPUT_HTML;
+		}
+
 		if (!in_array($output_type, [self::OUTPUT_BBC, self::OUTPUT_HTML, self::OUTPUT_HTML_STRICT])) {
 			throw new \ValueError();
 		}
 
-		$this->output_type = $output_type;
+		parent::__construct();
 
-		$this->hard_breaks = $hard_breaks ?? (int) (Config::$modSettings['markdown_brs'] ?? 0);
+		$this->hard_breaks = (int) ($hard_breaks ?? Config::$modSettings['markdown_brs'] ?? 0);
+		$this->output_type = $output_type;
 
 		// Maybe a mod wants to add a Markdown extension or something?
 		IntegrationHook::call('integrate_markdown', [&$this->block_types, &$this->render_methods]);
@@ -752,11 +745,11 @@ class MarkdownParser
 	 *
 	 * Getting Markdown and BBCode to play nicely with each other requires some
 	 * extra handling, so $from_bbcode_parser should always be set to true if
-	 * the string was already processed by the SMF\BBCodeParser class.
+	 * the string was already processed by the SMF\Parsers\BBCodeParser class.
 	 *
 	 * @param string $string The string to parse.
 	 * @param string $from_bbcode_parser Whether the string was the output from
-	 *    the SMF\BBCodeParser class.
+	 *    the SMF\Parsers\BBCodeParser class.
 	 * @return string The result of parsing the string.
 	 */
 	public function parse(string $string, bool $from_bbcode_parser = false): string
@@ -3988,21 +3981,35 @@ class MarkdownParser
 	 */
 	protected function resetRuntimeProperties(): void
 	{
-		foreach (get_class_vars($this::class) as $var => $value) {
-			if (in_array($var, ['output_type', 'hard_breaks', 'parsers'])) {
-				continue;
-			}
+		// Reset these properties.
+		$to_reset = [
+			'line_info',
+			'structure',
+			'open',
+			'last_block',
+			'link_reference_definitions',
+			'in_code',
+			'opening_fence_linenum',
+			'opening_fence',
+			'info_string',
+			'in_html',
+			'table_align',
+			'placeholders',
+			'rendered',
+		];
 
-			// Ensure p is always last.
-			if ($var === 'block_types') {
-				$p = $value['p'];
-				unset($value['p']);
-				$value['p'] = $p;
-			}
+		$class_vars = get_class_vars(__CLASS__);
 
+		foreach ($to_reset as $var) {
 			unset($this->{$var});
+			$this->{$var} = $class_vars[$var];
+		}
 
-			$this->{$var} = $value;
+		// Ensure p is always the last element in $this->block_types.
+		if (array_key_last($this->block_types) !== 'p') {
+			$p = $this->block_types['p'];
+			unset($this->block_types['p']);
+			$this->block_types['p'] = $p;
 		}
 	}
 }

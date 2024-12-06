@@ -16,12 +16,11 @@ declare(strict_types=1);
 namespace SMF\Search;
 
 use SMF\Autolinker;
-use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\IP;
 use SMF\Lang;
-use SMF\MarkdownParser;
+use SMF\Parser;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -210,12 +209,14 @@ class SearchResult extends \SMF\Msg
 			// Set the number of characters before and after the searched keyword.
 			$charLimit = 50;
 
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$this->body = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($this->body);
-			}
-
 			$this->body = strtr($this->body, ["\n" => ' ', '<br>' => "\n", '<br/>' => "\n", '<br />' => "\n"]);
-			$this->body = BBCodeParser::load()->parse($this->body, $this->smileys_enabled, $this->id_msg);
+
+			$this->body = Parser::transform(
+				string: $this->body,
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ($this->smileys_enabled ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => $this->id_msg],
+			);
+
 			$this->body = strip_tags(strtr($this->body, ['</div>' => '<br>', '</li>' => '<br>']), '<br>');
 
 			if (Utils::entityStrlen($this->body) > $charLimit) {
@@ -259,11 +260,11 @@ class SearchResult extends \SMF\Msg
 			$this->body_highlighted = self::highlight($this->body, SearchApi::$loadedApi->searchArray);
 		} else {
 			// Run BBC interpreter on the message.
-			$this->body = BBCodeParser::load()->parse($this->body, $this->smileys_enabled, $this->id_msg);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$this->body = MarkdownParser::load()->parse($this->body, true);
-			}
+			$this->body = Parser::transform(
+				string: $this->body,
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ($this->smileys_enabled ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => $this->id_msg],
+			);
 
 			$this->subject_highlighted = self::highlight($this->subject, SearchApi::$loadedApi->searchArray);
 			$this->body_highlighted = self::highlight($this->body, SearchApi::$loadedApi->searchArray);
@@ -480,7 +481,7 @@ class SearchResult extends \SMF\Msg
 			$params['message_list'] = self::$messages_to_get = array_filter(array_unique(array_map('intval', (array) $ids)));
 		}
 
-		foreach(self::queryData($selects, $params, $joins, $where, $order, $group, $limit) as $row) {
+		foreach (self::queryData($selects, $params, $joins, $where, $order, $group, $limit) as $row) {
 			$id = (int) $row['id_msg'];
 
 			yield (new self($id, $row));

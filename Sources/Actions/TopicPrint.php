@@ -18,13 +18,12 @@ namespace SMF\Actions;
 use SMF\ActionInterface;
 use SMF\ActionTrait;
 use SMF\Attachment;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
-use SMF\MarkdownParser;
+use SMF\Parser;
 use SMF\Poll;
 use SMF\Theme;
 use SMF\Time;
@@ -97,18 +96,7 @@ class TopicPrint implements ActionInterface
 			Utils::$context['poll'] = $poll->format(['no_buttons' => true]);
 		}
 
-		// We want a separate BBCodeParser instance for this, not the reusable one
-		// that would be returned by BBCodeParser::load().
-		$bbcparser = new BBCodeParser();
-
-		// Set the BBCodeParser to print mode.
-		$bbcparser->for_print = true;
-
-		if (!empty(Config::$modSettings['enableMarkdown'])) {
-			$markdown_parser = new MarkdownParser();
-		}
-
-		// Lets "output" all that info.
+		// Let's output all that info.
 		Theme::loadTemplate('Printpage');
 		Utils::$context['template_layers'] = ['print'];
 		Utils::$context['board_name'] = Board::$info->name;
@@ -143,11 +131,7 @@ class TopicPrint implements ActionInterface
 			Lang::censorText($row['subject']);
 			Lang::censorText($row['body']);
 
-			$row['body'] = $bbcparser->parse($row['body']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = $markdown_parser->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform($row['body'], options: ['for_print' => true]);
 
 			Utils::$context['posts'][] = [
 				'subject' => $row['subject'],

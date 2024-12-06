@@ -19,7 +19,6 @@ use SMF\ActionInterface;
 use SMF\Actions\BackwardCompatibility;
 use SMF\Actions\Notify;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\Editor;
@@ -31,6 +30,7 @@ use SMF\Logging;
 use SMF\Mail;
 use SMF\Menu;
 use SMF\Msg;
+use SMF\Parser;
 use SMF\PersonalMessage\PM;
 use SMF\SecurityToken;
 use SMF\Theme;
@@ -1106,7 +1106,7 @@ class News implements ActionInterface
 			$admin_current_news[$id] = [
 				'id' => $id,
 				'unparsed' => Msg::un_preparsecode($line),
-				'parsed' => preg_replace('~<([/]?)form[^>]*?[>]*>~i', '<em class="smalltext">&lt;$1form&gt;</em>', BBCodeParser::load()->parse($line)),
+				'parsed' => preg_replace('~<([/]?)form[^>]*?[>]*>~i', '<em class="smalltext">&lt;$1form&gt;</em>', Parser::transform($line)),
 			];
 		}
 
@@ -1193,7 +1193,7 @@ class News implements ActionInterface
 			if (!empty(Utils::$context['send_html'])) {
 				$enablePostHTML = Config::$modSettings['enablePostHTML'];
 				Config::$modSettings['enablePostHTML'] = Utils::$context['send_html'];
-				Utils::$context[$key] = BBCodeParser::load()->parse(Utils::$context[$key]);
+				Utils::$context[$key] = Parser::transform(Utils::$context[$key]);
 				Config::$modSettings['enablePostHTML'] = $enablePostHTML;
 			}
 

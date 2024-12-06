@@ -19,7 +19,6 @@ use SMF\ActionInterface;
 use SMF\Actions\BackwardCompatibility;
 use SMF\Actions\Profile\Notification;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
@@ -27,8 +26,9 @@ use SMF\Graphics\Image;
 use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
-use SMF\MarkdownParser;
 use SMF\Menu;
+use SMF\Parser;
+use SMF\Parsers\MarkdownParser;
 use SMF\Profile;
 use SMF\Sapi;
 use SMF\SecurityToken;
@@ -185,7 +185,7 @@ class Features implements ActionInterface
 			$bbcTags = [];
 			$bbcTagsChildren = [];
 
-			foreach (BBCodeParser::getCodes() as $tag) {
+			foreach (Parser::getBBCodes() as $tag) {
 				$bbcTags[] = $tag['tag'];
 
 				if (isset($tag['require_children'])) {
@@ -194,8 +194,8 @@ class Features implements ActionInterface
 			}
 
 			// Clean up tags with children
-			foreach($bbcTagsChildren as $parent_tag => $children) {
-				foreach($children as $index => $child_tag) {
+			foreach ($bbcTagsChildren as $parent_tag => $children) {
+				foreach ($children as $index => $child_tag) {
 					// Remove entries where parent and child tag is the same
 					if ($child_tag == $parent_tag) {
 						unset($bbcTagsChildren[$parent_tag][$index]);
@@ -592,7 +592,7 @@ class Features implements ActionInterface
 			// Clean up the tag stuff!
 			$bbcTags = [];
 
-			foreach (BBCodeParser::getCodes() as $tag) {
+			foreach (Parser::getBBCodes() as $tag) {
 				$bbcTags[] = $tag['tag'];
 			}
 
@@ -1035,7 +1035,7 @@ class Features implements ActionInterface
 				[],
 			);
 
-			while($row = Db::$db->fetch_assoc($request)) {
+			while ($row = Db::$db->fetch_assoc($request)) {
 				$fields[] = $row['id_field'];
 			}
 			Db::$db->free_result($request);

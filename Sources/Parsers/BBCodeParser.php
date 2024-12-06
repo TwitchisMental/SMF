@@ -13,36 +13,25 @@
 
 declare(strict_types=1);
 
-namespace SMF;
+namespace SMF\Parsers;
 
-use SMF\Cache\CacheApi;
-use SMF\Db\DatabaseApi as Db;
+use SMF\Attachment;
+use SMF\Autolinker;
+use SMF\BrowserDetector;
+use SMF\Config;
+use SMF\IntegrationHook;
+use SMF\Lang;
+use SMF\Parser;
+use SMF\Sapi;
+use SMF\Theme;
+use SMF\Time;
+use SMF\Url;
+use SMF\Utils;
 
 /**
  * Parses Bulletin Board Code in a string and converts it to HTML.
- *
- * The recommended way to use this class to parse BBCode in a string is:
- *
- *     $parsed_string = BBCodeParser::load()->parse($unparsed_string);
- *
- * Calling the load() method like this will save on memory by reusing a single
- * instance of the BBCodeParser class. However, if you need more control over
- * the parser, you can always instantiate a new one.
- *
- * The following integration hooks are called during object construction:
- *
- *     integrate_bbc_codes            (Used to add or modify BBC)
- *     integrate_smileys              (Used for alternative smiley handling)
- *
- * The following integration hooks are called during parsing:
- *
- *     integrate_pre_parsebbc         (Allows adjustments before parsing)
- *     integrate_post_parsebbc        (Gives access to results of parsing)
- *     integrate_attach_bbc_validate  (Adjusts HTML produced by the attach BBC)
- *     integrate_bbc_print            (For BBC that need special handling in
- *                                        print mode)
  */
-class BBCodeParser
+class BBCodeParser extends Parser
 {
 	/*******************
 	 * Public properties
@@ -56,88 +45,11 @@ class BBCodeParser
 	public array $parse_tags = [];
 
 	/**
-	 * @var bool
-	 *
-	 * Whether BBCode should be parsed.
-	 */
-	public bool $enable_bbc;
-
-	/**
-	 * @var bool
-	 *
-	 * Whether to allow certain basic HTML tags in the input.
-	 */
-	public bool $enable_post_html;
-
-	/**
 	 * @var array
 	 *
 	 * List of disabled BBCode tags.
 	 */
 	public array $disabled = [];
-
-	/**
-	 * @var bool
-	 *
-	 * Whether smileys should be parsed.
-	 */
-	public bool $smileys = true;
-
-	/**
-	 * @var string
-	 *
-	 * The smiley set to use when parsing smileys.
-	 */
-	public string $smiley_set;
-
-	/**
-	 * @var bool
-	 *
-	 * Whether custom smileys are enabled.
-	 */
-	public bool $custom_smileys_enabled;
-
-	/**
-	 * @var string
-	 *
-	 * URL of the base smileys directory.
-	 */
-	public string $smileys_url;
-
-	/**
-	 * @var string
-	 *
-	 * The character encoding of the strings to be parsed.
-	 */
-	public string $encoding = 'UTF-8';
-
-	/**
-	 * @var bool
-	 *
-	 * Shorthand check for whether character encoding is UTF-8.
-	 */
-	public bool $utf8 = true;
-
-	/**
-	 * @var string
-	 *
-	 * Language locale to use.
-	 */
-	public string $locale = 'en_US';
-
-	/**
-	 * @var int
-	 *
-	 * User's time offset from UTC.
-	 */
-	public int $time_offset;
-
-	/**
-	 * @var string
-	 *
-	 * User's strftime format.
-	 */
-	public string $time_format;
 
 	/**
 	 * @var bool
@@ -156,35 +68,6 @@ class BBCodeParser
 	 * Regular expression to match all BBCode tags.
 	 */
 	protected ?string $alltags_regex = null;
-
-	/**
-	 * @var ?string
-	 *
-	 * Regular expression to match smileys.
-	 */
-	protected ?string $smiley_preg_search = null;
-
-	/**
-	 * @var array
-	 *
-	 * Replacement values for smileys.
-	 */
-	protected array $smiley_preg_replacements = [];
-
-	/**
-	 * @var array
-	 *
-	 * Holds any extra info that should be used in the cache_key.
-	 *
-	 * Data can be added to this variable using the integrate_pre_parsebbc hook.
-	 *
-	 * This is important if your mod can cause the same input string to produce
-	 * different output strings in different situations. For example, if your
-	 * mod adds a BBCode that shows different output to guests vs. members, then
-	 * you need to add information to this variable in order to distinguish the
-	 * guest version vs. the member version of the output.
-	 */
-	private array $cache_key_extras = [];
 
 	/**
 	 * @var array
@@ -271,13 +154,6 @@ class BBCodeParser
 	 * Uses private use Unicode characters to prevent conflicts.
 	 */
 	private string $placeholder_template = "\u{E03C}" . '%1$s' . "\u{E03E}";
-
-	/**
-	 * @var array
-	 *
-	 * Holds parsed messages.
-	 */
-	private array $results = [];
 
 	/****************************
 	 * Internal static properties
@@ -942,11 +818,11 @@ class BBCodeParser
 	private static bool $integrate_bbc_codes_done = false;
 
 	/**
-	 * @var self
+	 * @var array
 	 *
-	 * A reference to an existing, reusable instance of this class.
+	 * Reusable instances of this class.
 	 */
-	private static self $parser;
+	private static array $parsers = [];
 
 	/*****************
 	 * Public methods.
@@ -954,32 +830,12 @@ class BBCodeParser
 
 	/**
 	 * Constructor.
-	 *
-	 * @return object A reference to this object for method chaining.
-	 * @suppress PHP0436
 	 */
-	public function __construct()
+	public function __construct(bool $for_print = false)
 	{
-		// Set up localization.
-		if (!empty(Utils::$context['utf8'])) {
-			$this->utf8 = true;
-			$this->encoding = 'UTF-8';
-		} else {
-			$this->encoding = !empty(Config::$modSettings['global_character_set']) ? Config::$modSettings['global_character_set'] : (!empty(Lang::$txt['lang_character_set']) ? Lang::$txt['lang_character_set'] : $this->encoding);
+		$this->for_print = $for_print;
 
-			$this->utf8 = $this->encoding === 'UTF-8';
-		}
-
-		if (!empty(Lang::$txt['lang_locale'])) {
-			$this->locale = Lang::$txt['lang_locale'];
-		}
-
-		$this->time_offset = User::$me->time_offset ?? 0;
-		$this->time_format = User::$me->time_format ?? Time::getTimeFormat();
-
-		// Set up BBCode parsing.
-		$this->enable_bbc = !empty(Config::$modSettings['enableBBC']);
-		$this->enable_post_html = !empty(Config::$modSettings['enablePostHTML']);
+		parent::__construct();
 
 		self::integrateBBC();
 
@@ -987,27 +843,12 @@ class BBCodeParser
 			self::$codes,
 			fn ($a, $b) => $a['tag'] <=> $b['tag'],
 		);
-
-		// Set up smileys parsing.
-		$this->custom_smileys_enabled = !empty(Config::$modSettings['smiley_enable']);
-		$this->smileys_url = Config::$modSettings['smileys_url'];
-		$this->smiley_set = !empty(User::$me->smiley_set) ? User::$me->smiley_set : (!empty(Config::$modSettings['smiley_sets_default']) ? Config::$modSettings['smiley_sets_default'] : 'none');
-
-		// Maybe a mod wants to implement an alternative method for smileys
-		// (e.g. emojis instead of images)
-		if ($this->smiley_set !== 'none') {
-			IntegrationHook::call('integrate_smileys', [&$this->smiley_preg_search, &$this->smiley_preg_replacements]);
-		}
-
-		// Allow method chaining.
-		return $this;
 	}
 
 	/**
-	 * Parse bulletin board code in a string, as well as smileys optionally.
+	 * Parse bulletin board code in a string.
 	 *
 	 * @param string|bool $message The string to parse.
-	 * @param bool $smileys Whether to parse smileys. Default: true.
 	 * @param string|int $cache_id The cache ID.
 	 *    If $cache_id is left empty, an ID will be generated automatically.
 	 *    Manually specifying a ID is helpful in cases when an integration hook
@@ -1016,7 +857,7 @@ class BBCodeParser
 	 * @param array $parse_tags If set, only parses these tags rather than all of them.
 	 * @return string The parsed string.
 	 */
-	public function parse(string $message, bool $smileys = true, string|int $cache_id = '', array $parse_tags = []): string
+	public function parse(string $message, string|int $cache_id = '', array $parse_tags = []): string
 	{
 		// Don't waste cycles
 		if (strval($message) === '') {
@@ -1027,7 +868,6 @@ class BBCodeParser
 		$this->resetRuntimeProperties();
 
 		$this->message = $message;
-		$this->smileys = $smileys;
 		$this->parse_tags = $parse_tags;
 
 		$this->setDisabled();
@@ -1041,174 +881,16 @@ class BBCodeParser
 			return $this->message;
 		}
 
-		if (!$this->enable_bbc) {
-			if ($this->smileys === true) {
-				$this->message = $this->parseSmileys($this->message);
-			}
-
+		if (!self::$enable_bbc) {
 			$this->message = $this->fixHtml($this->message);
 
 			return $this->message;
 		}
 
-		// Allow mods access before entering $this->parseMessage.
-		IntegrationHook::call('integrate_pre_parsebbc', [&$this->message, &$this->smileys, &$cache_id, &$this->parse_tags, &$this->cache_key_extras]);
-
-		// If no cache id was given, make a generic one.
-		$cache_id = strval($cache_id) !== '' ? $cache_id : 'str' . substr(md5($this->message), 0, 7);
-
-		// Use a unique identifier key for this combination of string and settings.
-		$cache_key = 'parse:' . $cache_id . '-' . md5(json_encode([
-			$this->message,
-			// Localization settings.
-			$this->encoding,
-			$this->locale,
-			$this->time_offset,
-			$this->time_format,
-			// BBCode settings.
-			$this->bbc_codes,
-			$this->disabled,
-			$this->parse_tags,
-			$this->enable_post_html,
-			$this->for_print,
-			// Smiley settings.
-			$this->smileys,
-			$this->smiley_set,
-			$this->smiley_preg_search,
-			$this->smiley_preg_replacements,
-			// Additional stuff that might affect output.
-			$this->cache_key_extras,
-		]));
-
-		// Have we already parsed this string?
-		if (isset($this->results[$cache_key])) {
-			return $this->results[$cache_key];
-		}
-
-		// Or maybe we cached the results recently?
-		if (($this->results[$cache_key] = CacheApi::get($cache_key, 240)) != null) {
-			return $this->results[$cache_key];
-		}
-
-		// Keep track of how long this takes.
-		$cache_t = microtime(true);
-
 		// Do the job.
 		$this->parseMessage();
 
-		// Allow mods access to what $this->parseMessage created.
-		IntegrationHook::call('integrate_post_parsebbc', [&$this->message, &$this->smileys, &$cache_id, &$this->parse_tags]);
-
-		// Cache the output if it took some time...
-		if (!empty(CacheApi::$enable) && microtime(true) - $cache_t > pow(50, -CacheApi::$enable)) {
-			CacheApi::put($cache_key, $this->message, 240);
-		}
-
-		// Remember for later.
-		$this->results[$cache_key] = $this->message;
-
-		return $this->results[$cache_key];
-	}
-
-	/**
-	 * Parse smileys in the passed message.
-	 *
-	 * The smiley parsing function which makes pretty faces appear :).
-	 * If custom smiley sets are turned off by smiley_enable, the default set of smileys will be used.
-	 * These are specifically not parsed in code tags [url=mailto:Dad@blah.com]
-	 * Caches the smileys from the database or array in memory.
-	 *
-	 * @param string $message The message to parse smileys in.
-	 * @return string The message with smiley images inserted.
-	 */
-	public function parseSmileys(string $message): string
-	{
-		if ($this->smiley_set == 'none' || trim($message) == '') {
-			return $message;
-		}
-
-		// If smileyPregSearch hasn't been set, do it now.
-		if (empty($this->smiley_preg_search)) {
-			// Cache for longer when customized smiley codes aren't enabled
-			$cache_time = !$this->custom_smileys_enabled ? 7200 : 480;
-
-			// Load the smileys in reverse order by length so they don't get parsed incorrectly.
-			if (($temp = CacheApi::get('parsing_smileys_' . $this->smiley_set, $cache_time)) == null) {
-				$smileysfrom = [];
-				$smileysto = [];
-				$smileysdescs = [];
-
-				$result = Db::$db->query(
-					'',
-					'SELECT s.code, f.filename, s.description
-					FROM {db_prefix}smileys AS s
-						JOIN {db_prefix}smiley_files AS f ON (s.id_smiley = f.id_smiley)
-					WHERE f.smiley_set = {string:smiley_set}' . (!$this->custom_smileys_enabled ? '
-						AND s.code IN ({array_string:default_codes})' : '') . '
-					ORDER BY LENGTH(s.code) DESC',
-					[
-						'default_codes' => ['>:D', ':D', '::)', '>:(', ':))', ':)', ';)', ';D', ':(', ':o', '8)', ':P', '???', ':-[', ':-X', ':-*', ':\'(', ':-\\', '^-^', 'O0', 'C:-)', 'O:-)'],
-						'smiley_set' => $this->smiley_set,
-					],
-				);
-
-				while ($row = Db::$db->fetch_assoc($result)) {
-					$smileysfrom[] = $row['code'];
-					$smileysto[] = Utils::htmlspecialchars($row['filename']);
-					$smileysdescs[] = !empty(Lang::$txt['icon_' . strtolower($row['description'])]) ? Lang::$txt['icon_' . strtolower($row['description'])] : $row['description'];
-				}
-				Db::$db->free_result($result);
-
-				CacheApi::put('parsing_smileys_' . $this->smiley_set, [$smileysfrom, $smileysto, $smileysdescs], $cache_time);
-			} else {
-				list($smileysfrom, $smileysto, $smileysdescs) = $temp;
-			}
-
-			// The non-breaking-space is a complex thing...
-			$non_breaking_space = $this->utf8 ? '\x{A0}' : '\xA0';
-
-			// This smiley regex makes sure it doesn't parse smileys within code tags (so [url=mailto:David@bla.com] doesn't parse the :D smiley)
-			$this->smiley_preg_replacements = [];
-			$search_parts = [];
-			$smileys_path = Utils::htmlspecialchars($this->smileys_url . '/' . rawurlencode($this->smiley_set) . '/');
-
-			for ($i = 0, $n = count($smileysfrom); $i < $n; $i++) {
-				$special_chars = Utils::htmlspecialchars($smileysfrom[$i], ENT_QUOTES);
-
-				$smiley_code = '<img src="' . $smileys_path . $smileysto[$i] . '" alt="' . strtr($special_chars, [':' => '&#58;', '(' => '&#40;', ')' => '&#41;', '$' => '&#36;', '[' => '&#091;']) . '" title="' . strtr(Utils::htmlspecialchars($smileysdescs[$i]), [':' => '&#58;', '(' => '&#40;', ')' => '&#41;', '$' => '&#36;', '[' => '&#091;']) . '" class="smiley">';
-
-				$this->smiley_preg_replacements[$smileysfrom[$i]] = $smiley_code;
-
-				$search_parts[] = $smileysfrom[$i];
-
-				if ($smileysfrom[$i] != $special_chars) {
-					$this->smiley_preg_replacements[$special_chars] = $smiley_code;
-					$search_parts[] = $special_chars;
-
-					// Some 2.0 hex htmlchars are in there as 3 digits; allow for finding leading 0 or not
-					$special_chars2 = preg_replace('/&#(\d{2});/', '&#0$1;', $special_chars);
-
-					if ($special_chars2 != $special_chars) {
-						$this->smiley_preg_replacements[$special_chars2] = $smiley_code;
-						$search_parts[] = $special_chars2;
-					}
-				}
-			}
-
-			$this->smiley_preg_search = '~(?<=[>:\?\.\s' . $non_breaking_space . '[\]()*\\\;]|(?<![a-zA-Z0-9])\(|^)(' . Utils::buildRegex($search_parts, '~') . ')(?=[^[:alpha:]0-9]|$)~' . ($this->utf8 ? 'u' : '');
-		}
-
-		// If there are no smileys defined, no need to replace anything
-		if (empty($this->smiley_preg_replacements)) {
-			return $message;
-		}
-
-		// Replace away!
-		return preg_replace_callback(
-			$this->smiley_preg_search,
-			fn ($matches) => $this->smiley_preg_replacements[$matches[1]],
-			$message,
-		);
+		return $this->message;
 	}
 
 	/**
@@ -1257,38 +939,6 @@ class BBCodeParser
 		$string = preg_replace('~<style[^>]*[^/]?' . '>.*?</style>~i', '', $string);
 		$string = preg_replace('~\\<\\!--.*?-->~i', '', $string);
 		$string = preg_replace('~\\<\\!\\[CDATA\\[.*?\\]\\]\\>~i', '', $string);
-
-		// Do the smileys ultra first!
-		preg_match_all('~<img\b[^>]+alt="([^"]+)"[^>]+class="smiley"[^>]*>(?:\s)?~i', $string, $matches);
-
-		if (!empty($matches[0])) {
-			// Get all our smiley codes
-			$request = Db::$db->query(
-				'',
-				'SELECT code
-				FROM {db_prefix}smileys
-				ORDER BY LENGTH(code) DESC',
-				[],
-			);
-			$smiley_codes = Db::$db->fetch_all($request);
-			Db::$db->free_result($request);
-
-			foreach ($matches[1] as $k => $possible_code) {
-				$possible_code = Utils::htmlspecialcharsDecode($possible_code);
-
-				if (in_array($possible_code, $smiley_codes)) {
-					$matches[1][$k] = '-[]-smf_smily_start#|#' . $possible_code . '-[]-smf_smily_end#|#';
-				} else {
-					$matches[1][$k] = $matches[0][$k];
-				}
-			}
-
-			// Replace the tags!
-			$string = str_replace($matches[0], $matches[1], $string);
-
-			// Now sort out spaces
-			$string = str_replace(['-[]-smf_smily_end#|#-[]-smf_smily_start#|#', '-[]-smf_smily_end#|#', '-[]-smf_smily_start#|#'], ' ', $string);
-		}
 
 		// Only try to buy more time if the client didn't quit.
 		if (connection_aborted()) {
@@ -2027,22 +1677,22 @@ class BBCodeParser
 	 * Using this method to get a BBCodeParser instance saves memory by avoiding
 	 * creating redundant instances.
 	 *
-	 * @param bool $init If true, reinitializes the reusable BBCodeParser.
+	 * @param bool $for_print If true, adjusts output for print media.
 	 * @return object An instance of this class.
 	 */
-	public static function load(bool $init = false): object
+	public static function load(bool $for_print = false): object
 	{
-		if (!isset(self::$parser) || !empty($init)) {
-			self::$parser = new self();
+		if (!isset(self::$parsers[(int) $for_print])) {
+			self::$parsers[(int) $for_print] = new self($for_print);
 		}
 
-		return self::$parser;
+		return self::$parsers[(int) $for_print];
 	}
 
 	/**
 	 * Get the list of supported BBCodes, including any added by modifications.
 	 *
-	 * @return array List of supported BBCodes
+	 * @return array List of supported BBCodes.
 	 */
 	public static function getCodes(): array
 	{
@@ -2052,9 +1702,10 @@ class BBCodeParser
 	}
 
 	/**
-	 * Returns an array of BBC tags that are allowed in signatures.
+	 * Returns an array of BBCodes tags that are allowed in signatures.
 	 *
-	 * @return array An array containing allowed tags for signatures, or an empty array if all tags are allowed.
+	 * @return array An array containing allowed tags for signatures, or an
+	 *    empty array if all tags are allowed.
 	 */
 	public static function getSigTags(): array
 	{
@@ -2066,7 +1717,7 @@ class BBCodeParser
 
 		$disabled_tags = explode(',', $sig_bbc);
 
-		// Get all available bbc tags
+		// Get all available BBCode tags.
 		$temp = self::getCodes();
 		$allowed_tags = [];
 
@@ -2079,150 +1730,12 @@ class BBCodeParser
 		$allowed_tags = array_unique($allowed_tags);
 
 		if (empty($allowed_tags)) {
-			// An empty array means that all bbc tags are allowed. So if all tags are disabled we need to add a dummy tag.
+			// An empty array means that all BBCode tags are allowed.
+			// So if all tags are disabled we need to add a dummy tag.
 			$allowed_tags[] = 'nonexisting';
 		}
 
 		return $allowed_tags;
-	}
-
-	/**
-	 * Highlight any code.
-	 *
-	 * Uses PHP's highlight_string() to highlight PHP syntax.
-	 * Does special handling to keep the tabs in the code available.
-	 * Used to parse PHP code from inside [code] and [php] tags.
-	 *
-	 * @param string $code The code.
-	 * @return string The code with highlighted HTML.
-	 */
-	public static function highlightPhpCode(string $code): string
-	{
-		// Remove special characters.
-		$code = Utils::htmlspecialcharsDecode(strtr($code, ['<br />' => "\n", '<br>' => "\n", "\t" => 'SMF_TAB();', '&#91;' => '[']));
-
-		$oldlevel = error_reporting(0);
-
-		$buffer = str_replace(["\n", "\r"], '', @highlight_string($code, true));
-
-		error_reporting($oldlevel);
-
-		// Yes, I know this is kludging it, but this is the best way to preserve tabs from PHP :P.
-		$buffer = preg_replace('~SMF_TAB(?:</(?:font|span)><(?:font color|span style)="[^"]*?">)?\(\);~', '<span style="white-space: pre-wrap;">' . "\t" . '</span>', $buffer);
-
-		// PHP 8.3 changed the returned HTML.
-		$buffer = preg_replace('/^(<pre>)?<code[^>]*>|<\/code>(<\/pre>)?$/', '', $buffer);
-
-		return strtr($buffer, ['\'' => '&#039;']);
-	}
-
-	/**
-	 * Microsoft uses their own character set Code Page 1252 (CP1252), which is
-	 * a superset of ISO 8859-1, defining several characters between DEC 128 and
-	 * 159 that are not normally displayable. This converts the popular ones
-	 * that appear from a cut and paste from Windows.
-	 *
-	 * @param string $string The string.
-	 * @return string The sanitized string.
-	 */
-	public static function sanitizeMSCutPaste(string $string): string
-	{
-		if (empty($string)) {
-			return $string;
-		}
-
-		self::load();
-
-		// UTF-8 occurrences of MS special characters.
-		$findchars_utf8 = [
-			"\xe2\x80\x9a",	// single low-9 quotation mark
-			"\xe2\x80\x9e",	// double low-9 quotation mark
-			"\xe2\x80\xa6",	// horizontal ellipsis
-			"\xe2\x80\x98",	// left single curly quote
-			"\xe2\x80\x99",	// right single curly quote
-			"\xe2\x80\x9c",	// left double curly quote
-			"\xe2\x80\x9d",	// right double curly quote
-		];
-
-		// windows 1252 / iso equivalents
-		$findchars_iso = [
-			chr(130),
-			chr(132),
-			chr(133),
-			chr(145),
-			chr(146),
-			chr(147),
-			chr(148),
-		];
-
-		// safe replacements
-		$replacechars = [
-			',',	// &sbquo;
-			',,',	// &bdquo;
-			'...',	// &hellip;
-			"'",	// &lsquo;
-			"'",	// &rsquo;
-			'"',	// &ldquo;
-			'"',	// &rdquo;
-		];
-
-		$string = str_replace(Utils::$context['utf8'] ? $findchars_utf8 : $findchars_iso, $replacechars, $string);
-
-		return $string;
-	}
-
-	/**
-	 * Backward compatibility wrapper for parse() and/or getCodes().
-	 *
-	 * @param string|bool $message The message.
-	 *		When an empty string, nothing is done.
-	 *		When false we provide a list of BBC codes available.
-	 *		When a string, the message is parsed and bbc handled.
-	 * @param bool $smileys Whether to parse smileys as well.
-	 * @param string $cache_id The cache ID.
-	 * @param array $parse_tags If set, only parses these tags rather than all of them.
-	 * @return string|array The parsed message or the list of BBCodes.
-	 */
-	public static function backcompatParseBbc(string|bool $message, bool $smileys = true, string $cache_id = '', array $parse_tags = []): string|array
-	{
-		if ($message === false) {
-			return self::getCodes();
-		}
-
-		self::load();
-
-		$cache_id = (is_string($cache_id) || is_int($cache_id)) && strlen($cache_id) === strspn($cache_id, '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_') ? (string) $cache_id : '';
-
-		$for_print = self::$parser->for_print;
-		self::$parser->for_print = $smileys === 'print';
-
-		$message = self::$parser->parse((string) $message, !empty($smileys), $cache_id, (array) $parse_tags);
-
-		self::$parser->for_print = $for_print;
-
-		return $message;
-	}
-
-	/**
-	 * Backward compatibility wrapper for parseSmileys().
-	 * Doesn't return anything, but rather modifies $message directly.
-	 *
-	 * @param string &$message The message to parse smileys in.
-	 */
-	public static function backcompatParseSmileys(string &$message)
-	{
-		$message = self::load()->parseSmileys($message);
-	}
-
-	/**
-	 * Backward compatibility wrapper for unparse().
-	 *
-	 * @param string $string Text containing HTML
-	 * @return string The string with html converted to bbc
-	 */
-	public function htmlToBbc(string $string): string
-	{
-		return self::load()->unparse($string);
 	}
 
 	/*
@@ -2727,20 +2240,7 @@ class BBCodeParser
 			$this->message .= "\n" . $tag['after'] . "\n";
 		}
 
-		// Parse the smileys within the parts where it can be done safely.
-		if ($this->smileys === true) {
-			$message_parts = explode("\n", $this->message);
-
-			for ($i = 0, $n = count($message_parts); $i < $n; $i += 2) {
-				$message_parts[$i] = $this->parseSmileys($message_parts[$i]);
-			}
-
-			$this->message = implode('', $message_parts);
-		}
-		// No smileys, just get rid of the markers.
-		else {
-			$this->message = strtr($this->message, ["\n" => '']);
-		}
+		$this->message = strtr($this->message, ["\n" => '']);
 
 		// Transform the first table row into a table header and wrap the rest
 		// in table body tags.
@@ -2852,7 +2352,7 @@ class BBCodeParser
 	protected function setBbcCodes(): void
 	{
 		// If we already have a version of the BBCodes for the current language, use that.
-		$locale_key = $this->locale . '|' . implode(',', $this->disabled);
+		$locale_key = self::$locale . '|' . implode(',', $this->disabled);
 
 		if (!empty($this->bbc_lang_locales[$locale_key])) {
 			$this->bbc_codes = $this->bbc_lang_locales[$locale_key];
@@ -3007,7 +2507,7 @@ class BBCodeParser
 	 */
 	protected function fixHtml(string $data): string
 	{
-		if (empty($this->enable_post_html) || !str_contains($data, '&lt;')) {
+		if (empty(self::$enable_post_html) || !str_contains($data, '&lt;')) {
 			return $data;
 		}
 
@@ -3019,10 +2519,10 @@ class BBCodeParser
 				}
 
 				if (str_starts_with($matches[2], Config::$boardurl)) {
-					return $this->enable_bbc ? '[iurl=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/iurl]' : '<a href="' . $matches[2] . '" class="bbc_link">' . $matches[3] . '</a>';
+					return self::$enable_bbc ? '[iurl=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/iurl]' : '<a href="' . $matches[2] . '" class="bbc_link">' . $matches[3] . '</a>';
 				}
 
-				return $this->enable_bbc ? '[url=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/url]' : '<a href="' . $matches[2] . '" class="bbc_link" target="_blank" rel="noopener">' . $matches[3] . '</a>';
+				return self::$enable_bbc ? '[url=&quot;' . $matches[2] . '&quot;]' . $matches[3] . '[/url]' : '<a href="' . $matches[2] . '" class="bbc_link" target="_blank" rel="noopener">' . $matches[3] . '</a>';
 			},
 			$data,
 		);
@@ -4225,7 +3725,6 @@ class BBCodeParser
 		$to_reset = [
 			'message',
 			'bbc_codes',
-			'smileys',
 			'parse_tags',
 			'open_tags',
 			'inside',
@@ -4233,12 +3732,12 @@ class BBCodeParser
 			'last_pos',
 			'placeholders',
 			'placeholders_counter',
-			'cache_key_extras',
 		];
 
 		$class_vars = get_class_vars(__CLASS__);
 
 		foreach ($to_reset as $var) {
+			unset($this->{$var});
 			$this->{$var} = $class_vars[$var];
 		}
 	}
@@ -4266,7 +3765,7 @@ class BBCodeParser
 
 				// Closures cannot be serialized, but they can be reflected.
 				if (($value['validate'] ?? null) instanceof \Closure) {
-					$value['validate'] = (string) new ReflectionFunction($value['validate']);
+					$value['validate'] = (string) new \ReflectionFunction($value['validate']);
 				}
 
 				$serialized = serialize($value);

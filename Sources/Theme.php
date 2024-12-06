@@ -774,7 +774,12 @@ class Theme
 			}
 
 			// Clean it up for presentation ;).
-			Utils::$context['news_lines'][$i] = Utils::adjustHeadingLevels(BBCodeParser::load()->parse(stripslashes(trim(Utils::$context['news_lines'][$i])), true, 'news' . $i), null);
+			Utils::$context['news_lines'][$i] = Parser::transform(
+				string: stripslashes(trim(Utils::$context['news_lines'][$i])),
+				options: ['cache_id' => 'news' . $i],
+			);
+
+			Utils::$context['news_lines'][$i] = Utils::adjustHeadingLevels(Utils::$context['news_lines'][$i], null);
 		}
 
 		if (!empty(Utils::$context['news_lines']) && (!empty(Config::$modSettings['allow_guestAccess']) || User::$me->is_logged)) {
@@ -3005,7 +3010,7 @@ class Theme
 				// I know, I know... this is VERY COMPLICATED.  Still, it's good.
 				if (preg_match('~ <strong>(\d+)</strong><br( /)?' . '>$~i', $error, $match) != 0) {
 					$data = file($filename);
-					$data2 = BBCodeParser::highlightPhpCode(implode('', $data));
+					$data2 = Parser::highlightPhpCode(implode('', $data));
 					$data2 = preg_split('~\\<br( /)?\\>~', $data2);
 
 					// Fix the PHP code stuff...

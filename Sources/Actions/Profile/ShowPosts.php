@@ -18,7 +18,6 @@ namespace SMF\Actions\Profile;
 use SMF\ActionInterface;
 use SMF\ActionTrait;
 use SMF\Autolinker;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -27,10 +26,10 @@ use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Logging;
-use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\PageIndex;
+use SMF\Parser;
 use SMF\Profile;
 use SMF\Theme;
 use SMF\Time;
@@ -839,11 +838,11 @@ class ShowPosts implements ActionInterface
 			}
 
 			// Do the code.
-			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform(
+				string: $row['body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['smileys_enabled'] ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => (int) $row['id_msg']],
+			);
 
 			// And the array...
 			Utils::$context['posts'][$counter += $reverse ? -1 : 1] = [

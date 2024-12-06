@@ -17,13 +17,13 @@ namespace SMF\Actions\Admin;
 
 use SMF\ActionInterface;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\IP;
 use SMF\Lang;
 use SMF\PageIndex;
+use SMF\Parser;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\Time;
@@ -430,7 +430,7 @@ class ErrorLog implements ActionInterface
 			ErrorHandler::fatalLang('error_bad_line');
 		}
 
-		$file_data = explode('<br />', BBCodeParser::highlightPhpCode(Utils::htmlspecialchars(file_get_contents($file))));
+		$file_data = explode('<br />', Parser::highlightPhpCode(Utils::htmlspecialchars(file_get_contents($file))));
 
 		// We don't want to slice off too many so lets make sure we stop at the last one
 		$max = min($max, max(array_keys($file_data)));

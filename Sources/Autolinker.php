@@ -117,7 +117,7 @@ class Autolinker
 	 * BBCodes whose content should be skipped when autolinking URLs.
 	 *
 	 * Mods can add to this list using the integrate_bbc_codes hook in
-	 * BBCodeParser::integrateBBC()
+	 * Parsers\BBCodeParser::integrateBBC()
 	 */
 	public static array $no_autolink_tags = [
 		'url',
@@ -280,8 +280,8 @@ class Autolinker
 
 		// For historical reasons, the integrate_bbc_codes hook is used to give
 		// mods access to Autolinker::$no_autolink_tags. The easiest way to
-		// trigger a call to that hook is to call BBCodeParser::getCodes().
-		BBCodeParser::getCodes();
+		// trigger a call to that hook is to call Parser::getBBCodes().
+		Parser::getBBCodes();
 	}
 
 	/**

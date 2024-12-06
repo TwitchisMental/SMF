@@ -19,7 +19,6 @@ use SMF\ActionInterface;
 use SMF\Actions\BackwardCompatibility;
 use SMF\ActionTrait;
 use SMF\Attachment;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -27,10 +26,10 @@ use SMF\IntegrationHook;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Logging;
-use SMF\MarkdownParser;
 use SMF\Menu;
 use SMF\Msg;
 use SMF\PageIndex;
+use SMF\Parser;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\Time;
@@ -380,11 +379,11 @@ class Posts implements ActionInterface
 				$can_delete = false;
 			}
 
-			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform(
+				string: $row['body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['last_smileys'] ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => (int) $row['id_msg']],
+			);
 
 			Utils::$context['unapproved_items'][] = [
 				'id' => $row['id_msg'],
@@ -784,11 +783,7 @@ class Posts implements ActionInterface
 		);
 
 		while ($row = Db::$db->fetch_assoc($request)) {
-			$row['body'] = BBCodeParser::load()->parse($row['body']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform($row['body']);
 
 			$unapproved_items[] = [
 				'id' => $row['id_attach'],

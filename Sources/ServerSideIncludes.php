@@ -522,11 +522,11 @@ class ServerSideIncludes
 				$row['body'] = Autolinker::load(true)->makeLinks($row['body']);
 			}
 
-			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform(
+				string: $row['body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['smileys_enabled'] ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => (int) $row['id_msg']],
+			);
 
 			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
 
@@ -708,11 +708,18 @@ class ServerSideIncludes
 		$posts = [];
 
 		while ($row = Db::$db->fetch_assoc($request)) {
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load(MarkdownParser::OUTPUT_BBC)->parse($row['body']);
-			}
-
-			$row['body'] = strip_tags(strtr(BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']), ['<br>' => '&#10;', Utils::TAB_SUBSTITUTE => '&#9;']));
+			$row['body'] = Parser::transform(
+				string: $row['body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['smileys_enabled'] ? Parser::INPUT_SMILEYS : 0),
+				output_type: Parser::OUTPUT_TEXT,
+				options: [
+					'cache_id' => (int) $row['id_msg'],
+					'str_replace' => [
+						'<br>' => '&#10;',
+						Utils::TAB_SUBSTITUTE => '&#9;',
+					],
+				],
+			);
 
 			if (Utils::entityStrlen($row['body']) > 128) {
 				$row['body'] = Utils::entitySubstr($row['body'], 0, 128) . '...';
@@ -2249,11 +2256,11 @@ class ServerSideIncludes
 				$row['body'] .= '...';
 			}
 
-			$row['body'] = BBCodeParser::load()->parse($row['body'], (bool) $row['smileys_enabled'], $row['id_msg']);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$row['body'] = MarkdownParser::load()->parse($row['body'], true);
-			}
+			$row['body'] = Parser::transform(
+				string: $row['body'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['smileys_enabled'] ? Parser::INPUT_SMILEYS : 0),
+				options: ['cache_id' => (int) $row['id_msg']],
+			);
 
 			$row['body'] = strtr($row['body'], [Utils::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']);
 

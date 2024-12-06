@@ -17,7 +17,6 @@ namespace SMF\Actions;
 
 use SMF\ActionInterface;
 use SMF\ActionTrait;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\BrowserDetector;
 use SMF\Config;
@@ -27,7 +26,7 @@ use SMF\Group;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Mail;
-use SMF\MarkdownParser;
+use SMF\Parser;
 use SMF\Theme;
 use SMF\Topic;
 use SMF\User;
@@ -168,11 +167,7 @@ class Announce implements ActionInterface
 		Lang::censorText(Utils::$context['topic_subject']);
 		Lang::censorText($message);
 
-		$message = BBCodeParser::load()->parse($message, false, $id_msg);
-
-		if (!empty(Config::$modSettings['enableMarkdown'])) {
-			$message = MarkdownParser::load()->parse($message, true);
-		}
+		$message = Parser::transform(string: $message, options: ['cache_id' => $id_msg]);
 
 		$message = trim(Utils::htmlspecialcharsDecode(strip_tags(strtr($message, ['<br>' => "\n", '</div>' => "\n", '</li>' => "\n", '<p>' => '', '</p>' => "\n\n", '&#91;' => '[', '&#93;' => ']']))));
 

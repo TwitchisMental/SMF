@@ -17,7 +17,6 @@ namespace SMF\Actions;
 
 use SMF\Attachment;
 use SMF\Autolinker;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\BrowserDetector;
 use SMF\Cache\CacheApi;
@@ -30,8 +29,8 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
-use SMF\MarkdownParser;
 use SMF\Msg;
+use SMF\Parser;
 use SMF\Poll;
 use SMF\Search\SearchApi;
 use SMF\Security;
@@ -269,11 +268,10 @@ class Post2 extends Post
 			Msg::preparsecode($_POST['message']);
 
 			// Let's see if there's still some content left without the tags.
-			$temp = BBCodeParser::load()->parse($_POST['message'], false);
-
-			if (!empty(Config::$modSettings['enableMarkdown'])) {
-				$temp = MarkdownParser::load()->parse($temp, true);
-			}
+			$temp = Parser::transform(
+				string: $_POST['message'],
+				input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN,
+			);
 
 			if (Utils::htmlTrim(strip_tags($temp, implode('', Utils::$context['allowed_html_tags']))) === '' && (!User::$me->allowedTo('bbc_html') || !str_contains($_POST['message'], '[html]'))) {
 				$this->errors[] = 'no_message';
