@@ -33,31 +33,6 @@ use SMF\Utils;
  */
 class BBCodeParser extends Parser
 {
-	/*******************
-	 * Public properties
-	 *******************/
-
-	/**
-	 * @var array
-	 *
-	 * If not empty, only these BBCode tags will be parsed.
-	 */
-	public array $parse_tags = [];
-
-	/**
-	 * @var array
-	 *
-	 * List of disabled BBCode tags.
-	 */
-	public array $disabled = [];
-
-	/**
-	 * @var bool
-	 *
-	 * Enables special handling if output is meant for paper printing.
-	 */
-	public bool $for_print = false;
-
 	/*********************
 	 * Internal properties
 	 *********************/
@@ -2221,7 +2196,7 @@ class BBCodeParser extends Parser
 
 			// Is this tag disabled?
 			if (isset($this->disabled[$tag['tag']])) {
-				$tag = $this->useDisabledTag($tag);
+				$tag = $this->disableCode($tag);
 			}
 
 			// The only special case is 'html', which doesn't need to close things.
@@ -2256,94 +2231,6 @@ class BBCodeParser extends Parser
 
 		// Cleanup whitespace.
 		$this->message = strtr($this->message, ['  ' => ' &nbsp;', "\r" => '', "\n" => '<br>', '<br> ' => '<br>&nbsp;', '&#13;' => "\n"]);
-	}
-
-	/**
-	 * Checks whether the server's load average is too high to parse BBCode.
-	 *
-	 * @return bool Whether the load average is too high.
-	 */
-	protected function highLoadAverage(): bool
-	{
-		return !empty(Utils::$context['load_average']) && !empty(Config::$modSettings['bbc']) && Utils::$context['load_average'] >= Config::$modSettings['bbc'];
-	}
-
-	/**
-	 * Sets $this->disabled.
-	 */
-	protected function setDisabled(): void
-	{
-		$this->disabled = [];
-
-		if (!empty(Config::$modSettings['disabledBBC'])) {
-			$temp = explode(',', strtolower(Config::$modSettings['disabledBBC']));
-
-			foreach ($temp as $tag) {
-				$this->disabled[trim($tag)] = true;
-			}
-
-			if (in_array('color', $this->disabled)) {
-				$this->disabled = array_merge(
-					$this->disabled,
-					[
-						'black' => true,
-						'white' => true,
-						'red' => true,
-						'green' => true,
-						'blue' => true,
-					],
-				);
-			}
-		}
-
-		if (!empty($this->parse_tags)) {
-			if (!in_array('email', $this->parse_tags)) {
-				$this->disabled['email'] = true;
-			}
-
-			if (!in_array('url', $this->parse_tags)) {
-				$this->disabled['url'] = true;
-			}
-
-			if (!in_array('iurl', $this->parse_tags)) {
-				$this->disabled['iurl'] = true;
-			}
-		}
-
-		if ($this->for_print) {
-			// [glow], [shadow], and [move] can't really be printed.
-			$this->disabled['glow'] = true;
-			$this->disabled['shadow'] = true;
-			$this->disabled['move'] = true;
-
-			// Colors can't well be displayed... supposed to be black and white.
-			$this->disabled['color'] = true;
-			$this->disabled['black'] = true;
-			$this->disabled['blue'] = true;
-			$this->disabled['white'] = true;
-			$this->disabled['red'] = true;
-			$this->disabled['green'] = true;
-			$this->disabled['me'] = true;
-
-			// Color coding doesn't make sense.
-			$this->disabled['php'] = true;
-
-			// Links are useless on paper... just show the link.
-			$this->disabled['ftp'] = true;
-			$this->disabled['url'] = true;
-			$this->disabled['iurl'] = true;
-			$this->disabled['email'] = true;
-			$this->disabled['flash'] = true;
-
-			// @todo Change maybe?
-			if (!isset($_GET['images'])) {
-				$this->disabled['img'] = true;
-				$this->disabled['attach'] = true;
-			}
-
-			// Maybe some custom BBC need to be disabled for printing.
-			IntegrationHook::call('integrate_bbc_print', [&$this->disabled]);
-		}
 	}
 
 	/**
@@ -2950,28 +2837,6 @@ class BBCodeParser extends Parser
 			$this->open_tags[count($this->open_tags) - 1]['after'] = '';
 			$this->open_tags[count($this->open_tags) - 2]['after'] = '</li></ul>';
 		}
-	}
-
-	/**
-	 * Adjusts a tag definition so that it uses its disabled version for output.
-	 *
-	 * @param array $tag A tag definition.
-	 * @return array The disabled version of the tag definition.
-	 */
-	protected function useDisabledTag(array $tag): array
-	{
-		if (!isset($tag['disabled_before']) && !isset($tag['disabled_after']) && !isset($tag['disabled_content'])) {
-			$tag['before'] = !empty($tag['block_level']) ? '<div>' : '';
-			$tag['after'] = !empty($tag['block_level']) ? '</div>' : '';
-			$tag['content'] = isset($tag['type']) && $tag['type'] == 'closed' ? '' : (!empty($tag['block_level']) ? '<div>$1</div>' : '$1');
-		} elseif (isset($tag['disabled_before']) || isset($tag['disabled_after'])) {
-			$tag['before'] = $tag['disabled_before'] ?? (!empty($tag['block_level']) ? '<div>' : '');
-			$tag['after'] = $tag['disabled_after'] ?? (!empty($tag['block_level']) ? '</div>' : '');
-		} else {
-			$tag['content'] = $tag['disabled_content'];
-		}
-
-		return $tag;
 	}
 
 	/**

@@ -715,13 +715,9 @@ class MarkdownParser extends Parser
 	 * @param int $output_type The type of output to generate.
 	 *    Value must be one of this class's or its parent class's OUTPUT_*
 	 *    constants. Default: self::OUTPUT_HTML.
-	 * @param ?int $hard_breaks How to handle line breaks in HTML output.
-	 *    Value should be a bitmask of this class's BR_* constants.
-	 *    If null, uses the value of Config::$modSettings['markdown_brs'].
-	 *    Ignored when output is BBCode. Default: null.
 	 * @throws \ValueError if $output_type is invalid.
 	 */
-	public function __construct(int $output_type = self::OUTPUT_HTML, ?int $hard_breaks = null)
+	public function __construct(int $output_type = self::OUTPUT_HTML)
 	{
 		if ($output_type === self::OUTPUT_TEXT) {
 			$output_type === self::OUTPUT_HTML;
@@ -733,7 +729,6 @@ class MarkdownParser extends Parser
 
 		parent::__construct();
 
-		$this->hard_breaks = (int) ($hard_breaks ?? Config::$modSettings['markdown_brs'] ?? 0);
 		$this->output_type = $output_type;
 
 		// Maybe a mod wants to add a Markdown extension or something?
@@ -750,11 +745,30 @@ class MarkdownParser extends Parser
 	 * @param string $string The string to parse.
 	 * @param string $from_bbcode_parser Whether the string was the output from
 	 *    the SMF\Parsers\BBCodeParser class.
+	 * @param array $options Parser options. Recognized options are:
+	 *    - 'hard_breaks':
+	 *         How to handle line breaks in HTML output.
+	 *         Value should be a bitmask of this class's BR_* constants.
+	 *         If not set, defaults to Config::$modSettings['markdown_brs'].
+	 *         Ignored when output is BBCode.
+	 *    - 'parse_tags':
+	 *         When not empty, only Markdown that is equivalent to one of these
+	 *         BBCode tags will be rendered.
 	 * @return string The result of parsing the string.
 	 */
-	public function parse(string $string, bool $from_bbcode_parser = false): string
+	public function parse(string $string, bool $from_bbcode_parser = false, array $options = []): string
 	{
 		$this->resetRuntimeProperties();
+
+		$this->hard_breaks = (int) ($options['hard_breaks'] ?? Config::$modSettings['markdown_brs'] ?? 0);
+
+		$this->parse_tags = $options['parse_tags'] ?? [];
+		$this->setDisabled();
+
+		// If the load average is too high, don't parse the Markdown.
+		if ($this->highLoadAverage()) {
+			return $this->message;
+		}
 
 		if ($from_bbcode_parser) {
 			$input_replacements = [
@@ -3072,6 +3086,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= strtr(
 					$before,
 					[
@@ -3170,6 +3188,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				// Add a class to the quote to style nested blockquotes.
 				$code['before'] = strtr($code['before'], ['<blockquote>' => '<blockquote class="bbc_' . ($nesting_level % 2 === 1 ? 'alternate' : 'standard') . '_quote">']);
 
@@ -3260,6 +3282,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= strtr($code['before'], ['{type}' => $style_type]);
 				break;
 
@@ -3316,6 +3342,10 @@ class MarkdownParser extends Parser
 					if ($code['tag'] === 'li') {
 						break;
 					}
+				}
+
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
 				}
 
 				$this->rendered .= $code['before'];
@@ -3390,6 +3420,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= $code['content'];
 				break;
 
@@ -3426,6 +3460,10 @@ class MarkdownParser extends Parser
 					if ($code['tag'] === 'h' . $element['properties']['level']) {
 						break;
 					}
+				}
+
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
 				}
 
 				$this->rendered .= $code['before'];
@@ -3510,6 +3548,8 @@ class MarkdownParser extends Parser
 	 */
 	protected function renderTable(array $element): void
 	{
+		$is_disabled = false;
+
 		switch ($this->output_type) {
 			case self::OUTPUT_BBC:
 				if ($element['content'] === []) {
@@ -3530,6 +3570,11 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+					$is_disabled = true;
+				}
+
 				$this->rendered .= $code['before'];
 				break;
 
@@ -3541,13 +3586,15 @@ class MarkdownParser extends Parser
 		$this->rendered .= "\n";
 
 		foreach ($element['content'] as $key => $row) {
-			if ($this->output_type !== self::OUTPUT_BBC && $key < 2) {
+			if ($this->output_type !== self::OUTPUT_BBC && $key < 2 && !$is_disabled) {
 				$this->rendered .= $key === 0 ? '<thead>' : '<tbody>';
 				$this->rendered .= "\n";
 			}
 
-			$this->rendered .= $this->output_type === self::OUTPUT_BBC ? '[tr]' : '<tr>';
-			$this->rendered .= "\n";
+			if (!$is_disabled) {
+				$this->rendered .= $this->output_type === self::OUTPUT_BBC ? '[tr]' : '<tr>';
+				$this->rendered .= "\n";
+			}
 
 			foreach ($row as $col => $cell) {
 				$cell['properties']['th'] = $this->output_type !== self::OUTPUT_BBC && $key === 0;
@@ -3556,21 +3603,37 @@ class MarkdownParser extends Parser
 				$this->render($cell);
 			}
 
-			$this->rendered .= $this->output_type === self::OUTPUT_BBC ? '[/tr]' : '</tr>';
-			$this->rendered .= "\n";
+			if (!$is_disabled) {
+				$this->rendered .= $this->output_type === self::OUTPUT_BBC ? '[/tr]' : '</tr>';
+				$this->rendered .= "\n";
+			}
 
-			if ($this->output_type !== self::OUTPUT_BBC) {
+			if ($this->output_type !== self::OUTPUT_BBC && !$is_disabled) {
 				$this->rendered .= $key === 0 ? '</thead>' . "\n" : '';
 			}
 		}
 
-		if ($this->output_type !== self::OUTPUT_BBC) {
+		if ($this->output_type !== self::OUTPUT_BBC && !$is_disabled) {
 			$this->rendered .= '</tbody>';
 			$this->rendered .= "\n";
 		}
 
-		$this->rendered .= $this->output_type === self::OUTPUT_BBC ? '[/table]' : '</table>';
-		$this->rendered .= "\n";
+		switch ($this->output_type) {
+			case self::OUTPUT_BBC:
+				$this->rendered .= '[table]';
+				$this->rendered .= "\n";
+				break;
+
+			case self::OUTPUT_HTML:
+				$this->rendered .= $code['after'];
+				$this->rendered .= "\n";
+				break;
+
+			default:
+				$this->rendered .= '<table>';
+				$this->rendered .= "\n";
+				break;
+		}
 	}
 
 	/**
@@ -3580,6 +3643,8 @@ class MarkdownParser extends Parser
 	 */
 	protected function renderTableCell(array $element): void
 	{
+		$is_disabled = $this->output_type === self::OUTPUT_HTML && isset($this->disabled['td']);
+
 		$tag = !empty($element['properties']['th']) ? 'th' : 'td';
 		$align = $element['properties']['align'] === 'none' ? null : $element['properties']['align'];
 
@@ -3591,6 +3656,12 @@ class MarkdownParser extends Parser
 					$this->rendered .= '[' . $element['properties']['align'] . 'text]';
 				}
 				break;
+
+			case self::OUTPUT_HTML:
+				if ($is_disabled) {
+					break;
+				}
+				// no break
 
 			default:
 				$this->rendered .= '<' . $tag;
@@ -3625,6 +3696,12 @@ class MarkdownParser extends Parser
 
 				$this->rendered .= '[/td]';
 				break;
+
+			case self::OUTPUT_HTML:
+				if ($is_disabled) {
+					break;
+				}
+				// no break
 
 			default:
 				$this->rendered .= '</' . $tag . '>';
@@ -3695,6 +3772,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= strtr($code['before'], ['$1' => $element['properties']['url']]);
 				break;
 
@@ -3710,6 +3791,10 @@ class MarkdownParser extends Parser
 		switch ($this->output_type) {
 			case self::OUTPUT_BBC:
 				$this->rendered .= '[/' . $bbc . ']';
+				break;
+
+			case self::OUTPUT_HTML:
+				$this->rendered .= strtr($code['after'], ['$1' => $element['properties']['url']]);
 				break;
 
 			default:
@@ -3767,6 +3852,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= $code['before'];
 				break;
 
@@ -3811,6 +3900,10 @@ class MarkdownParser extends Parser
 					if ($code['tag'] === 'i') {
 						break;
 					}
+				}
+
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
 				}
 
 				$this->rendered .= $code['before'];
@@ -3859,6 +3952,10 @@ class MarkdownParser extends Parser
 					}
 				}
 
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
+				}
+
 				$this->rendered .= $code['before'];
 				break;
 
@@ -3903,6 +4000,10 @@ class MarkdownParser extends Parser
 					if ($code['tag'] === 's') {
 						break;
 					}
+				}
+
+				if (isset($this->disabled[$code['tag']])) {
+					$code = $this->disableCode($code);
 				}
 
 				$this->rendered .= $code['before'];
