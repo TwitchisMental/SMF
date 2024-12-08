@@ -1940,11 +1940,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Actions\Calendar::removeHolidays($holiday_ids);
 	}
 
-	function convertDateToEnglish(string $date): string
-	{
-		return Actions\Calendar::convertDateToEnglish($date);
-	}
-
 	/**
 	 * Begin
 	 * Actions\CoppaForm
@@ -4765,6 +4760,11 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	function timeformat(int $log_time, bool|string $show_today = true, ?string $tzid = null): string
 	{
 		return SMF\Time::timeformat($log_time, $show_today, $tzid);
+	}
+
+	function convertDateToEnglish(string $date): string
+	{
+		return SMF\Time::convertToEnglish($date);
 	}
 
 	/** @deprecated since 2.1 */

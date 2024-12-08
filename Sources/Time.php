@@ -1086,6 +1086,91 @@ class Time extends \DateTime implements \ArrayAccess
 	}
 
 	/**
+	 * Helper function to convert a date string to English so that date_parse()
+	 * can parse it correctly.
+	 *
+	 * @param string $date A localized date string.
+	 * @return string English date string.
+	 */
+	public static function convertToEnglish(string $date): string
+	{
+		self::setParsableWordsRegex();
+
+		// Preserve any existing parseable words, such as time zone identifiers.
+		$placeholders = [];
+
+		$date = preg_replace_callback(
+			'~\b' . self::$parsable_words_regex . '\b~iu',
+			function ($matches) use (&$placeholders) {
+				$char = mb_chr(0xE000 + count($placeholders));
+				$placeholders[$char] = $matches[0];
+
+				return $char;
+			},
+			$date,
+		);
+
+		// Build an array of regular expressions to translate the current language strings to English.
+		$replacements = array_combine(
+			array_map(fn ($arg) => '~' . $arg . '~iu', Lang::$txt['months_titles']),
+			[
+				'January', 'February', 'March', 'April', 'May', 'June',
+				'July', 'August', 'September', 'October', 'November', 'December',
+			],
+		);
+
+		$replacements += array_combine(
+			array_map(fn ($arg) => '~' . $arg . '~iu', Lang::$txt['months_short']),
+			['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+		);
+
+		$replacements += array_combine(
+			array_map(fn ($arg) => '~' . $arg . '~iu', Lang::$txt['days']),
+			['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+		);
+
+		$replacements += array_combine(
+			array_map(fn ($arg) => '~' . $arg . '~iu', Lang::$txt['days_short']),
+			['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+		);
+
+		// Find all possible variants of AM and PM for this language.
+		$replacements['~' . Lang::$txt['time_am'] . '~iu'] = 'AM';
+		$replacements['~' . Lang::$txt['time_pm'] . '~iu'] = 'PM';
+
+		if (($am = self::strftime('%p', strtotime('01:00:00'))) !== 'p' && $am !== false) {
+			$replacements['~' . $am . '~iu'] = 'AM';
+			$replacements['~' . self::strftime('%p', strtotime('23:00:00')) . '~iu'] = 'PM';
+		}
+
+		if (($am = self::strftime('%P', strtotime('01:00:00'))) !== 'P' && $am !== false) {
+			$replacements['~' . $am . '~iu'] = 'AM';
+			$replacements['~' . self::strftime('%P', strtotime('23:00:00')) . '~iu'] = 'PM';
+		}
+
+		// Find this language's equivalents for today, yesterday, and tomorrow.
+		// In theory, it would be nice to do the same for other keywords used by
+		// PHP's date parser, but that would get very complicated very quickly.
+		foreach (['today', 'yesterday', 'tomorrow'] as $word) {
+			$translated_word = preg_replace('~\X*<strong>(\X*?)</strong>\X*~u', '$1', Lang::$txt[$word]);
+			$replacements['~\b' . $translated_word . '\b~iu'] = $word;
+		}
+
+		// Wrap the replacement strings in closures.
+		foreach ($replacements as $pattern => $replacement) {
+			$replacements[$pattern] = fn ($matches) => $replacement;
+		}
+
+		// Translate.
+		$date = preg_replace_callback_array($replacements, $date);
+
+		// Restore the preserved words.
+		$date = strtr($date, $placeholders);
+
+		return $date;
+	}
+
+	/**
 	 * Backward compatibility wrapper for the format method.
 	 *
 	 * @param int|string $log_time A timestamp.
