@@ -18,7 +18,6 @@ namespace SMF\Actions;
 use SMF\ActionInterface;
 use SMF\ActionTrait;
 use SMF\Autolinker;
-use SMF\BBCodeParser;
 use SMF\Board;
 use SMF\Cache\CacheApi;
 use SMF\Config;
@@ -28,6 +27,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Msg;
+use SMF\Parser;
 use SMF\Time;
 use SMF\Topic;
 use SMF\User;
@@ -137,7 +137,12 @@ class JavaScriptModify implements ActionInterface
 
 				Msg::preparsecode($_POST['message']);
 
-				if (Utils::htmlTrim(strip_tags(BBCodeParser::load()->parse($_POST['message'], false), implode('', Utils::$context['allowed_html_tags']))) === '') {
+				$temp = Parser::transform(
+					string: $row['body'],
+					input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN,
+				);
+
+				if (Utils::htmlTrim(strip_tags($temp, implode('', Utils::$context['allowed_html_tags']))) === '') {
 					$post_errors[] = 'no_message';
 					unset($_POST['message']);
 				}
@@ -294,7 +299,13 @@ class JavaScriptModify implements ActionInterface
 				Lang::censorText(Utils::$context['message']['subject']);
 				Lang::censorText(Utils::$context['message']['body']);
 
-				Utils::$context['message']['body'] = BBCodeParser::load()->parse(Utils::$context['message']['body'], (bool) $row['smileys_enabled'], (int) $row['id_msg']);
+				Utils::$context['message']['body'] = Parser::transform(
+					string: Utils::$context['message']['body'],
+					input_types: Parser::INPUT_BBC | Parser::INPUT_MARKDOWN | ((bool) $row['smileys_enabled'] ? Parser::INPUT_SMILEYS : 0),
+					options: ['cache_id' => (int) $row['id_msg']],
+				);
+
+				Utils::$context['message']['body'] = Utils::adjustHeadingLevels(Utils::$context['message']['body'], null);
 			}
 			// Topic?
 			elseif (empty($post_errors)) {

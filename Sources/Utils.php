@@ -222,6 +222,18 @@ class Utils
 	 */
 	public const ENT_NBSP = '&(?' . '>nbsp|#(?' . '>x0*A0|0*160));';
 
+	/**
+	 * @var string
+	 *
+	 * Used to force the browser not to collapse tabs.
+	 *
+	 * This will normally be replaced in the final output with a real tab
+	 * character wrapped in a span with "white-space: pre-wrap" applied to it.
+	 * But if this substitute string somehow makes it into the final output,
+	 * it will still look like an appropriately sized string of white space.
+	 */
+	public const TAB_SUBSTITUTE = "\u{200B}\u{2007}\u{2007}\u{2007}\u{2007}\u{200B}";
+
 	/**************************
 	 * Public static properties
 	 **************************/
@@ -271,7 +283,7 @@ class Utils
 		// Even when enabled, they'll only work in old posts and not new ones.
 		'legacy_bbc' => [
 			'acronym', 'bdo', 'black', 'blue', 'flash', 'ftp', 'glow',
-			'green', 'move', 'red', 'shadow', 'tt', 'white',
+			'green', 'move', 'red', 'shadow', 'white',
 		],
 		// Define a list of BBC tags that require permissions to use.
 		'restricted_bbc' => [
@@ -1175,6 +1187,50 @@ class Utils
 		$regexes[$regex_key] = $regex;
 
 		return $regex;
+	}
+
+	/**
+	 * Adjusts the heading levels of h1-h6 elements in a string in order to
+	 * fit the needs of a particular location in the output HTML.
+	 *
+	 * For example, setting $modifier to 1 will change h1 into h2, h5 into h6,
+	 * etc.
+	 *
+	 * If the adjusted tag for the heading would be invalid (e.g. h7 or h0),
+	 * then the tag will be changed to a simple div.
+	 *
+	 * Any attributes of the adjusted elements will be preserved unchanged.
+	 * For example, `<h1 class="bbc_h1">` might become `<h5 class="bbc_h1">`.
+	 *
+	 * As a general rule, this method should be called from theme templates
+	 * rather than source files, since only the template really knows what level
+	 * of adjustment is necessary.
+	 *
+	 * @param mixed $str The string in which to adjust heading levels.
+	 *    If a non-string value is given, it will be returned unchanged.
+	 * @param ?int $modifier The amount by which to adjust heading levels.
+	 *    If null, all headings will be converted to div elements. Default: 0.
+	 * @return mixed The adjusted version of $str.
+	 */
+	public static function adjustHeadingLevels(mixed $str, ?int $modifier = 0): mixed
+	{
+		if (!is_string($str)) {
+			return $str;
+		}
+
+		return preg_replace_callback(
+			'/<(\/?)h(\d)([^>]*)>/u',
+			function ($matches) use ($modifier) {
+				$l = (int) $matches[2] + (int) $modifier;
+
+				if (!is_null($modifier) && $l >= 1 && $l <= 6) {
+					return '<' . $matches[1] . 'h' . $l . $matches[3] . '>';
+				}
+
+				return '<' . $matches[1] . 'div' . $matches[3] . '>';
+			},
+			$str,
+		);
 	}
 
 	/**
@@ -2296,6 +2352,9 @@ class Utils
 
 			// Start up the session URL fixer.
 			ob_start('SMF\\QueryString::ob_sessrewrite');
+
+			// Force the browser not to collapse tabs inside posts, etc.
+			ob_start(fn ($buffer) => strtr($buffer, [self::TAB_SUBSTITUTE => '<span style="white-space: pre-wrap;">' . "\t" . '</span>']));
 
 			if (!empty(Theme::$current->settings['output_buffers']) && is_string(Theme::$current->settings['output_buffers'])) {
 				$buffers = explode(',', Theme::$current->settings['output_buffers']);
