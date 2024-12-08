@@ -187,12 +187,24 @@ class Time extends \DateTime implements \ArrayAccess
 			unset($timezone);
 		}
 
-		parent::__construct($datetime, $timezone ?? self::$user_tz);
-
-		// If $datetime was a Unix timestamp, force the time zone to be the one we were told to use.
-		// Honestly, it's a mystery why the \DateTime class doesn't do this itself already...
-		if (str_starts_with($datetime, '@')) {
+		if (
+			// If $datetime was a Unix timestamp, set the time zone to the one
+			// we were told to use. Honestly, it's a mystery why the \DateTime
+			// class doesn't do this itself already...
+			str_starts_with($datetime, '@')
+			// In some versions of PHP, unexpected results may be produced if
+			// $datetime contains the special 'now' or 'ago' keywords and also
+			// contains a time zone ID string (e.g. 'now Europe/Paris'), but
+			// that time zone ID string is different than the one in $timezone.
+			// In order to avoid problems, we use two steps when the 'now' or
+			// 'ago' keywords are present.
+			|| str_contains($datetime, 'now')
+			|| str_contains($datetime, 'ago')
+		) {
+			parent::__construct($datetime);
 			$this->setTimezone($timezone ?? self::$user_tz);
+		} else {
+			parent::__construct($datetime, $timezone ?? self::$user_tz);
 		}
 	}
 
