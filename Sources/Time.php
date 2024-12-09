@@ -151,6 +151,13 @@ class Time extends \DateTime implements \ArrayAccess
 	 */
 	protected static array $today;
 
+	/**
+	 * @var string
+	 *
+	 * Regular expression to match all keywords recognized by PHP's date parser.
+	 */
+	protected static string $parsable_words_regex;
+
 	/****************
 	 * Public methods
 	 ****************/
@@ -186,6 +193,8 @@ class Time extends \DateTime implements \ArrayAccess
 		if (is_string($timezone) && ($timezone = @timezone_open($timezone)) === false) {
 			unset($timezone);
 		}
+
+		$datetime = self::sanitize($datetime);
 
 		if (
 			// If $datetime was a Unix timestamp, set the time zone to the one
@@ -1011,6 +1020,62 @@ class Time extends \DateTime implements \ArrayAccess
 	}
 
 	/**
+	 * Removes text that the date parser wouldn't recognize.
+	 *
+	 * @param string $datetime A date/time string that needs to be parsed.
+	 * @return string Sanitized version of $datetime.
+	 */
+	public static function sanitize(string $datetime): string
+	{
+		self::setParsableWordsRegex();
+
+		// Remove HTML.
+		$datetime = strip_tags($datetime);
+
+		// Parsing fails when AM/PM is not separated from the time by a space.
+		$datetime = preg_replace_callback_array(
+			[
+				'/(\s\d?\d)([ap]\.?m\.?)/i' => fn ($matches) => $matches[1] . ':00 ' . $matches[2],
+				'/(:\d\d)([ap]\.?m\.?)/i' => fn ($matches) => $matches[1] . ' ' . $matches[2],
+			],
+			$datetime,
+		);
+
+		// Protect the parsable strings.
+		$placeholders = [];
+
+		$datetime = preg_replace_callback(
+			[
+				'~(GMT)?[+\-](0?\d|1[0-2]):?([0-5]\d)~i',
+				'~\b' . self::$parsable_words_regex . '\b~iu',
+				'~[ap]\.?m\.?~i',
+				'~\d+(st|nd|rd|th)~i',
+				'~(\b|d+)[TW]\d+~i',
+				'~[.:+\-/@]~',
+				'~\d+~',
+			],
+			function ($matches) use (&$placeholders) {
+				$char = mb_chr(0xE000 + count($placeholders));
+				$placeholders[$char] = $matches[0];
+
+				return $char;
+			},
+			$datetime,
+		);
+
+		// Remove unparsable strings.
+		$datetime = preg_replace('~[^\s' . implode('', array_keys($placeholders)) . ']~u', '', $datetime);
+
+		// Restore the parsable strings.
+		$datetime = strtr($datetime, $placeholders);
+
+		// Clean up white space.
+		$datetime = trim(Utils::normalizeSpaces($datetime, true, true, ['collapse_hspace' => true, 'replace_tabs' => true, 'no_breaks' => true]));
+
+		return $datetime;
+	}
+
+	/**
 	 * Backward compatibility wrapper for the format method.
 	 *
 	 * @param int|string $log_time A timestamp.
@@ -1297,6 +1362,44 @@ class Time extends \DateTime implements \ArrayAccess
 		self::$formats[$orig_format][$type] = trim($format);
 
 		return self::$formats[$orig_format][$type];
+	}
+
+	/**
+	 * Builds a regex to match words that the date parser recognizes and saves
+	 * it in self::$parsable_words_regex.
+	 */
+	protected static function setParsableWordsRegex(): void
+	{
+		self::$parsable_words_regex = self::$parsable_words_regex ?? Utils::buildRegex(
+			array_merge(
+				// Time zone abbreviations.
+				array_filter(array_keys(\DateTimeZone::listAbbreviations()), fn ($a) => !is_numeric($a)),
+				// Time zone identifiers.
+				\DateTimeZone::listIdentifiers(\DateTimeZone::ALL_WITH_BC),
+				// Recognized key words.
+				[
+					'january', 'february', 'march', 'april', 'may', 'june',
+					'july', 'august', 'september', 'october', 'november',
+					'december', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
+					'aug', 'sep', 'sept', 'oct', 'nov', 'dec', 'I', 'II', 'III',
+					'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII',
+					'sunday', 'monday', 'tuesday', 'wednesday', 'thursday',
+					'friday', 'saturday', 'sun', 'mon', 'tue', 'wed', 'thu',
+					'fri', 'sat', 'first', 'second', 'third', 'fourth', 'fifth',
+					'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh',
+					'twelfth', 'next', 'last', 'previous', 'this', 'ms', 'µs',
+					'msec', 'millisecond', 'µsec', 'microsecond', 'usec', 'sec',
+					'second', 'min', 'minute', 'hour', 'day', 'week',
+					'fortnight', 'forthnight', 'month', 'year', 'msecs',
+					'milliseconds', 'µsecs', 'microseconds', 'usecs', 'secs',
+					'seconds', 'mins', 'minutes', 'hours', 'days', 'weeks',
+					'fortnights', 'forthnights', 'months', 'years', 'yesterday',
+					'midnight', 'today', 'now', 'noon', 'tomorrow', 'back',
+					'front', 'of', 'ago',
+				],
+			),
+			'~',
+		);
 	}
 }
 
