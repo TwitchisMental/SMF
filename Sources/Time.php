@@ -830,6 +830,19 @@ class Time extends \DateTime implements \ArrayAccess
 	}
 
 	/**
+	 * Like self::strftime(), but always uses the current user's time zone and
+	 * preferred time format.
+	 *
+	 * @param int|string|null $timestamp A Unix timestamp.
+	 *     If null or invalid, defaults to the current time.
+	 * @return string A formatted time string.
+	 */
+	public static function stringFromUnix(int|string|null $timestamp = null): string
+	{
+		return self::create('@' . (is_numeric($timestamp) ? $timestamp : time()))->format();
+	}
+
+	/**
 	 * Returns a strftime format or DateTime format for showing dates.
 	 *
 	 * Returned string will be based on the current user's preferred strftime
@@ -1168,47 +1181,6 @@ class Time extends \DateTime implements \ArrayAccess
 		$date = strtr($date, $placeholders);
 
 		return $date;
-	}
-
-	/**
-	 * Backward compatibility wrapper for the format method.
-	 *
-	 * @param int|string $log_time A timestamp.
-	 * @param bool|string $show_today Whether to show "Today"/"Yesterday" or
-	 *    just a date. If a string is specified, that is used to temporarily
-	 *    override the date format.
-	 * @param string $tzid Time zone identifier string of the time zone to use.
-	 *    If empty, the user's time zone will be used.
-	 *    If set to a valid time zone identifier, that will be used.
-	 *    Otherwise, the value of Config::$modSettings['default_timezone'] will
-	 *    be used.
-	 * @return string A formatted time string
-	 */
-	public static function timeformat(int|string $log_time, bool|string $show_today = true, ?string $tzid = null): string
-	{
-		$log_time = (int) $log_time;
-
-		// For backward compatibility, replace empty values with the user's time
-		// zone and replace anything invalid with the forum's default time zone.
-		$tzid = empty($tzid) ? User::getTimezone() : (($tzid === 'forum' || @timezone_open((string) $tzid) === false) ? Config::$modSettings['default_timezone'] : $tzid);
-
-		$date = new self('@' . $log_time);
-		$date->setTimezone(new \DateTimeZone($tzid));
-
-		return is_bool($show_today) ? $date->format(null, $show_today) : $date->format($show_today);
-	}
-
-	/**
-	 * Backward compatibility method.
-	 *
-	 * @deprecated since 2.1
-	 * @param bool $use_user_offset This parameter is deprecated and ignored.
-	 * @param int $timestamp A timestamp (null to use current time).
-	 * @return int Seconds since the Unix epoch.
-	 */
-	public static function forumTime(bool $use_user_offset = true, ?int $timestamp = null): int
-	{
-		return !isset($timestamp) ? time() : (int) $timestamp;
 	}
 
 	/*************************

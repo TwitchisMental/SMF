@@ -626,7 +626,7 @@ class BBCodeParser extends Parser
 			'parameters' => [
 				'author' => ['match' => '([^<>]{1,192}?)'],
 				'link' => ['match' => '(?:board=\d+;)?((?:topic|threadid)=[\dmsg#\./]{1,40}(?:;start=[\dmsg#\./]{1,40})?|msg=\d+?|action=profile;u=\d+)'],
-				'date' => ['match' => '(\d+)', 'validate' => 'SMF\\Time::timeformat'],
+				'date' => ['match' => '(\d+)', 'validate' => 'SMF\\Time::stringFromUnix'],
 			],
 			'before' => '<blockquote><cite><a href="{scripturl}?{link}">{txt_quote_from}: {author} {txt_search_on} {date}</a></cite>',
 			'after' => '</blockquote>',
