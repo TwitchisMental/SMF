@@ -749,7 +749,7 @@ abstract class Parser
 			self::$time_format,
 			// BBCode settings.
 			self::getBBCodes(),
-			Config::$modSettings['disabledBBC'],
+			Config::$modSettings['disabledBBC'] ?? '',
 			self::$enable_post_html,
 			// Smiley settings.
 			SmileyParser::loadData(self::$smiley_set),
