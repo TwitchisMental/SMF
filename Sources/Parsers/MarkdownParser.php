@@ -3256,6 +3256,8 @@ class MarkdownParser extends Parser
 	 */
 	protected function renderList(array $element): void
 	{
+		static $nesting_level = 0;
+
 		switch ($this->output_type) {
 			case self::OUTPUT_BBC:
 				if ($element['content'] === []) {
@@ -3270,7 +3272,10 @@ class MarkdownParser extends Parser
 					return;
 				}
 
-				$style_type = $element['properties']['ordered'] ? 'decimal' : 'disc';
+				$ordered_styles = ['decimal', 'lower-roman', 'lower-alpha'];
+				$unordered_styles = ['disc', 'circle', 'square'];
+
+				$style_type = $element['properties']['ordered'] ? $ordered_styles[$nesting_level % 3] : $unordered_styles[$nesting_level % 3];
 
 				foreach (BBCodeParser::getCodes() as $code) {
 					if (
@@ -3297,7 +3302,9 @@ class MarkdownParser extends Parser
 		$this->rendered .= "\n";
 
 		foreach ($element['content'] as $content_element) {
+			$nesting_level++;
 			$this->render($content_element);
+			$nesting_level--;
 		}
 
 		switch ($this->output_type) {
