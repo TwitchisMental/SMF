@@ -397,7 +397,7 @@ class MarkdownParser extends Parser
 			'interrupts_p' => true,
 			'marker_pattern' => '/^((?P<bullet>[*+-])|(?P<number>\d+)(?P<num_punct>[.)]))\h+/u',
 			'opener_test' => 'testOpensListItem',
-			'continue_test' => 'testContinuesListItem',
+			'continue_test' => false,
 			'closer_test' => 'testClosesListItem',
 			'add' => 'addListItem',
 			'append' => null,
@@ -1396,21 +1396,6 @@ class MarkdownParser extends Parser
 	}
 
 	/**
-	 * Tests whether a line is part of a list item.
-	 *
-	 * @param array $line_info Info about the current line.
-	 * @return bool Whether this line is part of a list item.
-	 */
-	protected function testContinuesListItem(array $line_info, int $last_container, int $o): bool
-	{
-		return (bool) (
-			$this->open[$o]['type'] === 'list_item'
-			&& $this->open[$o - 1]['type'] === 'list'
-			&& $line_info['indent'] >= $this->open[$o]['properties']['indent']
-		);
-	}
-
-	/**
 	 * Tests whether a line closes a list item.
 	 *
 	 * @param array $line_info Info about the current line.
@@ -1826,6 +1811,21 @@ class MarkdownParser extends Parser
 		$num_punct = ($matches['num_punct'] ?? '') !== '' ? $matches['num_punct'] : null;
 
 		$indent = $line_info['indent'] + mb_strlen($marker) + strspn($line_info['content'], ' ', strlen($marker));
+
+		// Check for nested lists.
+		if (
+			$this->open[$last_container]['type'] === 'list'
+			&& $line_info['indent'] >= $this->open[$last_container]['properties']['indent']
+		) {
+			// Close the open paragraph (or whatever) inside the open list item.
+			while ($this->open[$o]['type'] !== 'list_item') {
+				$this->getMethod($this->block_types[$this->open[$o]['type']]['close'] ?? 'closeBlock')($o);
+				$o--;
+			}
+
+			// Consider the open list item to be our container.
+			$last_container = $o;
+		}
 
 		// If this list item doesn't match the existing list's type,
 		// exit the existing list so we can start a new one.
