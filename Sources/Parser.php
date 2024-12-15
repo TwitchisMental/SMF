@@ -628,10 +628,13 @@ abstract class Parser
 
 		// Parse the BBCode.
 		if ($input_types & self::INPUT_BBC) {
-			$string = BBcodeParser::load(!empty($options['for_print']))->parse($string, $options['cache_id'], $options['parse_tags']);
+			$string = BBcodeParser::load(!empty($options['for_print']))->parse($string, !empty($input_types & self::INPUT_SMILEYS), $options['cache_id'], $options['parse_tags']);
+
+			// BBCodeParser calls the SmileyParser internally; don't repeat.
+			$input_types &= ~self::INPUT_SMILEYS;
 		}
 
-		// Parse the smileys.
+		// Parse the smileys, if we haven't already.
 		if ($input_types & self::INPUT_SMILEYS) {
 			$string = SmileyParser::load()->parse($string);
 		}
