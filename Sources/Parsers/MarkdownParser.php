@@ -2479,8 +2479,41 @@ class MarkdownParser extends Parser
 						}
 
 						// We need more info to make decisions about this run of delimiter chars.
-						$prev_char = html_entity_decode($chars[$start - 1] ?? ' ');
-						$next_char = html_entity_decode($chars[$i + 1] ?? ' ');
+						if (isset($chars[$start - 1])) {
+							$prev_char = $chars[$start - 1];
+						} elseif (!isset($content[$c - 1])) {
+							$prev_char = ' ';
+						} else {
+							$temp = $content[$c - 1];
+
+							while (isset($temp[array_key_last($temp)]['content'])) {
+								$temp = $temp[array_key_last($temp)]['content'];
+							}
+
+							if (is_string(end($temp['content']))) {
+								$prev_char = mb_substr(end($temp['content']), -1);
+							} else {
+								$prev_char = ' ';
+							}
+						}
+
+						if (isset($chars[$i + 1])) {
+							$next_char = $chars[$i + 1];
+						} elseif (!isset($content[$c + 1])) {
+							$next_char = ' ';
+						} else {
+							$temp = $content[$c + 1];
+
+							while (isset($temp[0]['content'])) {
+								$temp = $temp[0]['content'];
+							}
+
+							if (is_string(reset($temp['content']))) {
+								$next_char = mb_substr(reset($temp['content']), 0, 1);
+							} else {
+								$next_char = ' ';
+							}
+						}
 
 						$prev_is_space = preg_match('/\s/u', $prev_char);
 						$prev_is_punct = $prev_is_space ? false : preg_match('/\pP/u', $prev_char);
