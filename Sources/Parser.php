@@ -371,22 +371,21 @@ abstract class Parser
 
 		$oldlevel = error_reporting(0);
 
-		$buffer = str_replace(["\n", "\r"], '', @highlight_string($code, true));
+		$buffer = @highlight_string($code, true);
 
 		error_reporting($oldlevel);
 
-		$buffer = preg_replace_callback_array(
+		return preg_replace_callback_array(
 			[
 				'~(?:' . Utils::TAB_SUBSTITUTE . ')+~u' => fn ($matches) => '<span style="white-space: pre-wrap;">' . strtr($matches[0], [Utils::TAB_SUBSTITUTE => "\t"]) . '</span>',
 				'~<span style="color: #[0-9a-fA-F]{6}">(<span style="white-space: pre-wrap;">\h*</span>)</span>~' => fn ($matches) => $matches[1],
+				'~\R~' => fn ($matches) => '<br>',
+				'/\'/' => fn ($matches) => '&#039;',
+				// PHP 8.3 changed the returned HTML.
+				'/^(<pre>)?<code[^>]*>|<\/code>(<\/pre>)?$/' => fn ($matches) => '',
 			],
 			$buffer,
 		);
-
-		// PHP 8.3 changed the returned HTML.
-		$buffer = preg_replace('/^(<pre>)?<code[^>]*>|<\/code>(<\/pre>)?$/', '', $buffer);
-
-		return strtr($buffer, ['\'' => '&#039;']);
 	}
 
 	/**
