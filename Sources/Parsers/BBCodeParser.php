@@ -1876,7 +1876,7 @@ class BBCodeParser extends Parser
 			// Fix the PHP code stuff...
 			$code = str_replace("<pre style=\"display: inline;\">\t</pre>", "\t", implode('', $php_parts));
 
-			$code = str_replace("\t", "<span style=\"white-space: pre-wrap;\">\t</span>", $code);
+			$code = str_replace("\t", "<span style=\"white-space: pre;\">\t</span>", $code);
 
 			if ($add_begin) {
 				$code = preg_replace(['/^(.+?)&lt;\?.{0,40}?php(?:&nbsp;|\s)/', '/\?&gt;((?:\s*<\/(font|span)>)*)$/m'], '$1', $code, 2);

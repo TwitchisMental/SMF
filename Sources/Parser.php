@@ -377,8 +377,8 @@ abstract class Parser
 
 		return preg_replace_callback_array(
 			[
-				'~(?:' . Utils::TAB_SUBSTITUTE . ')+~u' => fn ($matches) => '<span style="white-space: pre-wrap;">' . strtr($matches[0], [Utils::TAB_SUBSTITUTE => "\t"]) . '</span>',
-				'~<span style="color: #[0-9a-fA-F]{6}">(<span style="white-space: pre-wrap;">\h*</span>)</span>~' => fn ($matches) => $matches[1],
+				'~(?:' . Utils::TAB_SUBSTITUTE . ')+~u' => fn ($matches) => '<span style="white-space: pre;">' . strtr($matches[0], [Utils::TAB_SUBSTITUTE => "\t"]) . '</span>',
+				'~<span style="color: #[0-9a-fA-F]{6}">(<span style="white-space: pre;">\h*</span>)</span>~' => fn ($matches) => $matches[1],
 				'~\R~' => fn ($matches) => '<br>',
 				'/\'/' => fn ($matches) => '&#039;',
 				// PHP 8.3 changed the returned HTML.

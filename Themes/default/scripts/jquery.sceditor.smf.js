@@ -1087,7 +1087,7 @@ sceditor.formats.bbcode.set(
 		isSelfClosing: true,
 		isInline: true,
 		format: '\t',
-		html: '<span style="white-space: pre-wrap;" class="tab">\t</span>'
+		html: '<span style="white-space: pre;" class="tab">\t</span>'
 	}
 );
 
