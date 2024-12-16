@@ -1226,12 +1226,16 @@ class MarkdownParser extends Parser
 			return true;
 		}
 
+		if ($this->in_code === 2) {
+			return false;
+		}
+
 		if ($this->testIsBlank($line_info) && $this->in_code === 1) {
 			return true;
 		}
 
 		if ($line_info['indent'] < 4) {
-			$this->in_code = $this->in_code === 1 ? 0 : $this->in_code;
+			$this->in_code = 0;
 
 			return false;
 		}
@@ -1248,7 +1252,7 @@ class MarkdownParser extends Parser
 					&& $open_block['properties']['indent'] >= $line_info['indent']
 				)
 			) {
-				$this->in_code = $this->in_code === 1 ? 0 : $this->in_code;
+				$this->in_code = 0;
 
 				return false;
 			}
