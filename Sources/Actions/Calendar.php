@@ -665,7 +665,7 @@ class Calendar implements ActionInterface
 				'cal.start_date <= {date:high_date}',
 				'cal.end_date >= {date:low_date}',
 				'type = {int:type}',
-				'cal.id_board IN (0,' . implode(',', $this->getBoardsForExport($user)) . ')',
+				'cal.id_board IN (' . implode(',', $this->getBoardsForExport($user)) . ')',
 			];
 
 			foreach (Event::getOccurrencesInRange($low_date->format('Y-m-d'), $high_date->format('Y-m-d'), false, $query_customizations) as $occurrence) {
@@ -1760,8 +1760,8 @@ class Calendar implements ActionInterface
 	{
 		$request = Db::$db->query(
 			'',
-			'SELECT id_board
-			FROM {db_prefix}boards
+			'SELECT b.id_board
+			FROM {db_prefix}boards as b
 			WHERE ' . $user->query_wanna_see_board,
 			[],
 		);
@@ -1769,6 +1769,8 @@ class Calendar implements ActionInterface
 		$board_ids = array_map(fn ($row) => $row['id_board'], Db::$db->fetch_all($request));
 
 		Db::$db->free_result($request);
+
+		$board_ids[] = 0;
 
 		return $board_ids;
 	}
