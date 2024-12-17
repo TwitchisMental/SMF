@@ -80,7 +80,7 @@ class QuoteFast implements ActionInterface
 		$bq = User::$me->mod_cache['bq'];
 
 		if (isset($_REQUEST['modify']) || $bq != '1=1') {
-			$query_customizations['where'][] = 't.locked = {int:not_locked}' . ($bq == '0=1' ? '' : ' OR m.' . $bq);
+			$query_customizations['where'][] = 't.locked = {int:not_locked}' . ($bq == '0=1' || $bq == '1=1' ? '' : ' OR m.' . $bq);
 		}
 
 		$row = current(Msg::load((int) $_REQUEST['quote'], $query_customizations));
