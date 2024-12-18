@@ -191,7 +191,7 @@ class MarkdownParser extends Parser
 				// or
 				'|' .
 				// Non-space, non-control characters.
-				'[^\s\p{Cc}]+' .
+				'[^\s\p{Cc}]+?' .
 			')' .
 		')';
 
@@ -2697,10 +2697,8 @@ class MarkdownParser extends Parser
 
 			$str = implode('', array_slice($chars, $delim['properties']['position'], $i - $delim['properties']['position'])) . ']' . mb_substr(implode('', $chars), $i + 1);
 
-			$prefix = $delim['type'] === '![' ? '!' : '';
-
 			// Inline link/image?
-			if (preg_match('~^' . $prefix . self::REGEX_LINK_INLINE . '~u', $str, $matches)) {
+			if (preg_match('~^' . self::REGEX_LINK_INLINE . '~u', $str, $matches)) {
 				$this->parseEmphasis($content, $c);
 
 				$text = array_slice($content, $c + 1);
@@ -2730,7 +2728,7 @@ class MarkdownParser extends Parser
 				self::REGEX_LINK_REF_COLLAPSED,
 				self::REGEX_LINK_REF_SHORTCUT,
 			] as $regex) {
-				if (preg_match('~' . $prefix . $regex . '~u', $str, $matches)) {
+				if (preg_match('~' . $regex . '~u', $str, $matches)) {
 					break;
 				}
 			}
