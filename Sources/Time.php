@@ -485,28 +485,38 @@ class Time extends \DateTime implements \ArrayAccess
 			$format = strtr($format, self::FORMAT_SHORT_FORMS);
 		}
 
-		// Today and Yesterday?
-		$prefix = '';
-
-		if ($relative && Config::$modSettings['todayMod'] >= 1) {
+		// Yesterday, today, or tomorrow?
+		if (!$relative) {
+			$prefix = '';
+		} else {
 			$tzid = date_format($this, 'e');
 
 			if (!isset(self::$today[$tzid])) {
 				self::$today[$tzid] = strtotime('today ' . $tzid);
 			}
 
-			// Tomorrow? We don't support the future. ;)
-			if ($this->getTimestamp() >= self::$today[$tzid] + 86400) {
-				$prefix = '';
+			// The future.
+			if ($this->getTimestamp() >= self::$today[$tzid] + 172800) {
+				$relative_day = null;
+			}
+			// Tomorrow.
+			elseif ($this->getTimestamp() >= self::$today[$tzid] + 86400) {
+				$relative_day = Config::$modSettings['todayMod'] > 1 ? 'tomorrow' : null;
 			}
 			// Today.
 			elseif ($this->getTimestamp() >= self::$today[$tzid]) {
-				$prefix = Lang::$txt['today'] ?? '';
+				$relative_day = Config::$modSettings['todayMod'] >= 1 ? 'today' : null;
 			}
 			// Yesterday.
-			elseif (Config::$modSettings['todayMod'] > 1 && $this->getTimestamp() >= self::$today[$tzid] - 86400) {
-				$prefix = Lang::$txt['yesterday'] ?? '';
+			elseif ($this->getTimestamp() >= self::$today[$tzid] - 86400) {
+				$relative_day = Config::$modSettings['todayMod'] > 1 ? 'yesterday' : null;
 			}
+			// The past.
+			else {
+				$relative_day = null;
+			}
+
+			$prefix = Lang::$txt[$relative_day] ?? '';
 		}
 
 		$format = !empty($prefix) ? self::getTimeFormat($format) : $format;
