@@ -384,7 +384,11 @@ class Autolinker
 
 		// An entity right after the URL can break the autolinker.
 		$this->setEntitiesRegex();
-		$string = preg_replace('~(' . $this->entities_regex . ')*(?=\s|$)~u', ' ', $string);
+		$string = preg_replace_callback(
+			'~(' . $this->entities_regex . ')*(?=\s|$)~u',
+			fn ($matches) => str_repeat(' ', strlen($matches[0])),
+			$string,
+		);
 
 		$this->setUrlRegex();
 
