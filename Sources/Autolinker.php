@@ -416,7 +416,7 @@ class Autolinker
 
 			// Overwrite all BBC markup elements.
 			$string = preg_replace_callback(
-				'/\[[^\]]*\]/i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
+				'~\[/?' . Parser::getBBCodeTagsRegex() . '[^\]]*\]~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
 				fn ($matches) => str_repeat(' ', strlen($matches[0])),
 				$string,
 			);

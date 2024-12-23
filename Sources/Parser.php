@@ -355,6 +355,16 @@ abstract class Parser
 	}
 
 	/**
+	 * Gets a regular expression to match all known BBC tags.
+	 *
+	 * @return string Regular expression to match all BBCode tags.
+	 */
+	public static function getBBCodeTagsRegex(): string
+	{
+		return BBcodeParser::load()->getAllTagsRegex();
+	}
+
+	/**
 	 * Highlight any code.
 	 *
 	 * Uses PHP's highlight_string() to highlight PHP syntax.
