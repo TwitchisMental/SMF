@@ -3020,7 +3020,9 @@ class MarkdownParser extends Parser
 	 */
 	protected function amalgamateStrings(array &$content): void
 	{
-		for ($i = 0; $i < count($content); $i++) {
+		$content = array_values($content);
+
+		for ($i = 0; $i <= array_key_last($content); $i++) {
 			if (!isset($content[$i]) || !is_string($content[$i])) {
 				continue;
 			}
