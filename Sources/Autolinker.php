@@ -386,7 +386,7 @@ class Autolinker
 		$this->setEntitiesRegex();
 		$string = preg_replace_callback(
 			'~(' . $this->entities_regex . ')*(?=\s|$)~u',
-			fn ($matches) => str_repeat(' ', strlen($matches[0])),
+			fn($matches) => str_repeat(' ', strlen($matches[0])),
 			$string,
 		);
 
@@ -410,14 +410,14 @@ class Autolinker
 					// 4 = Closing BBC markup element.
 					'(\[/\2\])' .
 				'~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
-				fn ($matches) => $matches[1] . str_repeat('x', strlen($matches[3])) . $matches[4],
+				fn($matches) => $matches[1] . str_repeat('x', strlen($matches[3])) . $matches[4],
 				$string,
 			);
 
 			// Overwrite all BBC markup elements.
 			$string = preg_replace_callback(
 				'~\[/?' . Parser::getBBCodeTagsRegex() . '[^\]]*\]~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
-				fn ($matches) => str_repeat(' ', strlen($matches[0])),
+				fn($matches) => str_repeat(' ', strlen($matches[0])),
 				$string,
 			);
 
@@ -431,14 +431,14 @@ class Autolinker
 					// 3 = Closing 'a' markup element.
 					'(</a>)' .
 				'~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
-				fn ($matches) => $matches[1] . str_repeat('x', strlen($matches[2])) . $matches[3],
+				fn($matches) => $matches[1] . str_repeat('x', strlen($matches[2])) . $matches[3],
 				$string,
 			);
 
 			// Overwrite all HTML elements.
 			$string = preg_replace_callback(
 				'~</?(\w+)\b([^>]*)>~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
-				fn ($matches) => str_repeat(' ', strlen($matches[0])),
+				fn($matches) => str_repeat(' ', strlen($matches[0])),
 				$string,
 			);
 		}
@@ -736,7 +736,7 @@ class Autolinker
 						$parts[$i],
 						array_combine(
 							$detected_urls,
-							array_map(fn ($url) => '[' . $bbc . ']' . $url . '[/' . $bbc . ']', $detected_urls),
+							array_map(fn($url) => '[' . $bbc . ']' . $url . '[/' . $bbc . ']', $detected_urls),
 						),
 					);
 				}
@@ -822,7 +822,7 @@ class Autolinker
 			return;
 		}
 
-		$this->entities_regex = '(?' . '>&(?' . '>' . Utils::buildRegex(array_map(fn ($ent) => ltrim($ent, '&'), get_html_translation_table(HTML_ENTITIES, ENT_HTML5 | ENT_QUOTES)), '~') . '|(?' . '>#(?' . '>x[0-9a-fA-F]{1,6}|\d{1,7});)))';
+		$this->entities_regex = '(?' . '>&(?' . '>' . Utils::buildRegex(array_map(fn($ent) => ltrim($ent, '&'), get_html_translation_table(HTML_ENTITIES, ENT_HTML5 | ENT_QUOTES)), '~') . '|(?' . '>#(?' . '>x[0-9a-fA-F]{1,6}|\d{1,7});)))';
 	}
 
 	/**
