@@ -384,7 +384,11 @@ class Autolinker
 
 		// An entity right after the URL can break the autolinker.
 		$this->setEntitiesRegex();
-		$string = preg_replace('~(' . $this->entities_regex . ')*(?=\s|$)~u', ' ', $string);
+		$string = preg_replace_callback(
+			'~(' . $this->entities_regex . ')*(?=\s|$)~u',
+			fn ($matches) => str_repeat(' ', strlen($matches[0])),
+			$string,
+		);
 
 		$this->setUrlRegex();
 
@@ -412,7 +416,7 @@ class Autolinker
 
 			// Overwrite all BBC markup elements.
 			$string = preg_replace_callback(
-				'/\[[^\]]*\]/i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
+				'~\[/?' . Parser::getBBCodeTagsRegex() . '[^\]]*\]~i' . ($this->encoding === 'UTF-8' ? 'u' : ''),
 				fn ($matches) => str_repeat(' ', strlen($matches[0])),
 				$string,
 			);
@@ -786,7 +790,7 @@ class Autolinker
 		$regexes['email'] = self::load()->getJavaScriptEmailRegex();
 
 		// Don't autolink if the URL is inside a Markdown link construct.
-		$md_lookbehind = !empty(Config::$modSettings['enableMarkdown']) ? '(?<!\[[^\]]*\](?:\(|:[ \t\u00A0\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]*\n?[ \t\u00A0\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]*))' : '';
+		$md_lookbehind = !empty(Config::$modSettings['enableMarkdown']) ? '(?<!\[[^\]]*\](?:\(|:[ \t\u00A0\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]*\n?[ \t\u00A0\u1680\u180E\u2000-\u200A\u202F\u205F\u3000]*)|\[i?url(?:=[^\]]*)?\])' : '(?<!\[i?url(?:=[^\]]*)?\])';
 
 		foreach ($regexes as $key => $value) {
 			$js[] = 'autolinker_regexes.set(' . Utils::escapeJavaScript($key) . ', new RegExp(' . Utils::escapeJavaScript($md_lookbehind . $value) . ', "giu"));';
