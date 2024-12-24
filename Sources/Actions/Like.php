@@ -664,7 +664,7 @@ class Like implements ActionInterface
 		$loaded = User::load($members);
 
 		if (count($loaded) != count($members)) {
-			$members = array_diff($members, array_map(fn ($member) => $member->id, $loaded));
+			$members = array_diff($members, array_map(fn($member) => $member->id, $loaded));
 
 			foreach ($members as $not_loaded) {
 				unset(Utils::$context['likers'][$not_loaded]);
