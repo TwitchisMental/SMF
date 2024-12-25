@@ -2237,8 +2237,8 @@ class Utils
 		}
 
 		// Put the session ID in.
-		if (defined('SID') && SID != '') {
-			$setLocation = preg_replace('/^' . preg_quote(Config::$scripturl, '/') . '(?!\?' . preg_quote(SID, '/') . ')\??/', Config::$scripturl . '?' . SID . ';', $setLocation);
+		if (session_id() != '') {
+			$setLocation = preg_replace('/^' . preg_quote(Config::$scripturl, '/') . '(?!\?' . preg_quote(session_id(), '/') . ')\??/', Config::$scripturl . '?' . session_id() . ';', $setLocation);
 		}
 		// Keep that debug in their for template debugging!
 		elseif (isset($_GET['debug'])) {
@@ -2256,11 +2256,11 @@ class Utils
 				Sapi::isSoftware([Sapi::SERVER_APACHE, Sapi::SERVER_LIGHTTPD, Sapi::SERVER_LITESPEED])
 			)
 		) {
-			if (defined('SID') && SID != '') {
+			if (session_id() != '') {
 				$setLocation = preg_replace_callback(
-					'~^' . preg_quote(Config::$scripturl, '~') . '\?(?:' . SID . '(?:;|&|&amp;))((?:board|topic)=[^#]+?)(#[^"]*?)?$~',
+					'~^' . preg_quote(Config::$scripturl, '~') . '\?(?:' . session_id() . '(?:;|&|&amp;))((?:board|topic)=[^#]+?)(#[^"]*?)?$~',
 					function ($m) {
-						return Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html?' . SID . (isset($m[2]) ? "{$m[2]}" : '');
+						return Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html?' . session_id() . (isset($m[2]) ? "{$m[2]}" : '');
 					},
 					$setLocation,
 				);
