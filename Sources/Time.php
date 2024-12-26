@@ -440,18 +440,6 @@ class Time extends \DateTime implements \ArrayAccess
 	}
 
 	/**
-	 * Like \DateTime::diff(), but returns a TimeInterval object.
-	 *
-	 * @param \DateTimeInterface $target The date to compare to.
-	 * @param bool $absolute Whether to force the interval to be positive.
-	 * @return TimeInterval The difference between the two dates.
-	 */
-	public function diff(\DateTimeInterface $target, bool $absolute = false): TimeInterval
-	{
-		return TimeInterval::createFromDateInterval(parent::diff($target, $absolute));
-	}
-
-	/**
 	 * Like DateTime::format(), except that it can accept either DateTime format
 	 * specifiers or strftime format specifiers (but not both at once).
 	 *
