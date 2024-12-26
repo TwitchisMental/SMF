@@ -20,88 +20,6 @@ namespace SMF;
  */
 class TimeInterval extends \DateInterval implements \Stringable
 {
-	/*******************
-	 * Public properties
-	 *******************/
-
-	/**
-	 * @var int
-	 *
-	 * Number of years.
-	 */
-	public int $y;
-
-	/**
-	 * @var int
-	 *
-	 * Number of months.
-	 */
-	public int $m;
-
-	/**
-	 * @var int
-	 *
-	 * Number of days.
-	 */
-	public int $d;
-
-	/**
-	 * @var int
-	 *
-	 * Number of hours.
-	 */
-	public int $h;
-
-	/**
-	 * @var int
-	 *
-	 * Number of minutes.
-	 */
-	public int $i;
-
-	/**
-	 * @var int
-	 *
-	 * Number of seconds.
-	 */
-	public int $s;
-
-	/**
-	 * @var float
-	 *
-	 * Number of microseconds, as a fraction of a second.
-	 */
-	public float $f;
-
-	/**
-	 * @var int
-	 *
-	 * 1 if the interval represents a negative time period and 0 otherwise.
-	 */
-	public int $invert;
-
-	/**
-	 * @var mixed
-	 *
-	 * If the object was created by Time::diff(), then this is the total number
-	 * of full days between the start and end dates. Otherwise, false.
-	 */
-	public mixed $days;
-
-	/**
-	 * @var bool
-	 *
-	 * Whether the object was created by TimeInterval::createFromDateString().
-	 */
-	public bool $from_string;
-
-	/**
-	 * @var string
-	 *
-	 * The string used as argument to TimeInterval::createFromDateString().
-	 */
-	public string $date_string;
-
 	/****************
 	 * Public methods
 	 ****************/
@@ -210,28 +128,36 @@ class TimeInterval extends \DateInterval implements \Stringable
 			$can_be_fractional = false;
 		}
 
-		// Add the fractional value where appropriate.
-		if (isset($frac['prop'])) {
+		if (!isset($frac['prop'])) {
+			// If we have no fractional values, construction is easy.
+			parent::__construct($duration);
+		} else {
+			// Rebuild $duration without the fractional value.
+			$duration = 'P';
+
+			foreach (array_reverse($props) as $prop => $info) {
+				if ($prop === 'h') {
+					$duration .= 'T';
+				}
+
+				if (!empty($matches[$prop])) {
+					$duration .= $matches[$prop] . $info['unit'];
+				}
+			}
+
+			// Construct.
+			parent::__construct(rtrim($duration, 'PT'));
+
+			// Finally, set the fractional value.
 			$this->{$frac['prop']} += $frac['value'];
 		}
-
-		// Set our properties.
-		$this->y = $matches['y'] ?? 0;
-		$this->m = $matches['m'] ?? 0;
-		$this->d = $matches['d'] ?? 0;
-		$this->h = $matches['h'] ?? 0;
-		$this->i = $matches['i'] ?? 0;
-		$this->s = $matches['s'] ?? 0;
-		$this->f = $matches['f'] ?? 0.0;
-		$this->days = false;
-		$this->from_string = false;
 	}
 
 	/**
-	 * Formats the interval as a string so it can be reconstructed later.
+	 * Formats the object as a string so it can be reconstructed later.
 	 *
 	 * @return string A ISO 8601 duration string suitable for reconstructing
-	 *    this interval.
+	 *    this object.
 	 */
 	public function __toString(): string
 	{
@@ -261,11 +187,10 @@ class TimeInterval extends \DateInterval implements \Stringable
 	}
 
 	/**
-	 * Formats this interval as a string that can be parsed by
-	 * TimeInterval::createFromDateString().
+	 * Formats the object as a string that can be parsed by strtotime().
 	 *
-	 * @return string A parsable string suitable for reconstructing
-	 *    this interval.
+	 * @return string A strtotime parsable string suitable for reconstructing
+	 *    this object.
 	 */
 	public function toParsable(): string
 	{
@@ -392,37 +317,6 @@ class TimeInterval extends \DateInterval implements \Stringable
 		return ($later->format($fmt) - $when->format($fmt));
 	}
 
-	/**
-	 * Formats the interval using an arbitrary format string.
-	 *
-	 * @param string $format The format string. Accepts all the same format
-	 *    specifiers that \DateInterval::format() accepts.
-	 * @return string The formatted interval.
-	 */
-	public function format(string $format): string
-	{
-		return strtr($format, [
-			'%Y' => sprintf('%02d', $this->y),
-			'%y' => sprintf('%01d', $this->y),
-			'%M' => sprintf('%02d', $this->m),
-			'%m' => sprintf('%01d', $this->m),
-			'%D' => sprintf('%02d', $this->d),
-			'%d' => sprintf('%01d', $this->d),
-			'%a' => is_int($this->days) ? sprintf('%01d', $this->days) : '(unknown)',
-			'%H' => sprintf('%02d', $this->h),
-			'%h' => sprintf('%01d', $this->h),
-			'%I' => sprintf('%02d', $this->i),
-			'%i' => sprintf('%01d', $this->i),
-			'%S' => sprintf('%02d', $this->s),
-			'%s' => sprintf('%01d', $this->s),
-			'%F' => substr(sprintf('%06f', $this->f), 2),
-			'%f' => ltrim(sprintf('%06f', $this->f), '0.'),
-			'%R' => $this->invert ? '-' : '+',
-			'%r' => $this->invert ? '-' : '',
-			'%%' => '%',
-		]);
-	}
-
 	/***********************
 	 * Public static methods
 	 ***********************/
@@ -437,33 +331,9 @@ class TimeInterval extends \DateInterval implements \Stringable
 	{
 		$new = new TimeInterval('P0D');
 
-		foreach (get_object_vars($object) as $prop => $value) {
-			$new->{$prop} = $value;
+		foreach (['y', 'm', 'd', 'h', 'i', 's', 'f', 'invert'] as $prop) {
+			$new->{$prop} = $object->{$prop};
 		}
-
-		return $new;
-	}
-
-	/**
-	 * Creates a TimeInterval from the relative parts of a date string.
-	 *
-	 * @param string $datetime A date with relative parts.
-	 * @return TimeInterval A TimeInterval object.
-	 */
-	public static function createFromDateString(string $datetime): static
-	{
-		$object = parent::createFromDateString($datetime);
-
-		$new = self::createFromDateInterval($object);
-
-		$new->y = (int) $object->format('%y');
-		$new->m = (int) $object->format('%m');
-		$new->d = abs((int) $object->format('%d'));
-		$new->h = (int) $object->format('%h');
-		$new->i = (int) $object->format('%i');
-		$new->s = (int) $object->format('%s');
-		$new->f = (float) ('0.' . $object->format('%F'));
-		$new->invert = (int) ($object->format('%d') < 0);
 
 		return $new;
 	}
