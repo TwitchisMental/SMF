@@ -202,7 +202,7 @@ class PageIndex implements \Stringable
 	 *    "url;start=offset". Default: false.
 	 * @param bool $show_prevnext Whether the Previous and Next links should be
 	 *    shown. Default: true.
-	 * @param array|null $templateOverrides Array of template strings to override defaults.
+	 * @param array $template_overrides Array of template strings to override defaults.
 	 *    Supported keys: extra_before, previous_page, current_page, page, 
 	 *    expand_pages, next_page, extra_after.
 	 */
@@ -213,7 +213,7 @@ class PageIndex implements \Stringable
 		int $num_per_page, 
 		bool $short_format = false, 
 		bool $show_prevnext = true,
-		?array $templateOverrides = null
+		array $template_overrides = []
 	) {
 		$this->base_url = $base_url;
 		$this->max_value = $max_value;
@@ -234,14 +234,7 @@ class PageIndex implements \Stringable
 			Utils::$context['current_page'] = $this->start / $this->num_per_page;
 		}
 
-		// Override templates if provided
-		if ($templateOverrides) {
-			foreach ($templateOverrides as $key => $value) {
-				if (property_exists($this, $key)) {
-					$this->{$key} = $value;
-				}
-			}
-		}
+		$this->setTemplateOverrides($template_overrides);
 
 		$this->extra_before = str_replace('{txt_pages}', Lang::$txt['pages'], $this->extra_before);
 	}
@@ -249,13 +242,13 @@ class PageIndex implements \Stringable
 	/**
 	 * Sets template overrides.
 	 *
-	 * @param array $templateOverrides Array of template strings to override defaults.
+	 * @param array $template_overrides Array of template strings to override defaults.
 	 *    Supported keys: extra_before, previous_page, current_page, page, 
 	 *    expand_pages, next_page, extra_after.
 	 */
-	public function setTemplateOverrides(array $templateOverrides): void
+	public function setTemplateOverrides(array $template_overrides = []): void
 	{
-		foreach ($templateOverrides as $key => $value) {
+		foreach ($template_overrides as $key => $value) {
 			if (property_exists($this, $key)) {
 				$this->{$key} = $value;
 			}
@@ -322,7 +315,7 @@ class PageIndex implements \Stringable
 	 *    "url;start=offset". Default: false.
 	 * @param bool $show_prevnext Whether the Previous and Next links should be
 	 *    shown. Default: true.
-	 * @param array|null $templateOverrides Array of template strings to override defaults.
+	 * @param array $template_overrides Array of template strings to override defaults.
 	 *    Supported keys: extra_before, previous_page, current_page, page, 
 	 *    expand_pages, next_page, extra_after.
 	 * @return self An instance of this class.
@@ -334,9 +327,9 @@ class PageIndex implements \Stringable
 		int $num_per_page, 
 		bool $short_format = false, 
 		bool $show_prevnext = true,
-		?array $templateOverrides = null
+		array $template_overrides = []
 	): self {
-		return new self($base_url, $start, $max_value, $num_per_page, $short_format, $show_prevnext, $templateOverrides);
+		return new self($base_url, $start, $max_value, $num_per_page, $short_format, $show_prevnext, $template_overrides);
 	}
 
 	/******************
