@@ -391,6 +391,24 @@ class Theme
 	}
 
 	/**
+	 * Loads sub-templates into the current theme context.
+	 *
+	 * This method loads each sub-template in the `sub_templates` array. If it is
+	 * not defined, loads a single sub-template specified by `sub_template` or
+	 * falls back to loading the `main` template.
+	 */
+	public static function loadSubTemplates(): void
+	{
+		if (isset(Utils::$context['sub_templates'])) {
+			foreach (Utils::$context['sub_templates'] as $sub_template) {
+				self::loadSubTemplate($sub_template, true);
+			}
+		} else {
+			Theme::loadSubTemplate(Utils::$context['sub_template'] ?? 'main');
+		}
+	}
+
+	/**
 	 * Loads a sub-template.
 	 *
 	 * 	- Loads the sub template specified by sub_template_name, which must be
@@ -401,20 +419,25 @@ class Theme
 	 *
 	 * @todo get rid of reading $_REQUEST directly
 	 *
-	 * @param string $sub_template_name The name of the sub-template to load
+	 * @param string|array $sub_template_name The name of the sub-template to load
 	 * @param bool|string $fatal Whether to die with an error if the sub-template can't be loaded
 	 */
-	public static function loadSubTemplate(string $sub_template_name, bool|string $fatal = false): void
+	public static function loadSubTemplate(string|array $sub_template_name, bool|string $fatal = false): void
 	{
 		if (!empty(Config::$db_show_debug)) {
 			Utils::$context['debug']['sub_templates'][] = $sub_template_name;
 		}
 
 		// Figure out what the template function is named.
-		$theme_function = 'template_' . $sub_template_name;
+		if (is_array($sub_template_name)) {
+			$theme_function = 'template_' . $sub_template_name[0];
+			$function_params = $sub_template_name[1];
+		} else {
+			$theme_function = 'template_' . $sub_template_name;
+		}
 
-		if (function_exists($theme_function)) {
-			$theme_function();
+		if (is_callable($theme_function)) {
+			call_user_func_array($theme_function, $function_params ?? []);
 		} elseif ($fatal === false) {
 			ErrorHandler::fatalLang('theme_template_error', 'template', ['template_name' => (string) $sub_template_name, 'type' => 'sub']);
 		} elseif ($fatal !== 'ignore') {
@@ -1290,18 +1313,12 @@ class Theme
 
 		header('content-type: text/' . (isset($_REQUEST['xml']) ? 'xml' : 'html') . '; charset=' . (empty(Utils::$context['character_set']) ? 'ISO-8859-1' : Utils::$context['character_set']));
 
-		// We need to splice this in after the body layer, or after the main layer for older stuff.
+		// We need to splice this in after the body layer.
 		if (Utils::$context['in_maintenance'] && User::$me->is_admin) {
 			$position = array_search('body', Utils::$context['template_layers']);
 
-			if ($position === false) {
-				$position = array_search('main', Utils::$context['template_layers']);
-			}
-
 			if ($position !== false) {
-				$before = array_slice(Utils::$context['template_layers'], 0, $position + 1);
-				$after = array_slice(Utils::$context['template_layers'], $position + 1);
-				Utils::$context['template_layers'] = array_merge($before, ['maint_warning'], $after);
+				array_splice(Utils::$context['template_layers'], $position + 1, 0, ['maint_warning']);
 			}
 		}
 
@@ -2192,15 +2209,15 @@ class Theme
 						foreach (self::$current->settings['theme_variants'] as $variant) {
 							Utils::$context['available_themes'][$id_theme]['variants'][$variant] = [
 								'label' => Lang::$txt['variant_' . $variant] ?? $variant,
-								'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
-							];
-						}
+						'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
+					];
+				}
 
-						Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
+				Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
 
-						if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
-							Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
-						}
+				if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
+					Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
+				}
 
 						Utils::$context['available_themes'][$id_theme]['thumbnail_href'] = Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'];
 
