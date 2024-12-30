@@ -404,7 +404,7 @@ class Theme
 				self::loadSubTemplate($sub_template, true);
 			}
 		} else {
-			Theme::loadSubTemplate(Utils::$context['sub_template'] ?? 'main');
+			self::loadSubTemplate(Utils::$context['sub_template'] ?? 'main');
 		}
 	}
 
