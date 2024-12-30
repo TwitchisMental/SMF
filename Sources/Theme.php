@@ -425,7 +425,7 @@ class Theme
 	public static function loadSubTemplate(string|array $sub_template_name, bool|string $fatal = false): void
 	{
 		if (!empty(Config::$db_show_debug)) {
-			Utils::$context['debug']['sub_templates'][] = $sub_template_name;
+			Utils::$context['debug']['sub_templates'][] = is_array($sub_template_name) ? $sub_template_name[0] : $sub_template_name;
 		}
 
 		// Figure out what the template function is named.
