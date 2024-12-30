@@ -196,6 +196,10 @@ class Time extends \DateTime implements \ArrayAccess
 
 		$datetime = self::sanitize($datetime);
 
+		if (str_starts_with($datetime, '@')) {
+			$datetime = '@' . min(max((int) ltrim($datetime, '@'), PHP_INT_MIN), PHP_INT_MAX);
+		}
+
 		if (
 			// If $datetime was a Unix timestamp, set the time zone to the one
 			// we were told to use. Honestly, it's a mystery why the \DateTime
