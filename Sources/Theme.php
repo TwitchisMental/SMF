@@ -411,42 +411,62 @@ class Theme
 	/**
 	 * Loads a sub-template.
 	 *
-	 * 	- Loads the sub template specified by sub_template_name, which must be
-	 *    in an already-loaded template.
+	 * This function attempts to load and execute a sub-template by constructing its function name
+	 * and calling it dynamically. If the sub-template cannot be loaded, it handles errors based
+	 * on the `$fatal` parameter.
 	 *
-	 *  - If ?debug is in the query string, shows administrators a marker after
-	 *    every sub template for debugging purposes.
+	 * - Sub-template function names must follow the format `template_{name}`.
+	 * - When debugging is enabled, administrators can see markers after each loaded sub-template.
 	 *
-	 * @todo get rid of reading $_REQUEST directly
-	 *
-	 * @param string|array $sub_template_name The name of the sub-template to load
-	 * @param bool|string $fatal Whether to die with an error if the sub-template can't be loaded
+	 * @param string|array $sub_template_name The name of the sub-template to load.
+	 *                                         If an array is provided, the first element is the name,
+	 *                                         and the second element is an array of parameters to pass to the sub-template.
+	 * @param bool|string $fatal              Specifies error handling behavior:
+	 *                                        - `false` (default): Logs and handles the error.
+	 *                                        - `true`: Dies with an error message.
+	 *                                        - `'ignore'`: Silently ignore any errors.
 	 */
 	public static function loadSubTemplate(string|array $sub_template_name, bool|string $fatal = false): void
 	{
+		$template_name = is_array($sub_template_name) ? $sub_template_name[0] : $sub_template_name;
+
+		// Add the sub-template to the debug context if debugging is enabled.
 		if (!empty(Config::$db_show_debug)) {
-			Utils::$context['debug']['sub_templates'][] = is_array($sub_template_name) ? $sub_template_name[0] : $sub_template_name;
+			Utils::$context['debug']['sub_templates'][] = $template_name;
 		}
 
-		// Figure out what the template function is named.
+		// Determine the template function name and any associated parameters.
 		if (is_array($sub_template_name)) {
 			$theme_function = 'template_' . $sub_template_name[0];
-			$function_params = $sub_template_name[1];
+			$function_params = $sub_template_name[1] ?? [];
 		} else {
 			$theme_function = 'template_' . $sub_template_name;
+			$function_params = [];
 		}
 
+		// Attempt to call the sub-template function.
 		if (is_callable($theme_function)) {
-			call_user_func_array($theme_function, $function_params ?? []);
-		} elseif ($fatal === false) {
-			ErrorHandler::fatalLang('theme_template_error', 'template', ['template_name' => (string) $sub_template_name, 'type' => 'sub']);
-		} elseif ($fatal !== 'ignore') {
-			die(ErrorHandler::log(Lang::formatText(Lang::$txt['theme_template_error'] ?? 'Unable to load the {template_name} sub-template.', ['template_name' => (string) $sub_template_name, 'type' => 'sub']), 'template'));
+			call_user_func_array($theme_function, $function_params);
+		} else {
+			// Handle errors based on the $fatal parameter.
+			if ($fatal === false) {
+				ErrorHandler::fatalLang(
+					'theme_template_error',
+					'template',
+					['template_name' => $template_name, 'type' => 'sub']
+				);
+			} elseif ($fatal !== 'ignore') {
+				$error_message = Lang::formatText(
+					Lang::$txt['theme_template_error'] ?? 'Unable to load the {template_name} sub-template.',
+					['template_name' => $template_name, 'type' => 'sub']
+				);
+				die(ErrorHandler::log($error_message, 'template'));
+			}
 		}
 
-		// Are we showing debugging for templates?  Just make sure not to do it before the doctype...
-		if (isset(User::$me) && User::$me->allowedTo('admin_forum') && isset($_REQUEST['debug']) && !in_array($sub_template_name, ['init', 'main_below']) && ob_get_length() > 0 && !isset($_REQUEST['xml'])) {
-			echo "\n" . '<div class="noticebox">---- ', $sub_template_name, ' ends ----</div>';
+		// Show debug markers for administrators if enabled.
+		if (isset(User::$me) && User::$me->allowedTo('admin_forum') && isset($_REQUEST['debug']) && !in_array($template_name, ['init', 'html_below']) && ob_get_length() > 0 && !isset($_REQUEST['xml'])) {
+			echo "\n" . '<div class="noticebox">---- ', $template_name, ' ends ----</div>';
 		}
 	}
 
@@ -2209,15 +2229,15 @@ class Theme
 						foreach (self::$current->settings['theme_variants'] as $variant) {
 							Utils::$context['available_themes'][$id_theme]['variants'][$variant] = [
 								'label' => Lang::$txt['variant_' . $variant] ?? $variant,
-								'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
-							];
-						}
+						'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
+					];
+				}
 
-						Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
+				Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
 
-						if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
-							Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
-						}
+				if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
+					Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
+				}
 
 						Utils::$context['available_themes'][$id_theme]['thumbnail_href'] = Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'];
 
