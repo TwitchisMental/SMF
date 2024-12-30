@@ -401,7 +401,7 @@ class Theme
 	{
 		if (isset(Utils::$context['sub_templates'])) {
 			foreach (Utils::$context['sub_templates'] as $sub_template) {
-				self::loadSubTemplate($sub_template, true);
+				self::loadSubTemplate($sub_template);
 			}
 		} else {
 			self::loadSubTemplate(Utils::$context['sub_template'] ?? 'main');
