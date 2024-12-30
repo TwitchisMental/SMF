@@ -2209,15 +2209,15 @@ class Theme
 						foreach (self::$current->settings['theme_variants'] as $variant) {
 							Utils::$context['available_themes'][$id_theme]['variants'][$variant] = [
 								'label' => Lang::$txt['variant_' . $variant] ?? $variant,
-						'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
-					];
-				}
+								'thumbnail' => file_exists($theme_data['theme_dir'] . '/images/thumbnail_' . $variant . '.png') ? $theme_data['images_url'] . '/thumbnail_' . $variant . '.png' : (file_exists($theme_data['theme_dir'] . '/images/thumbnail.png') ? $theme_data['images_url'] . '/thumbnail.png' : ''),
+							];
+						}
 
-				Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
+						Utils::$context['available_themes'][$id_theme]['selected_variant'] = $_GET['vrt'] ?? (!empty($variant_preferences[$id_theme]) ? $variant_preferences[$id_theme] : (!empty(self::$current->settings['default_variant']) ? self::$current->settings['default_variant'] : self::$current->settings['theme_variants'][0]));
 
-				if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
-					Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
-				}
+						if (!isset(Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'])) {
+							Utils::$context['available_themes'][$id_theme]['selected_variant'] = self::$current->settings['theme_variants'][0];
+						}
 
 						Utils::$context['available_themes'][$id_theme]['thumbnail_href'] = Utils::$context['available_themes'][$id_theme]['variants'][Utils::$context['available_themes'][$id_theme]['selected_variant']]['thumbnail'];
 
