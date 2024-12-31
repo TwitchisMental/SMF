@@ -758,9 +758,23 @@ class Msg implements \ArrayAccess
 
 		// Let's look at the time tags...
 		$message = preg_replace_callback(
-			'~\[time(?:=(absolute))*\](.+?)\[/time\]~i',
-			function ($m) {
-				return '[time]' . (is_numeric("{$m[2]}") || @strtotime("{$m[2]}") == 0 ? "{$m[2]}" : strtotime("{$m[2]}") - ("{$m[1]}" == 'absolute' ? 0 : ((Config::$modSettings['time_offset'] + User::$me->time_offset) * 3600))) . '[/time]';
+			'~\[time(?:=([^\\]]*))?\](.+?)\[/time\]~i',
+			function ($matches) {
+				return preg_replace(
+					[
+						'~^<time[^>]*\bdatetime="([^"]+)"[^>]*>(.*)</time>$~',
+						'~^<span[^>]*>.*</span>$~',
+					],
+					[
+						// If it parsed successfully, insert the resolved datetime value.
+						// This ensures that "[time]today[/time]" ends up resolving to
+						// the date the post was written, not the date it is being read.
+						'[time=$1]$2[/time]',
+						// If it didn't parse successfully, remove the BBC entirely.
+						$matches[2],
+					],
+					Parser::transform($matches[0], Parser::INPUT_BBC),
+				);
 			},
 			$message,
 		);
@@ -943,10 +957,14 @@ class Msg implements \ArrayAccess
 		}
 
 		// Attempt to un-parse the time to something less awful.
+		// This form will never be created by Msg::preparsecode() in SMF 3.0+
+		// but it might be present in old data.
 		$message = preg_replace_callback(
 			'~\[time\](\d{0,10})\[/time\]~i',
 			function ($matches) {
-				return '[time]' . Time::create('@' . $matches[1])->setTimezone(new \DateTimeZone(User::getTimezone()))->format(Time::getDateFormat()) . '[/time]';
+				$time = Time::create('@' . $matches[1]);
+
+				return '[time=' . $time->format('Y-m-d\TH:i:sP') . ']' . $time->format(null, false) . '[/time]';
 			},
 			$message,
 		);
