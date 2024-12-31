@@ -1190,7 +1190,9 @@ class SearchEngines implements ActionInterface
 			'*' => [
 				'allow' => [],
 				'disallow' => [
-					Url::create(Config::$scripturl)->path . '?msg=*',
+					Url::create(Config::$scripturl)->path . '?msg=',
+					'*PHPSESSID=',
+					'*;topicseen',
 				],
 			],
 		];
