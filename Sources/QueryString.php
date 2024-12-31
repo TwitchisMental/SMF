@@ -414,14 +414,17 @@ class QueryString
 	 */
 	public static function ob_sessrewrite(string $buffer): string
 	{
-		// If Config::$scripturl is set to nothing, or the session ID is not defined (SSI?) just quit.
-		if (Config::$scripturl == '' || session_id() === false) {
+		// PHP 8.4 deprecated SID. A better long-term solution is needed, but this works for now.
+		$sid = defined('SID') ? @constant('SID') : null;
+
+		// If Config::$scripturl is set to nothing, or the SID is not defined (SSI?) just quit.
+		if (Config::$scripturl == '' || !isset($sid)) {
 			return $buffer;
 		}
 
 		// Do nothing if the session is cookied, or they are a crawler - guests are caught by redirectexit().
-		if (empty($_COOKIE) && session_id() != '' && !BrowserDetector::isBrowser('possibly_robot')) {
-			$buffer = preg_replace('/(?<!<link rel="canonical" href=)"' . preg_quote(Config::$scripturl, '/') . '(?!\?' . preg_quote(session_id(), '/') . ')\??/', '"' . Config::$scripturl . '?' . session_id() . '&amp;', $buffer);
+		if (empty($_COOKIE) && $sid != '' && !BrowserDetector::isBrowser('possibly_robot')) {
+			$buffer = preg_replace('/(?<!<link rel="canonical" href=)"' . preg_quote(Config::$scripturl, '/') . '(?!\?' . preg_quote($sid, '/') . ')\??/', '"' . Config::$scripturl . '?' . $sid . '&amp;', $buffer);
 		}
 		// Debugging templates, are we?
 		elseif (isset($_GET['debug'])) {
@@ -441,11 +444,11 @@ class QueryString
 			)
 		) {
 			// Let's do something special for session ids!
-			if (session_id() != '') {
+			if ($sid != '') {
 				$buffer = preg_replace_callback(
-					'~"' . preg_quote(Config::$scripturl, '~') . '\?(?:' . session_id() . '(?:;|&|&amp;))((?:board|topic)=[^#"]+?)(#[^"]*?)?"~',
+					'~"' . preg_quote(Config::$scripturl, '~') . '\?(?:' . $sid . '(?:;|&|&amp;))((?:board|topic)=[^#"]+?)(#[^"]*?)?"~',
 					function ($m) {
-						return '"' . Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html?' . session_id() . ($m[2] ?? '') . '"';
+						return '"' . Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html?' . $sid . ($m[2] ?? '') . '"';
 					},
 					$buffer,
 				);
