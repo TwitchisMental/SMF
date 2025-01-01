@@ -2350,7 +2350,6 @@ class Utils
 						],
 					);
 				}
-
 			}
 
 			// Start up the session URL fixer.
@@ -2388,7 +2387,7 @@ class Utils
 		}
 
 		if ($do_footer) {
-			Theme::loadSubTemplate(Utils::$context['sub_template'] ?? 'main');
+			Theme::loadSubTemplates();
 
 			// Anything special to put out?
 			if (!empty(Utils::$context['insert_after_template']) && !isset($_REQUEST['xml'])) {
@@ -2400,6 +2399,7 @@ class Utils
 				$footer_done = true;
 				Theme::template_footer();
 
+				// Add $db_show_debug = true; to Settings.php if you want to show the debugging information.
 				// (since this is just debugging... it's okay that it's after </html>.)
 				if (!isset($_REQUEST['xml'])) {
 					Logging::displayDebug();
