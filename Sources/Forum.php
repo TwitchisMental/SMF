@@ -29,6 +29,23 @@ use SMF\Db\DatabaseApi as Db;
  *
  * Then, you can access the FunctionToCall() function from Source-File.php with
  * the URL index.php?action=action-in-url. Relatively simple, no?
+ *
+ * MOD AUTHORS:
+ *
+ * To add a new action, do the following:
+ *
+ *  1. Create a class that implements SMF\ActionInterface and uses SMF\ActionTrait.
+ *     Put your code in its execute() method.
+ *  2. Use the integrate_actions hook to add information about your
+ *     action to SMF\Forum::$actions.
+ *
+ * Deprecations:
+ *
+ *  1. integrate_pre_log_stats (modifying SMF\Forum::$unlogged_actions)
+ *     Implement SMF\ActionInterface::canBeLogged() to manage logging at the action level.
+ *
+ *  2. integrate_guest_actions (modifying SMF\Forum::$guest_access_actions)
+ *     Implement SMF\ActionInterface::isRestrictedGuestAccessAllowed() for guest access control.
  */
 class Forum
 {
@@ -46,83 +63,83 @@ class Forum
 	 *
 	 * Mod authors can add new actions to this via the integrate_actions hook.
 	 */
-	public static $actions = [
-		'agreement' => ['', 'SMF\\Actions\\Agreement::call'],
-		'acceptagreement' => ['', 'SMF\\Actions\\AgreementAccept::call'],
-		'activate' => ['', 'SMF\\Actions\\Activate::call'],
-		'admin' => ['', 'SMF\\Actions\\Admin\\ACP::call'],
-		'announce' => ['', 'SMF\\Actions\\Announce::call'],
-		'attachapprove' => ['', 'SMF\\Actions\\AttachmentApprove::call'],
-		'buddy' => ['', 'SMF\\Actions\\BuddyListToggle::call'],
-		'calendar' => ['', 'SMF\\Actions\\Calendar::call'],
-		'clock' => ['', 'SMF\\Actions\\Calendar::call'], // Deprecated; is now a sub-action
-		'coppa' => ['', 'SMF\\Actions\\CoppaForm::call'],
-		'credits' => ['', 'SMF\\Actions\\Credits::call'],
-		'deletemsg' => ['', 'SMF\\Actions\\MsgDelete::call'],
-		'dlattach' => ['', 'SMF\\Actions\\AttachmentDownload::call'],
-		'editpoll' => ['', 'SMF\\Poll::edit'],
-		'editpoll2' => ['', 'SMF\\Poll::edit2'],
-		'groups' => ['', 'SMF\\Actions\\Groups::call'],
-		'help' => ['', 'SMF\\Actions\\Help::call'],
-		'helpadmin' => ['', 'SMF\\Actions\\HelpAdmin::call'],
-		'jsmodify' => ['', 'SMF\\Actions\\JavaScriptModify::call'],
-		'jsoption' => ['', 'SMF\\Theme::setJavaScript'],
-		'likes' => ['', 'SMF\\Actions\\Like::call'],
-		'lock' => ['', 'SMF\\Topic::lock'],
-		'lockvoting' => ['', 'SMF\\Poll::lock'],
-		'login' => ['', 'SMF\\Actions\\Login::call'],
-		'login2' => ['', 'SMF\\Actions\\Login2::call'],
-		'logintfa' => ['', 'SMF\\Actions\\LoginTFA::call'],
-		'logout' => ['', 'SMF\\Actions\\Logout::call'],
-		'markasread' => ['', 'SMF\\Board::MarkRead'],
-		'mergetopics' => ['', 'SMF\\Actions\\TopicMerge::call'],
-		'mlist' => ['', 'SMF\\Actions\\Memberlist::call'],
-		'moderate' => ['', 'SMF\\Actions\\Moderation\\Main::call'],
-		'modifycat' => ['', 'SMF\\Actions\\Admin\\Boards::modifyCat'],
-		'movetopic' => ['', 'SMF\\Actions\\TopicMove::call'],
-		'movetopic2' => ['', 'SMF\\Actions\\TopicMove2::call'],
-		'notifyannouncements' => ['', 'SMF\\Actions\\NotifyAnnouncements::call'],
-		'notifyboard' => ['', 'SMF\\Actions\\NotifyBoard::call'],
-		'notifytopic' => ['', 'SMF\\Actions\\NotifyTopic::call'],
-		'pm' => ['', 'SMF\\Actions\\PersonalMessage::call'],
-		'post' => ['', 'SMF\\Actions\\Post::call'],
-		'post2' => ['', 'SMF\\Actions\\Post2::call'],
-		'printpage' => ['', 'SMF\\Actions\\TopicPrint::call'],
-		'profile' => ['', 'SMF\\Actions\\Profile\\Main::call'],
-		'quotefast' => ['', 'SMF\\Actions\\QuoteFast::call'],
-		'quickmod' => ['', 'SMF\\Actions\\QuickModeration::call'],
-		'quickmod2' => ['', 'SMF\\Actions\\QuickModerationInTopic::call'],
-		'recent' => ['', 'SMF\\Actions\\Recent::call'],
-		'reminder' => ['', 'SMF\\Actions\\Reminder::call'],
-		'removepoll' => ['', 'SMF\\Poll::remove'],
-		'removetopic2' => ['', 'SMF\\Actions\\TopicRemove::call'],
-		'reporttm' => ['', 'SMF\\Actions\\ReportToMod::call'],
-		'requestmembers' => ['', 'SMF\\Actions\\RequestMembers::call'],
-		'restoretopic' => ['', 'SMF\\Actions\\TopicRestore::call'],
-		'search' => ['', 'SMF\\Actions\\Search::call'],
-		'search2' => ['', 'SMF\\Actions\\Search2::call'],
-		'sendactivation' => ['', 'SMF\\Actions\\SendActivation::call'],
-		'signup' => ['', 'SMF\\Actions\\Register::call'],
-		'signup2' => ['', 'SMF\\Actions\\Register2::call'],
-		'smstats' => ['', 'SMF\\Actions\\SmStats::call'],
-		'suggest' => ['', 'SMF\\Actions\\AutoSuggest::call'],
-		'splittopics' => ['', 'SMF\\Actions\\TopicSplit::call'],
-		'stats' => ['', 'SMF\\Actions\\Stats::call'],
-		'sticky' => ['', 'SMF\\Topic::sticky'],
-		'theme' => ['', 'SMF\\Theme::dispatch'],
-		'trackip' => ['', 'SMF\\Actions\\TrackIP::call'],
-		'about:unknown' => ['', 'SMF\\Actions\\Like::BookOfUnknown'],
-		'unread' => ['', 'SMF\\Actions\\Unread::call'],
-		'unreadreplies' => ['', 'SMF\\Actions\\UnreadReplies::call'],
-		'uploadAttach' => ['', 'SMF\\Actions\\AttachmentUpload::call'],
-		'verificationcode' => ['', 'SMF\\Actions\\VerificationCode::call'],
-		'viewprofile' => ['', 'SMF\\Actions\\Profile\\Main::call'],
-		'vote' => ['', 'SMF\\Poll::vote'],
-		'viewquery' => ['', 'SMF\\Actions\\ViewQuery::call'],
-		'viewsmfile' => ['', 'SMF\\Actions\\DisplayAdminFile::call'],
-		'who' => ['', 'SMF\\Actions\\Who::call'],
-		'.xml' => ['', 'SMF\\Actions\\Feed::call'],
-		'xmlhttp' => ['', 'SMF\\Actions\\XmlHttp::call'],
+	public static array $actions = [
+		'agreement' => ['', Actions\Agreement::class],
+		'acceptagreement' => ['', Actions\AgreementAccept::class],
+		'activate' => ['', Actions\Activate::class],
+		'admin' => ['', Actions\Admin\ACP::class],
+		'announce' => ['', Actions\Announce::class],
+		'attachapprove' => ['', Actions\AttachmentApprove::class],
+		'buddy' => ['', Actions\BuddyListToggle::class],
+		'calendar' => ['', Actions\Calendar::class],
+		'clock' => ['', Actions\Calendar::class], // Deprecated; is now a sub-action
+		'coppa' => ['', Actions\CoppaForm::class],
+		'credits' => ['', Actions\Credits::class],
+		'deletemsg' => ['', Actions\MsgDelete::class],
+		'dlattach' => ['', Actions\AttachmentDownload::class],
+		'editpoll' => ['', [Poll::class, 'edit']],
+		'editpoll2' => ['', [Poll::class, 'edit2']],
+		'groups' => ['', Actions\Groups::class],
+		'help' => ['', Actions\Help::class],
+		'helpadmin' => ['', Actions\HelpAdmin::class],
+		'jsmodify' => ['', Actions\JavaScriptModify::class],
+		'jsoption' => ['', [Theme::class, 'setJavaScript']],
+		'likes' => ['', Actions\Like::class],
+		'lock' => ['', [Topic::class, 'lock']],
+		'lockvoting' => ['', [Poll::class, 'lock']],
+		'login' => ['', Actions\Login::class],
+		'login2' => ['', Actions\Login2::class],
+		'logintfa' => ['', Actions\LoginTFA::class],
+		'logout' => ['', Actions\Logout::class],
+		'markasread' => ['', [Board::class, 'MarkRead']],
+		'mergetopics' => ['', Actions\TopicMerge::class],
+		'mlist' => ['', Actions\Memberlist::class],
+		'moderate' => ['', Actions\Moderation\Main::class],
+		'modifycat' => ['', [Actions\Admin\Boards::class, 'modifyCat']],
+		'movetopic' => ['', Actions\TopicMove::class],
+		'movetopic2' => ['', Actions\TopicMove2::class],
+		'notifyannouncements' => ['', Actions\NotifyAnnouncements::class],
+		'notifyboard' => ['', Actions\NotifyBoard::class],
+		'notifytopic' => ['', Actions\NotifyTopic::class],
+		'pm' => ['', Actions\PersonalMessage::class],
+		'post' => ['', Actions\Post::class],
+		'post2' => ['', Actions\Post2::class],
+		'printpage' => ['', Actions\TopicPrint::class],
+		'profile' => ['', Actions\Profile\Main::class],
+		'quotefast' => ['', Actions\QuoteFast::class],
+		'quickmod' => ['', Actions\QuickModeration::class],
+		'quickmod2' => ['', Actions\QuickModerationInTopic::class],
+		'recent' => ['', Actions\Recent::class],
+		'reminder' => ['', Actions\Reminder::class],
+		'removepoll' => ['', [Poll::class, 'remove']],
+		'removetopic2' => ['', Actions\TopicRemove::class],
+		'reporttm' => ['', Actions\ReportToMod::class],
+		'requestmembers' => ['', Actions\RequestMembers::class],
+		'restoretopic' => ['', Actions\TopicRestore::class],
+		'search' => ['', Actions\Search::class],
+		'search2' => ['', Actions\Search2::class],
+		'sendactivation' => ['', Actions\SendActivation::class],
+		'signup' => ['', Actions\Register::class],
+		'signup2' => ['', Actions\Register2::class],
+		'smstats' => ['', Actions\SmStats::class],
+		'suggest' => ['', Actions\AutoSuggest::class],
+		'splittopics' => ['', Actions\TopicSplit::class],
+		'stats' => ['', Actions\Stats::class],
+		'sticky' => ['', [Topic::class, 'sticky']],
+		'theme' => ['', [Theme::class, 'dispatch']],
+		'trackip' => ['', Actions\TrackIP::class],
+		'about:unknown' => ['', [Actions\Like::class, 'BookOfUnknown']],
+		'unread' => ['', Actions\Unread::class],
+		'unreadreplies' => ['', Actions\UnreadReplies::class],
+		'uploadAttach' => ['', Actions\AttachmentUpload::class],
+		'verificationcode' => ['', Actions\VerificationCode::class],
+		'viewprofile' => ['', Actions\Profile\Main::class],
+		'vote' => ['', [Poll::class, 'vote']],
+		'viewquery' => ['', Actions\ViewQuery::class],
+		'viewsmfile' => ['', Actions\DisplayAdminFile::class],
+		'who' => ['', Actions\Who::class],
+		'.xml' => ['', Actions\Feed::class],
+		'xmlhttp' => ['', Actions\XmlHttp::class],
 	];
 
 	/**
@@ -143,7 +160,7 @@ class Forum
 	 *    log visits to index.php?action=pm;sa=popup, but other sub-actions
 	 *    like index.php?action=pm;sa=send will be logged.
 	 */
-	public static $unlogged_actions = [
+	public static array $unlogged_actions = [
 		'about:unknown' => true,
 		'clock' => true,
 		'dlattach' => true,
@@ -171,7 +188,7 @@ class Forum
 	 * Actions that guests are always allowed to do.
 	 * This allows users to log in when guest access is disabled.
 	 */
-	public static $guest_access_actions = [
+	public static array $guest_access_actions = [
 		'coppa',
 		'login',
 		'login2',
@@ -186,12 +203,22 @@ class Forum
 		'signup2',
 	];
 
+	/**
+	 * @var ActionInterface|null
+	 *
+	 * Stores the current action.
+	 */
+	protected static ?ActionInterface $current_action = null;
+
 	/****************
 	 * Public methods
 	 ****************/
 
 	/**
 	 * Constructor
+	 *
+	 * Initializes the forum by setting up database connections, loading settings,
+	 * and handling maintenance mode.
 	 */
 	public function __construct()
 	{
@@ -234,7 +261,7 @@ class Forum
 		}
 
 		// Register an error handler.
-		set_error_handler(__NAMESPACE__ . '\\ErrorHandler::call');
+		set_error_handler([ErrorHandler::class, 'call']);
 
 		// Start the session. (assuming it hasn't already been.)
 		Session::load();
@@ -244,23 +271,60 @@ class Forum
 		IntegrationHook::call('integrate_actions', [&self::$actions]);
 
 		// Allow modifying $unlogged_actions easily.
+		// Deprecated: Implement ActionInterface::isSimpleAction() instead of this hook.
 		IntegrationHook::call('integrate_pre_log_stats', [&self::$unlogged_actions]);
 
 		// Allow modifying $guest_access_actions easily.
+		// Deprecated: Implement ActionInterface::isRestrictedGuestAccessAllowed() instead of this hook.
 		IntegrationHook::call('integrate_guest_actions', [&self::$guest_access_actions]);
 	}
 
 	/**
-	 * This is the one that gets stuff done.
+	 * Executes the main forum action.
 	 *
-	 * Internally, this calls $this->main() to find out what function to call,
-	 * then calls that function, and then calls obExit() in order to send
-	 * results to the browser.
+	 * This method serves as the main dispatcher for determining the appropriate action
+	 * in various scenarios, ensuring proper handling of the following cases:
+	 *
+	 * - **Maintenance Mode**: If the forum is in maintenance mode, only login and logout actions
+	 *   are allowed for non-administrators. All other actions are redirected to a maintenance page.
+	 *
+	 * - **Guest Access Restrictions**: If guest access is disabled, guests are redirected to the login page
+	 *   unless the requested action explicitly allows guest access.
+	 *
+	 * - **Default Actions**: When no specific action is requested, a default or fallback action is determined:
+	 *   - If both the board and topic are empty, the default action (e.g., BoardIndex) is executed.
+	 *   - If only the topic is empty, the MessageIndex action is executed.
+	 *   - Otherwise, the Display action is executed.
+	 *
+	 * - **Custom Actions**: Resolves user-requested actions using the defined `$actions` array or
+	 *   fallback logic, including support for theme-level catch actions or configured fallback actions.
 	 */
 	public function execute(): void
 	{
-		// What function shall we execute? (done like this for memory's sake.)
-		call_user_func($this->main());
+		$this->init();
+		$current_action = $this->findAction();
+
+		if (is_a($current_action, ActionInterface::class, true)) {
+			$action = call_user_func([$current_action, 'load']);
+			self::$current_action = $action;
+		}
+
+		$this->main();
+
+		// Is the forum in maintenance mode? (doesn't apply to administrators.)
+		if (!empty(Config::$maintenance) && !User::$me->allowedTo('admin_forum') && self::$current_action?->canShowInMaintenanceMode() === false) {
+			// Don't even try it, sonny.
+			self::inMaintenance();
+		} elseif (empty(Config::$modSettings['allow_guestAccess']) && User::$me->is_guest && (self::$current_action?->isRestrictedGuestAccessAllowed() === false || (!isset($_REQUEST['action']) || !in_array($_REQUEST['action'], self::$guest_access_actions) && self::$current_action?->isRestrictedGuestAccessAllowed() === null))) {
+			// If guest access is off, a guest can only do one of a few actions.
+			User::$me->kickIfGuest(null, false);
+		} elseif (isset($action)) {
+			$action->execute();
+		} elseif (is_callable($current_action)) {
+			call_user_func($current_action);
+		} else {
+			ErrorHandler::fatalLang('not_found', false, [], 404);
+		}
 
 		// Call obExit specially; we're coming from the main area ;).
 		Utils::obExit(null, null, true);
@@ -271,11 +335,25 @@ class Forum
 	 ***********************/
 
 	/**
-	 * Display a message about the forum being in maintenance mode.
-	 * - display a login screen with sub template 'maintenance'.
-	 * - sends a 503 header, so search engines don't bother indexing while we're in maintenance mode.
+	 * Get the current action.
+	 *
+	 * @return ActionInterface|null The current action or null if not set.
 	 */
-	public static function inMaintenance(): void
+	public static function getCurrentAction(): ?ActionInterface
+	{
+		return self::$current_action;
+	}
+
+	/*************************
+	 * Internal static methods
+	 *************************/
+
+	/**
+	 * Display a message about the forum being in maintenance mode.
+	 * - Display a login screen with sub template 'maintenance'.
+	 * - Sends a 503 header, so search engines don't bother indexing while we're in maintenance mode.
+	 */
+	protected static function inMaintenance(): void
 	{
 		Lang::load('Login');
 		Theme::loadTemplate('Login');
@@ -296,12 +374,13 @@ class Forum
 	 ******************/
 
 	/**
-	 * The main dispatcher.
-	 * This delegates to each area.
+	 * The main forum loader.
 	 *
-	 * @return array|string An array containing the file to include and name of function to call, the name of a function to call or dies with a fatal_lang_error if we couldn't find anything to do.
+	 * This method initializes various components and settings required
+	 * for the forum to operate, such as security headers, user permissions,
+	 * and theme loading.
 	 */
-	protected function main(): array|string
+	protected function init(): void
 	{
 		// Special case: session keep-alive, output a transparent pixel.
 		if (isset($_GET['action']) && $_GET['action'] == 'keepalive') {
@@ -336,14 +415,23 @@ class Forum
 
 		// Check if the user should be disallowed access.
 		User::$me->kickIfBanned();
+	}
 
+	/**
+	 * The main forum loader.
+	 *
+	 * This method handles the main forum logic, such as checking permissions,
+	 * logging user activity, and tracking forum statistics.
+	 */
+	protected function main(): void
+	{
 		// If we are in a topic and don't have permission to approve it then duck out now.
 		if (!empty(Topic::$topic_id) && empty(Board::$info->cur_topic_approved) && !User::$me->allowedTo('approve_posts') && (User::$me->id != Board::$info->cur_topic_starter || User::$me->is_guest)) {
 			ErrorHandler::fatalLang('not_a_topic', false);
 		}
 
 		// Don't log if this is an attachment, avatar, toggle of editor buttons, theme option, XML feed, popup, etc.
-		if (!QueryString::isFilteredRequest(self::$unlogged_actions, 'action')) {
+		if (!QueryString::isFilteredRequest(self::$unlogged_actions, 'action') || self::$current_action?->canBeLogged() !== false) {
 			// Log this user as online.
 			User::$me->logOnline();
 
@@ -353,79 +441,51 @@ class Forum
 			}
 		}
 
-		// Make sure that our scheduled tasks have been running as intended
+		// Make sure that our scheduled tasks have been running as intended.
 		Config::checkCron();
+	}
 
-		// Is the forum in maintenance mode? (doesn't apply to administrators.)
-		if (!empty(Config::$maintenance) && !User::$me->allowedTo('admin_forum')) {
-			// You can only login.... otherwise, you're getting the "maintenance mode" display.
-			if (isset($_REQUEST['action']) && (in_array($_REQUEST['action'], ['login2', 'logintfa', 'logout']))) {
-				return self::$actions[$_REQUEST['action']][1];
-			}
-
-			// Don't even try it, sonny.
-			return __CLASS__ . '::inMaintenance';
-		}
-
-		// If guest access is off, a guest can only do one of the very few following actions.
-		if (empty(Config::$modSettings['allow_guestAccess']) && User::$me->is_guest && (!isset($_REQUEST['action']) || !in_array($_REQUEST['action'], self::$guest_access_actions))) {
-			User::$me->kickIfGuest(null, false);
-		} elseif (empty($_REQUEST['action'])) {
-			// Action and board are both empty... BoardIndex! Unless someone else wants to do something different.
+	/**
+	 * Resolves the appropriate action to execute based on the current request context.
+	 *
+	 * @return array|string|false Returns one of the following:
+	 *  - An array containing the file path and function name to call (e.g., `['file.php', 'function']`).
+	 *  - A callable string representing a static method (e.g., `'Class::method'`).
+	 */
+	protected function findAction(): array|string|false
+	{
+		if (empty($_REQUEST['action'])) {
 			if (empty(Board::$info->id) && empty(Topic::$topic_id)) {
 				if (!empty(Config::$modSettings['integrate_default_action'])) {
-					$defaultAction = explode(',', Config::$modSettings['integrate_default_action']);
+					$default_action = explode(',', Config::$modSettings['integrate_default_action']);
 
-					// Sorry, only one default action is needed.
-					$defaultAction = $defaultAction[0];
-
-					$call = Utils::getCallable($defaultAction);
-
-					if (!empty($call)) {
-						return $call;
-					}
+					return Utils::getCallable($default_action[0]);
 				}
 
-				// No default action huh? then go to our good old BoardIndex.
-				else {
-					return 'SMF\\Actions\\BoardIndex::call';
-				}
+				// Action and board are both empty... BoardIndex!
+				return Actions\BoardIndex::class;
 			}
 
-			// Topic is empty, and action is empty.... MessageIndex!
-			elseif (empty(Topic::$topic_id)) {
-				return 'SMF\\Actions\\MessageIndex::call';
+			if (empty(Topic::$topic_id)) {
+				// Topic is empty, and action is empty.... MessageIndex!
+				return Actions\MessageIndex::class;
 			}
 
 			// Board is not empty... topic is not empty... action is empty.. Display!
-			else {
-				return 'SMF\\Actions\\Display::call';
-			}
+			return Actions\Display::class;
 		}
 
 		// Get the function and file to include - if it's not there, do the board index.
-		if (!isset($_REQUEST['action']) || !isset(self::$actions[$_REQUEST['action']])) {
+		if (!isset(self::$actions[$_REQUEST['action']])) {
 			// Catch the action with the theme?
 			if (!empty(Theme::$current->settings['catch_action'])) {
-				return 'SMF\\Theme::wrapAction';
+				return [Theme::class, 'wrapAction'];
 			}
 
 			if (!empty(Config::$modSettings['integrate_fallback_action'])) {
-				$fallbackAction = explode(',', Config::$modSettings['integrate_fallback_action']);
+				$fallback_action = explode(',', Config::$modSettings['integrate_fallback_action']);
 
-				// Sorry, only one fallback action is needed.
-				$fallbackAction = $fallbackAction[0];
-
-				$call = Utils::getCallable($fallbackAction);
-
-				if (!empty($call)) {
-					return $call;
-				}
-			}
-
-			// No fallback action, huh?
-			else {
-				ErrorHandler::fatalLang('not_found', false, [], 404);
+				return Utils::getCallable($fallback_action[0]);
 			}
 		}
 
@@ -435,7 +495,7 @@ class Forum
 		}
 
 		// Do the right thing.
-		return Utils::getCallable(self::$actions[$_REQUEST['action']][1]);
+		return self::$actions[$_REQUEST['action']][1];
 	}
 }
 

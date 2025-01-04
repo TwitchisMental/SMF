@@ -2661,13 +2661,14 @@ class Theme
 		// This allows sticking some HTML on the page output - useful for controls.
 		Utils::$context['insert_after_template'] = '';
 
+		// Deprecated: Implement ActionInterface::isSimpleAction() instead of this hook.
 		IntegrationHook::call('integrate_simple_actions', [&$this->simpleActions, &$this->simpleAreas, &$this->simpleSubActions, &$this->extraParams, &$this->xmlActions]);
 
 		Utils::$context['simple_action'] = (
-			in_array(Utils::$context['current_action'], $this->simpleActions)
+			Forum::getCurrentAction()?->isSimpleAction() === true)
+			|| (in_array(Utils::$context['current_action'], $this->simpleActions)
 			|| (
 				isset($this->simpleAreas[Utils::$context['current_action']], $_REQUEST['area'])
-
 				&& in_array($_REQUEST['area'], $this->simpleAreas[Utils::$context['current_action']])
 			)
 			|| (
@@ -2677,7 +2678,7 @@ class Theme
 		);
 
 		// See if there is any extra param to check.
-		$requiresXML = false;
+		$requiresXML = Forum::getCurrentAction()?->isXmlAction() === true;
 
 		foreach ($this->extraParams as $key => $extra) {
 			if (isset($_REQUEST[$extra])) {
