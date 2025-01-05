@@ -26,7 +26,7 @@ use SMF\Search\SearchApi;
  * including sending emails, pms, blocking spam, preparsing posts, spell
  * checking, and the post box.
  */
-class Msg implements \ArrayAccess
+class Msg implements \ArrayAccess, Routable
 {
 	use ArrayAccessHelper;
 
@@ -2829,6 +2829,44 @@ class Msg implements \ArrayAccess
 		}
 
 		return false;
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		if (isset($params['msg'])) {
+			$route[] = 'msgs';
+			$route[] = $params['msg'];
+			unset($params['msg']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		if (count($route) >= 2) {
+			array_shift($route);
+			$params['msg'] = array_shift($route);
+		}
+
+		return $params;
 	}
 
 	/*************************

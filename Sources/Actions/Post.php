@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Attachment;
 use SMF\Board;
@@ -31,6 +32,7 @@ use SMF\Lang;
 use SMF\Msg;
 use SMF\Parser;
 use SMF\Poll;
+use SMF\Routable;
 use SMF\Security;
 use SMF\Theme;
 use SMF\Time;
@@ -43,10 +45,10 @@ use SMF\Verifier;
 /**
  * This class handles posting and modifying replies and new topics.
  */
-class Post implements ActionInterface
+class Post implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*****************

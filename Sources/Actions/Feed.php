@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Attachment;
 use SMF\Autolinker;
@@ -29,6 +30,7 @@ use SMF\IntegrationHook;
 use SMF\IP;
 use SMF\Lang;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\Sapi;
 use SMF\Theme;
 use SMF\Time;
@@ -61,8 +63,9 @@ use SMF\Utils;
  *
  * Uses Stats, Profile, Post, and PersonalMessage language files.
  */
-class Feed implements ActionInterface
+class Feed implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*****************

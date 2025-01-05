@@ -2256,51 +2256,38 @@ class Utils
 			$setLocation = Config::$scripturl . ($setLocation != '' ? '?' . $setLocation : '');
 		}
 
-		// PHP 8.4 deprecated SID. A better long-term solution is needed, but this works for now.
-		$sid = defined('SID') ? @constant('SID') : null;
+		if (str_contains($setLocation, Config::$scripturl)) {
+			// PHP 8.4 deprecated SID. A better long-term solution is needed, but this works for now.
+			$sid = defined('SID') ? @constant('SID') : null;
 
-		// Put the session ID in.
-		if (isset($sid) && $sid != '') {
-			$setLocation = preg_replace('/^' . preg_quote(Config::$scripturl, '/') . '(?!\?' . preg_quote($sid, '/') . ')\??/', Config::$scripturl . '?' . $sid . ';', $setLocation);
-		}
-		// Keep that debug in their for template debugging!
-		elseif (isset($_GET['debug'])) {
-			$setLocation = preg_replace('/^' . preg_quote(Config::$scripturl, '/') . '\??/', Config::$scripturl . '?debug;', $setLocation);
-		}
+			// Put the session ID in.
+			if (isset($sid) && $sid != '' && !preg_match("/[;?]{$sid}/", $setLocation)) {
+				$insert = (str_contains($setLocation, '?') ? ';' : '?') . $sid;
 
-		if (
-			!empty(Config::$modSettings['queryless_urls'])
-			&& (
-				!Sapi::isCGI()
-				|| ini_get('cgi.fix_pathinfo') == 1
-				|| @get_cfg_var('cgi.fix_pathinfo') == 1
-			)
-			&& (
-				Sapi::isSoftware([Sapi::SERVER_APACHE, Sapi::SERVER_LIGHTTPD, Sapi::SERVER_LITESPEED])
-			)
-		) {
-			if (isset($sid) && $sid != '') {
-				$setLocation = preg_replace_callback(
-					'~^' . preg_quote(Config::$scripturl, '~') . '\?(?:' . $sid . '(?:;|&|&amp;))((?:board|topic)=[^#]+?)(#[^"]*?)?$~',
-					function ($m) {
-						return Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html?' . $sid . (isset($m[2]) ? "{$m[2]}" : '');
-					},
-					$setLocation,
-				);
-			} else {
-				$setLocation = preg_replace_callback(
-					'~^' . preg_quote(Config::$scripturl, '~') . '\?((?:board|topic)=[^#"]+?)(#[^"]*?)?$~',
-					function ($m) {
-						return Config::$scripturl . '/' . strtr("{$m[1]}", '&;=', '//,') . '.html' . (isset($m[2]) ? "{$m[2]}" : '');
-					},
-					$setLocation,
-				);
+				if (str_contains($setLocation, '#')) {
+					$setLocation = str_replace('#', $insert . '#', $setLocation);
+				} else {
+					$setLocation .= $insert;
+				}
 			}
-		}
+			// Keep that debug in there for template debugging!
+			elseif (isset($_GET['debug']) && !preg_match('/[;?]debug\b/', $setLocation)) {
+				$insert = (str_contains($setLocation, '?') ? ';' : '?') . 'debug';
 
-		// The request was from ajax/xhr/other api call, append ajax ot the url.
-		if (!empty(Utils::$context['from_ajax'])) {
-			$setLocation .= (strpos($setLocation, '?') ? ';' : '?') . 'ajax';
+				if (str_contains($setLocation, '#')) {
+					$setLocation = str_replace('#', $insert . '#', $setLocation);
+				} else {
+					$setLocation .= $insert;
+				}
+			}
+
+			// Rewrite as a queryless URL?
+			$setLocation = QueryString::rewriteAsQueryless($setLocation);
+
+			// The request was from ajax/xhr/other api call, append ajax to the url.
+			if (!empty(Utils::$context['from_ajax'])) {
+				$setLocation .= (str_contains($setLocation, '?') ? ';' : '?') . 'ajax';
+			}
 		}
 
 		// Maybe integrations want to change where we are heading?
@@ -2374,6 +2361,9 @@ class Utils
 
 			// Start up the session URL fixer.
 			ob_start('SMF\\QueryString::ob_sessrewrite');
+
+			// More work needed if using "queryless" URLS.
+			ob_start('SMF\\QueryString::rewriteAsQueryless');
 
 			// Force the browser not to collapse tabs inside posts, etc.
 			ob_start(fn($buffer) => strtr($buffer, [self::TAB_SUBSTITUTE => '<span style="white-space: pre;">' . "\t" . '</span>']));

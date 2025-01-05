@@ -16,11 +16,13 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -30,8 +32,9 @@ use SMF\Utils;
  * and privacy policy, and to ask the user to accept them if they haven't
  * already done so.
  */
-class Agreement implements ActionInterface
+class Agreement implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/****************

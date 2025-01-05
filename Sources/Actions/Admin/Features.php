@@ -1563,7 +1563,12 @@ class Features implements ActionInterface
 			'',
 
 			// SEO stuff
-			['check', 'queryless_urls', 'subtext' => '<strong>' . Lang::$txt['queryless_urls_note'] . '</strong>'],
+			[
+				'check',
+				'queryless_urls',
+				'subtext' => '<strong>' . Lang::$txt['queryless_urls_note'] . '</strong>',
+				'disabled' => !Sapi::isSoftware([Sapi::SERVER_APACHE, Sapi::SERVER_LIGHTTPD, Sapi::SERVER_LITESPEED]),
+			],
 			'',
 
 			// Time zone and formatting.

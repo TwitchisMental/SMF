@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -24,6 +25,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Mail;
+use SMF\Routable;
 use SMF\Security;
 use SMF\Theme;
 use SMF\User;
@@ -32,8 +34,9 @@ use SMF\Utils;
 /**
  * Activates a user's account.
  */
-class Activate implements ActionInterface
+class Activate implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

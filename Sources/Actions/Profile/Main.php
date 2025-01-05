@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions\Profile;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -26,6 +27,7 @@ use SMF\Menu;
 use SMF\OutputTypeInterface;
 use SMF\OutputTypes;
 use SMF\Profile;
+use SMF\Routable;
 use SMF\Sapi;
 use SMF\Security;
 use SMF\SecurityToken;
@@ -38,8 +40,9 @@ use SMF\Utils;
  * It also allows the user to change some of their or another's preferences,
  * and such things.
  */
-class Main implements ActionInterface
+class Main implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

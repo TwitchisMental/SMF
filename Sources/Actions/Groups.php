@@ -14,6 +14,7 @@
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -24,6 +25,7 @@ use SMF\ItemList;
 use SMF\Lang;
 use SMF\PageIndex;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\User;
@@ -32,10 +34,10 @@ use SMF\Utils;
 /**
  * Shows group info.
  */
-class Groups implements ActionInterface
+class Groups implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*******************

@@ -117,6 +117,9 @@ class Mail
 			$message = preg_replace('~(' . preg_quote(Config::$scripturl, '~') . '(?:[?/][\w\-_%\.,\?&;=#]+)?)~', '<a href="$1">$1</a>', $message);
 		}
 
+		// Respect the queryless URLs setting.
+		$message = QueryString::rewriteAsQueryless($message);
+
 		// Use real tabs.
 		$message = strtr($message, [Utils::TAB_SUBSTITUTE => $send_html ? '<span style="white-space: pre;">' . "\t" . '</span>' : "\t"]);
 

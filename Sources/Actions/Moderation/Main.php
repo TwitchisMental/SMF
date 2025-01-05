@@ -18,11 +18,13 @@ declare(strict_types=1);
 namespace SMF\Actions\Moderation;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
 use SMF\Menu;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -30,8 +32,9 @@ use SMF\Utils;
 /**
  * This is the Moderation Center.
  */
-class Main implements ActionInterface
+class Main implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

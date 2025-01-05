@@ -16,12 +16,14 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\BrowserDetector;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -29,8 +31,9 @@ use SMF\Utils;
 /**
  * Displays the COPPA form during registration.
  */
-class CoppaForm implements ActionInterface
+class CoppaForm implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/****************

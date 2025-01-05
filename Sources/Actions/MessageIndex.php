@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Category;
@@ -26,6 +27,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\PageIndex;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -37,8 +39,9 @@ use SMF\Utils;
  * Although this class is not accessed using an ?action=... URL query, it
  * behaves like an action in every other way.
  */
-class MessageIndex implements ActionInterface
+class MessageIndex implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************
@@ -419,6 +422,19 @@ class MessageIndex implements ActionInterface
 				'filename' => !empty($row['first_member_filename']) ? $row['first_member_filename'] : '',
 			]);
 		}
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		return Board::buildRoute($params);
 	}
 
 	/******************

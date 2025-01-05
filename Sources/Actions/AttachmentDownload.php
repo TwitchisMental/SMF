@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Attachment;
 use SMF\BrowserDetector;
@@ -24,6 +25,7 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\Routable;
 use SMF\User;
 use SMF\Utils;
 
@@ -35,8 +37,9 @@ use SMF\Utils;
  * It is accessed via the query string ?action=dlattach.
  * Views to attachments do not increase hits and are not logged in the "Who's Online" log.
  */
-class AttachmentDownload implements ActionInterface
+class AttachmentDownload implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

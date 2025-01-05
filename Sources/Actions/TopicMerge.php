@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Cache\CacheApi;
@@ -30,6 +31,7 @@ use SMF\Logging;
 use SMF\Mail;
 use SMF\Msg;
 use SMF\PageIndex;
+use SMF\Routable;
 use SMF\Search\SearchApi;
 use SMF\Theme;
 use SMF\Time;
@@ -40,10 +42,10 @@ use SMF\Utils;
 /**
  * Handles merging of topics.
  */
-class TopicMerge implements ActionInterface
+class TopicMerge implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*******************

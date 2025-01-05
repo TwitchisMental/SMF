@@ -408,7 +408,8 @@ $helptxt['db_persist'] = 'This keeps the connection active to increase performan
 If this option is disabled, you may need to enable the mysqli.allow_persistent or pgsql.allow_persistent setting in your php.ini file.';
 $helptxt['ssi_db_user'] = 'Optional setting to use a different database user and password when you are using SSI.php.';
 
-$helptxt['queryless_urls'] = 'This changes the format of URLs a little so search engines will like them better. They will look like index.php/topic,1.0.html.<br><br>{0, select,
+$helptxt['queryless_urls'] = 'This changes the format of URLs that point to pages within your forum to be more friendly to humans.<br><br>
+{0, select,
 	supported {This feature will work on your server.}
 	other {This feature will not work on your server.}
 }';

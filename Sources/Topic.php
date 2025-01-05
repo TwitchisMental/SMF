@@ -28,7 +28,7 @@ use SMF\Search\SearchApi;
  * This class's static methods also takes care of certain actions on topics:
  * lock/unlock a topic, sticky/unsticky it, etc.
  */
-class Topic implements \ArrayAccess
+class Topic implements \ArrayAccess, Routable
 {
 	use BackwardCompatibility;
 	use ArrayAccessHelper;
@@ -1437,6 +1437,81 @@ class Topic implements \ArrayAccess
 	public static function prepareLikesContext(int $topic): array
 	{
 		return self::load($topic)->getLikedMsgs();
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		$params['topic'] = $params['topic'] ?? (string) self::$id ?? null;
+
+		if (isset($params['topic'])) {
+			$route[] = 'topics';
+
+			if (str_contains($params['topic'], '.')) {
+				$params['start'] = $params['start'] ?? substr($params['topic'], strrpos($params['topic'], '.') + 1);
+				$params['topic'] = substr($params['topic'], 0, strrpos($params['topic'], '.'));
+			}
+
+			$route[] = $params['topic'];
+
+			if (!empty($params['start'])) {
+				$route[] = $params['start'];
+			}
+
+			unset($params['topic'], $params['start']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		if (isset($route[1])) {
+			$params['action'] = 'display';
+			array_shift($route);
+
+			$topic = preg_replace('/^\X*?(\d+(?:\.(?:new|msg\d+|from\d+|\d+))?)$/u', '$1', array_shift($route));
+
+			if (str_contains($topic, '.')) {
+				list($params['topic'], $params['start']) = explode('.', $topic);
+			} else {
+				$params['topic'] = $topic;
+			}
+
+			// Either an action suffix or a start value.
+			if (!empty($route)) {
+				if (isset(QueryString::$route_parsers[reset($route)])) {
+					$params = array_merge(
+						$params,
+						call_user_func(
+							[QueryString::$route_parsers[reset($route)], 'parseRoute'],
+							$route,
+							$params,
+						),
+					);
+				} elseif (!isset($params['start'])) {
+					$params['start'] = array_shift($route);
+				}
+			}
+		}
+
+		return $params;
 	}
 
 	/******************

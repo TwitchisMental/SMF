@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\BrowserDetector;
@@ -30,6 +31,7 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\Time;
 use SMF\TimeInterval;
@@ -42,10 +44,10 @@ use SMF\Utils;
  * This class has only one real task, showing the calendar.
  * Original module by Aaron O'Neil - aaron@mud-master.com
  */
-class Calendar implements ActionInterface
+class Calendar implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*******************

@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -24,6 +25,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\PageIndex;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -33,10 +35,10 @@ use SMF\Utils;
  * This class contains the methods for displaying and searching in the
  * members list.
  */
-class Memberlist implements ActionInterface
+class Memberlist implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*******************

@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Autolinker;
 use SMF\Board;
@@ -33,6 +34,7 @@ use SMF\OutputTypeInterface;
 use SMF\OutputTypes;
 use SMF\PageIndex;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\Search\SearchApi;
 use SMF\Theme;
 use SMF\Time;
@@ -43,10 +45,10 @@ use SMF\Utils;
 /**
  * Handles splitting of topics.
  */
-class TopicSplit implements ActionInterface
+class TopicSplit implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*******************

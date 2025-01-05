@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\BrowserDetector;
 use SMF\Cache\CacheApi;
@@ -39,6 +40,7 @@ use SMF\PersonalMessage\{
 	Search,
 };
 use SMF\Profile;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -48,10 +50,10 @@ use SMF\Utils;
  * messages. It allows viewing, sending, deleting, and marking personal
  * messages.
  */
-class PersonalMessage implements ActionInterface
+class PersonalMessage implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*****************

@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Cache\CacheApi;
@@ -25,6 +26,7 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Msg;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -39,8 +41,9 @@ use SMF\Utils;
  * Although this class is not accessed using an ?action=... URL query, it
  * behaves like an action in every other way.
  */
-class BoardIndex implements ActionInterface
+class BoardIndex implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/****************
@@ -563,6 +566,28 @@ class BoardIndex implements ActionInterface
 		}
 
 		return $board_index_options['include_categories'] ? Category::$loaded : $cat_boards;
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		// No route needed unless the board index is not our default action.
+		if (!empty(Config::$modSettings['integrate_default_action'])) {
+			$route[] = $params['action'];
+		}
+
+		unset($params['action']);
+
+		return ['route' => $route, 'params' => $params];
 	}
 
 	/******************

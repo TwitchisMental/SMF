@@ -16,10 +16,12 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
+use SMF\Routable;
 use SMF\Topic;
 use SMF\User;
 use SMF\Utils;
@@ -27,8 +29,9 @@ use SMF\Utils;
 /**
  * Mark boards and topics as read (or unread in some cases).
  */
-class MarkRead implements ActionInterface
+class MarkRead implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

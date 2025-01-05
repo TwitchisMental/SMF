@@ -16,11 +16,13 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\Routable;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -29,8 +31,9 @@ use SMF\Utils;
  * Shows popup help for the admin (and moderators sometimes) to describe
  * complex settings and such.
  */
-class HelpAdmin implements ActionInterface
+class HelpAdmin implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/****************

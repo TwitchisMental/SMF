@@ -16,12 +16,14 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
 use SMF\Msg;
+use SMF\Routable;
 use SMF\Security;
 use SMF\Theme;
 use SMF\Topic;
@@ -31,10 +33,10 @@ use SMF\Utils;
 /**
  * Deals with reporting posts or profiles to mods and admins.
  */
-class ReportToMod implements ActionInterface
+class ReportToMod implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
-
 	use BackwardCompatibility;
 
 	/*****************

@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -23,6 +24,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\PageIndex;
+use SMF\Routable;
 use SMF\Search\SearchApi;
 use SMF\Search\SearchResult;
 use SMF\Security;
@@ -34,8 +36,9 @@ use SMF\Verifier;
 /**
  * Shows the search form.
  */
-class Search2 implements ActionInterface
+class Search2 implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************

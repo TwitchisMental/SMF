@@ -21,15 +21,12 @@ use SMF\Db\DatabaseApi as Db;
 /**
  * This class loads information about the current board, as well as other boards
  * when needed. It also handles low-level tasks for managing boards, such as
- * creating, deleting, and modifying them, as well as minor tasks relating to
- * boards, such as marking them read.
+ * creating, deleting, and modifying them.
  *
  * Implements the \ArrayAccess interface to ease backward compatibility with the
  * deprecated global $board_info variable.
- *
- * @todo Refactor MessageIndex.php into an extension of this class.
  */
-class Board implements \ArrayAccess
+class Board implements \ArrayAccess, Routable
 {
 	use BackwardCompatibility;
 	use ArrayAccessHelper;
@@ -1864,6 +1861,82 @@ class Board implements \ArrayAccess
 		}
 
 		return $loaded_boards;
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		$params['board'] = $params['board'] ?? (string) self::$id ?? null;
+
+		if (isset($params['board'])) {
+			$route[] = 'boards';
+
+			if (str_contains($params['board'], '.')) {
+				$params['start'] = $params['start'] ?? substr($params['board'], strrpos($params['board'], '.') + 1);
+				$params['board'] = substr($params['board'], 0, strrpos($params['board'], '.'));
+			}
+
+			$route[] = $params['board'];
+
+			if (!empty($params['start'])) {
+				$route[] = $params['start'];
+			}
+
+			unset($params['board'], $params['start']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		if (isset($route[1])) {
+			$params['action'] = 'messageindex';
+			array_shift($route);
+
+			$board = preg_replace('/^\X*?(\d+(?:\.\d+)?)$/u', '$1', array_shift($route));
+
+			if (str_contains($board, '.')) {
+				list($params['board'], $params['start']) = explode('.', $board);
+			} else {
+				$params['board'] = $board;
+			}
+
+			// Either an action suffix or a start value.
+			// This accounts for both 'boards/ID/START' and '/boards/ID/ACTION'
+			if (!empty($route)) {
+				if (isset(QueryString::$route_parsers[reset($route)])) {
+					$params = array_merge(
+						$params,
+						call_user_func(
+							[QueryString::$route_parsers[reset($route)], 'parseRoute'],
+							$route,
+							$params,
+						),
+					);
+				} elseif (!isset($params['start'])) {
+					$params['start'] = array_shift($route);
+				}
+			}
+		}
+
+		return $params;
 	}
 
 	/**
