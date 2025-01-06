@@ -538,7 +538,37 @@ class QueryString
 						$matches[0] = str_replace('?' . $url->query, QueryString::buildRoute($url->query), $matches[0]);
 					}
 
+					// Remove '/index.php'.
+					if (!empty(Config::$modSettings['hide_index_php'])) {
+						$matches[0] = str_replace(Config::$scripturl, Config::$boardurl, $matches[0]);
+					}
+
 					return str_replace('/#', '#', $matches[0]);
+				},
+				$buffer,
+			);
+		}
+		// Not doing queryless URLs, but admin still wants to hide index.php.
+		elseif (!empty(Config::$modSettings['hide_index_php'])) {
+			$buffer = preg_replace_callback(
+				'~' . Autolinker::load()->getUrlRegex() . '~u',
+				function (array $matches) {
+					// Don't change external URLs.
+					if (!str_starts_with($matches[0], Config::$scripturl)) {
+						return $matches[0];
+					}
+
+					return str_replace(
+						[
+							Config::$scripturl,
+							'/#',
+						],
+						[
+							Config::$boardurl . '/',
+							'#',
+						],
+						$matches[0],
+					);
 				},
 				$buffer,
 			);

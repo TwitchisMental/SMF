@@ -23,6 +23,7 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Routable;
+use SMF\Sapi;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -128,7 +129,26 @@ class HelpAdmin implements ActionInterface, Routable
 				Utils::$context['help_text'] = Lang::formatText(
 					Utils::$context['help_text'],
 					[
-						(isset($_SERVER['SERVER_SOFTWARE']) && (str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache') || str_contains($_SERVER['SERVER_SOFTWARE'], 'lighttpd')) ? 'supported' : 'unsupported'),
+						Sapi::isSoftware([Sapi::SERVER_APACHE, Sapi::SERVER_LIGHTTPD, Sapi::SERVER_LITESPEED]) && (!Sapi::isCGI() || ini_get('cgi.fix_pathinfo') == 1 || @get_cfg_var('cgi.fix_pathinfo') == 1) ? 'supported' : 'unsupported',
+					],
+				);
+				break;
+
+			case 'hide_index_php':
+				Utils::$context['help_text'] = Lang::formatText(
+					Utils::$context['help_text'],
+					[
+						Sapi::isSoftware([Sapi::SERVER_APACHE, Sapi::SERVER_LITESPEED]) ? 'auto' : 'manual',
+						'htaccess_code' => <<<'END'
+							# Start SMF queryless URLs
+							RewriteEngine On
+							RewriteCond %{REQUEST_FILENAME} !-d
+							RewriteCond %{REQUEST_FILENAME} !-f
+							RewriteCond %{REQUEST_URI} !\bindex\.php\b [NC]
+							RewriteRule ^(.*) ./index\.php/$1
+							# End SMF queryless URLs
+
+							END,
 					],
 				);
 				break;
