@@ -33,6 +33,16 @@ class SmStats implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action allows access if guest access is restricted.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function isRestrictedGuestAccessAllowed(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Sends stats to simplemachines.org when requested, but only if enabled!
 	 *
 	 * - Called by simplemachines.org.

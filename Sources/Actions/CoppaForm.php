@@ -38,6 +38,16 @@ class CoppaForm implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action allows access if guest access is restricted.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function isRestrictedGuestAccessAllowed(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Display the contact information for the forum, as well a form to fill in.
 	 */
 	public function execute(): void

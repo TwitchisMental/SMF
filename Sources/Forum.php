@@ -188,20 +188,7 @@ class Forum
 	 * Actions that guests are always allowed to do.
 	 * This allows users to log in when guest access is disabled.
 	 */
-	public static array $guest_access_actions = [
-		'coppa',
-		'login',
-		'login2',
-		'logintfa',
-		'reminder',
-		'activate',
-		'help',
-		'helpadmin',
-		'smstats',
-		'verificationcode',
-		'signup',
-		'signup2',
-	];
+	public static array $guest_access_actions = [];
 
 	/**
 	 * @var ActionInterface|null

@@ -66,6 +66,16 @@ class Activate implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action allows access if guest access is restricted.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function isRestrictedGuestAccessAllowed(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Activates a user's account.
 	 *
 	 * Checks for mail changes, resends password if needed.
