@@ -23,6 +23,6 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Update year to ${{ env.CURRENT_YEAR }}
-        branch: update-year-${{ env.CURRENT_YEAR }}
+        branch: 3.0/update-year-${{ env.CURRENT_YEAR }}
         title: Update year to ${{ env.CURRENT_YEAR }}
         body: This commit updates `SMF_SOFTWARE_YEAR` to ${{ env.CURRENT_YEAR }} in `index.php`.
