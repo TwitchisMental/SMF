@@ -3428,7 +3428,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 
 	function MarkRead(): void
 	{
-		SMF\Board::markRead();
+		SMF\Actions\MarkRead::call();
 	}
 
 	function markBoardsRead(int|array $boards, bool $unread = false): void

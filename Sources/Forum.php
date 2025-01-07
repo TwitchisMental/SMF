@@ -158,7 +158,7 @@ class Forum
 			'', Actions\Logout::class,
 		],
 		'markasread' => [
-			'', [Board::class, 'MarkRead'],
+			'', Actions\MarkRead::class,
 		],
 		'mergetopics' => [
 			'', Actions\TopicMerge::class,
