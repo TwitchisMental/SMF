@@ -134,7 +134,7 @@ class Forum
 			'', Actions\JavaScriptModify::class,
 		],
 		'jsoption' => [
-			'', [Theme::class, 'setJavaScript'],
+			'', Actions\ThemeSetOption::class,
 		],
 		'likes' => [
 			'', Actions\Like::class,
@@ -265,8 +265,12 @@ class Forum
 		'sticky' => [
 			'', Actions\TopicSticky::class,
 		],
+		// Deprecated; will be redirected to the correct location.
 		'theme' => [
-			'', [Theme::class, 'dispatch'],
+			'', Actions\Admin\Themes::class,
+		],
+		'themechooser' => [
+			'', Actions\ThemeChooser::class,
 		],
 		'trackip' => [
 			'', Actions\TrackIP::class,

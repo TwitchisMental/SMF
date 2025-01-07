@@ -4720,7 +4720,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 
 	function SetJavaScript(): void
 	{
-		SMF\Theme::setJavaScript();
+		SMF\Actions\ThemeSetOption::call();
 	}
 
 	function WrapAction(): void
@@ -4730,7 +4730,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 
 	function PickTheme(): void
 	{
-		SMF\Theme::pickTheme();
+		SMF\Actions\ThemeChooser::call();
 	}
 
 	/**
