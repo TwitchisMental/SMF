@@ -4127,27 +4127,27 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 
 	function Vote(): void
 	{
-		SMF\Poll::vote();
+		SMF\Actions\PollVote::call();
 	}
 
 	function LockVoting(): void
 	{
-		SMF\Poll::lock();
+		SMF\Actions\PollLock::call();
 	}
 
 	function EditPoll(): void
 	{
-		SMF\Poll::edit();
+		SMF\Actions\PollEdit::call();
 	}
 
 	function EditPoll2(): void
 	{
-		SMF\Poll::edit2();
+		SMF\Actions\PollEdit2::call();
 	}
 
 	function RemovePoll(): void
 	{
-		SMF\Poll::remove();
+		SMF\Actions\PollRemove::call();
 	}
 
 	/**

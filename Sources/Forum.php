@@ -116,10 +116,10 @@ class Forum
 			'', Actions\AttachmentDownload::class,
 		],
 		'editpoll' => [
-			'', [Poll::class, 'edit'],
+			'', Actions\PollEdit::class,
 		],
 		'editpoll2' => [
-			'', [Poll::class, 'edit2'],
+			'', Actions\PollEdit2::class,
 		],
 		'groups' => [
 			'', Actions\Groups::class,
@@ -143,7 +143,7 @@ class Forum
 			'', [Topic::class, 'lock'],
 		],
 		'lockvoting' => [
-			'', [Poll::class, 'lock'],
+			'', Actions\PollLock::class,
 		],
 		'login' => [
 			'', Actions\Login::class,
@@ -221,7 +221,7 @@ class Forum
 			'', Actions\Reminder::class,
 		],
 		'removepoll' => [
-			'', [Poll::class, 'remove'],
+			'', Actions\PollRemove::class,
 		],
 		'removetopic2' => [
 			'', Actions\TopicRemove::class,
@@ -290,7 +290,7 @@ class Forum
 			'', Actions\Profile\Main::class,
 		],
 		'vote' => [
-			'', [Poll::class, 'vote'],
+			'', Actions\PollVote::class,
 		],
 		'viewquery' => [
 			'', Actions\ViewQuery::class,
