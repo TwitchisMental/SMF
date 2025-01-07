@@ -4814,12 +4814,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function LockTopic(): void
 	{
-		SMF\Topic::lock();
+		SMF\Actions\TopicLock::call();
 	}
 
 	function Sticky(): void
 	{
-		SMF\Topic::sticky();
+		SMF\Actions\TopicSticky::call();
 	}
 
 	function approveTopics(array $topics, bool $approve = true): bool

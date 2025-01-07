@@ -140,7 +140,7 @@ class Forum
 			'', Actions\Like::class,
 		],
 		'lock' => [
-			'', [Topic::class, 'lock'],
+			'', Actions\TopicLock::class,
 		],
 		'lockvoting' => [
 			'', Actions\PollLock::class,
@@ -263,7 +263,7 @@ class Forum
 			'', Actions\Stats::class,
 		],
 		'sticky' => [
-			'', [Topic::class, 'sticky'],
+			'', Actions\TopicSticky::class,
 		],
 		'theme' => [
 			'', [Theme::class, 'dispatch'],
