@@ -35,6 +35,16 @@ class Logout extends Login2
 	 ****************/
 
 	/**
+	 * Determines whether this action allows access in maintenance mode.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function canShowInMaintenanceMode(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Logs the current user out of their account.
 	 *
 	 * It requires that the session hash is sent as well, to prevent automatic

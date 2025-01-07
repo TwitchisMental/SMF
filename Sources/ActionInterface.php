@@ -36,6 +36,13 @@ interface ActionInterface
 	public function isRestrictedGuestAccessAllowed(): bool;
 
 	/**
+	 * Determines whether this action allows access in maintenance mode.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function canShowInMaintenanceMode(): bool;
+
+	/**
 	 * Determines whether this action can be logged in the online log.
 	 *
 	 * @return bool

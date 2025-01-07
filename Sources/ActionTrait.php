@@ -44,6 +44,16 @@ trait ActionTrait
 	}
 
 	/**
+	 * Determines whether this action allows access in maintenance mode.
+	 *
+	 * @return bool True if access is allowed, false otherwise.
+	 */
+	public function canShowInMaintenanceMode(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Determines whether this action can be logged in the online log.
 	 *
 	 * @return bool
