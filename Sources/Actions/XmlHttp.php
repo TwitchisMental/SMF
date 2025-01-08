@@ -73,6 +73,17 @@ class XmlHttp implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be accessed without accepting
+	 * the registration agreement and privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function isAgreementAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * The main handler and designator for AJAX stuff - jumpto, message icons and previews
 	 */
 	public function execute(): void

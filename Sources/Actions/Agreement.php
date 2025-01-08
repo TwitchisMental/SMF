@@ -39,6 +39,17 @@ class Agreement implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be accessed without accepting
+	 * the registration agreement and privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function isAgreementAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Shows the registration agreement and privacy policy.
 	 *
 	 * If the user hasn't yet accepted one or both of them, also shows the

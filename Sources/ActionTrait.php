@@ -91,7 +91,7 @@ trait ActionTrait
 	 */
 	public function isAgreementAction(): bool
 	{
-		return true;
+		return false;
 	}
 
 	/**

@@ -64,24 +64,6 @@ class Theme
 	/**
 	 * @var array
 	 *
-	 * Actions that can be accessed without accepting to the registration
-	 * agreement and privacy policy.
-	 */
-	public array $agreement_actions = [
-		'agreement' => true,
-		'acceptagreement' => true,
-		'login2' => true,
-		'logintfa' => true,
-		'logout' => true,
-		'pm' => ['sa' => ['popup']],
-		'profile' => ['area' => ['popup', 'alerts_popup']],
-		'xmlhttp' => true,
-		'.xml' => true,
-	];
-
-	/**
-	 * @var array
-	 *
 	 * Actions that do not require loading the index template.
 	 */
 	public array $simpleActions = [
@@ -2525,7 +2507,7 @@ class Theme
 		// 4a. View or accept the agreement and/or policy
 		// 4b. Login or logout
 		// 4c. Get a feed (RSS, ATOM, etc.)
-		if (!empty(User::$me->id) && empty(User::$me->is_admin) && SMF != 'SSI' && !isset($_REQUEST['xml']) && !QueryString::isFilteredRequest($this->agreement_actions, 'action')) {
+		if (!empty(User::$me->id) && empty(User::$me->is_admin) && SMF != 'SSI' && !isset($_REQUEST['xml']) && Forum::getCurrentAction()?->isAgreementAction() !== true) {
 			$can_accept_agreement = !empty(Config::$modSettings['requireAgreement']) && Agreement::canRequireAgreement();
 
 			$can_accept_privacy_policy = !empty(Config::$modSettings['requirePolicyAgreement']) && Agreement::canRequirePrivacyPolicy();

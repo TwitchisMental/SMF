@@ -252,6 +252,17 @@ class Feed implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be accessed without accepting
+	 * the registration agreement and privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function isAgreementAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $subaction Sets the sub-action to call.

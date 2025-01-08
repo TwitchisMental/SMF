@@ -89,6 +89,17 @@ class Login2 implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this action can be accessed without accepting
+	 * the registration agreement and privacy policy.
+	 *
+	 * @return bool
+	 */
+	public function isAgreementAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Actually logs you in.
 	 *
 	 * What it does:
