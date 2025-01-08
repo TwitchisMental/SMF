@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Attachment;
 use SMF\BrowserDetector;
@@ -39,7 +38,6 @@ use SMF\Utils;
  */
 class AttachmentDownload implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 
 	/*******************
@@ -312,6 +310,56 @@ class AttachmentDownload implements ActionInterface, Routable
 		}
 
 		Utils::emitFile($file, $this->showThumb);
+	}
+
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		if (isset($params['attach']) || isset($params['id'])) {
+			$route[] = 'dlattach';
+			$route[] = $params['attach'] ?? $params['id'];
+
+			unset($params['action'], $params['attach'], $params['id']);
+
+			if (isset($params['thumb'])) {
+				$route[] = 'thumbnail';
+				unset($params['thumb']);
+			}
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params['action'] = 'dlattach';
+		$params['attach'] = $route[1];
+
+		if (isset($route[2]) && $route[2] === 'thumbnail') {
+			$params['thumb'] = true;
+		}
+
+		return $params;
 	}
 
 	/******************
