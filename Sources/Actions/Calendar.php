@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\BrowserDetector;
@@ -46,7 +45,6 @@ use SMF\Utils;
  */
 class Calendar implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 	use BackwardCompatibility;
 
@@ -325,7 +323,7 @@ class Calendar implements ActionInterface, Routable
 		if (Utils::$context['can_post']) {
 			Utils::$context['calendar_buttons']['post_event'] = [
 				'text' => 'calendar_post_event',
-				'url' => Config::$scripturl . '?action=calendar;sa=post;month=' . Utils::$context['current_month'] . ';year=' . Utils::$context['current_year'] . ';' . Utils::$context['session_var'] . '=' . Utils::$context['session_id'],
+				'url' => Config::$scripturl . '?action=calendar;sa=post;' . Utils::$context['session_var'] . '=' . Utils::$context['session_id'],
 			];
 		}
 
@@ -1612,6 +1610,84 @@ class Calendar implements ActionInterface, Routable
 		Db::$db->free_result($request);
 
 		return (int) $poster;
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route[] = $params['action'];
+		unset($params['action']);
+
+		if (isset($params['sa'], self::$subactions[$params['sa']])) {
+			$route[] = $params['sa'];
+
+			if ($params['sa'] === 'clock') {
+				if (isset($params['omfg'])) {
+					$route[] = 'omfg';
+					unset($params['omfg']);
+				} elseif (isset($params['rb'])) {
+					$route[] = 'rb';
+					unset($params['rb']);
+				} elseif (isset($params['bcd'])) {
+					$route[] = 'bcd';
+					unset($params['bcd']);
+				}
+			}
+
+			unset($params['sa']);
+		} elseif (isset($params['year'])) {
+			$route[] = sprintf('%04d', $params['year']);
+			$route[] = sprintf('%02d', $params['month'] ?? 1);
+			$route[] = sprintf('%02d', $params['day'] ?? 1);
+			unset($params['year'], $params['month'], $params['day']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		if ($route[0] === 'clock') {
+			array_unshift($route, 'calendar');
+		}
+
+		$params['action'] = $route[0];
+
+		if (isset($route[1])) {
+			if (in_array($route[1], self::$subactions)) {
+				$params['sa'] = $route[1];
+
+				if ($params['sa'] === 'clock' && in_array($route[2] ?? null, ['bcd', 'rb', 'omfg'])) {
+					$params[$route[2]] = true;
+				}
+			} elseif (is_numeric($route[1])) {
+				$params['year'] = (int) $route[1];
+
+				if (isset($route[2])) {
+					$params['month'] = (int) $route[2];
+
+					if (isset($route[3])) {
+						$params['day'] = (int) $route[3];
+					}
+				}
+			}
+		}
+
+		return $params;
 	}
 
 	/**
