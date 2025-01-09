@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SMF\Actions\Profile;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -42,7 +41,6 @@ use SMF\Utils;
  */
 class Main implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 
 	/*******************
@@ -726,6 +724,69 @@ class Main implements ActionInterface, Routable
 		self::load();
 		Profile::$member->save_errors = $post_errors;
 		self::$obj->execute();
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$params['u'] = $params['u'] ?? User::$me->id;
+
+		if (!empty($params['u'])) {
+			$route[] = 'members';
+			$route[] = $params['u'];
+			unset($params['action'], $params['u']);
+
+			if (isset($params['area'])) {
+				if ($params['area'] !== 'index') {
+					$route[] = $params['area'];
+				}
+
+				unset($params['area']);
+
+				if (isset($params['sa'])) {
+					$route[] = $params['sa'];
+					unset($params['sa']);
+				}
+			}
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		// If they tried to go to /members/ without giving a member ID,
+		// redirect them to the member list.
+		if (!isset($route[1])) {
+			Utils::redirectexit('action=mlist');
+		}
+
+		$params['action'] = 'profile';
+		$params['u'] = preg_replace('/^\X*?(\d+)$/u', '$1', $route[1] ?? User::$me->id);
+
+		if (isset($route[2])) {
+			$params['area'] = $route[2];
+
+			if (isset($route[3])) {
+				$params['sa'] = $route[3];
+			}
+		}
+
+		return $params;
 	}
 
 	/******************
