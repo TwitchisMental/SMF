@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\BrowserDetector;
 use SMF\Config;
@@ -33,7 +32,6 @@ use SMF\Utils;
  */
 class CoppaForm implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 
 	/****************
@@ -133,6 +131,59 @@ class CoppaForm implements ActionInterface, Routable
 				'id' => $_GET['member'],
 			];
 		}
+	}
+
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route[] = $params['action'];
+
+		if (isset($params['form'])) {
+			$route[] = 'form';
+			unset($params['form']);
+		}
+
+		if (isset($params['dl'])) {
+			$route[] = 'dl';
+			unset($params['dl']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params['action'] = array_shift($route);
+
+		if (!empty($route)) {
+			$params['form'] = true;
+			array_shift($route);
+		}
+
+		if (!empty($route)) {
+			$params['dl'] = true;
+			array_shift($route);
+		}
+
+		return $params;
 	}
 
 	/******************
