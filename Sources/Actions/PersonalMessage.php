@@ -101,7 +101,7 @@ class PersonalMessage implements ActionInterface, Routable
 			'areas' => [
 				'inbox' => [
 					'label' => 'inbox',
-					'custom_url' => '{scripturl}?action=pm',
+					'custom_url' => '{scripturl}?action=pm;f=inbox',
 					'amt' => 0,
 				],
 				'send' => [
@@ -117,7 +117,7 @@ class PersonalMessage implements ActionInterface, Routable
 				],
 				'drafts' => [
 					'label' => 'drafts_show',
-					'custom_url' => '{scripturl}?action=pm;sa=showpmdrafts',
+					'custom_url' => '{scripturl}?action=pm;f=drafts',
 					'permission' => 'pm_draft',
 					'enabled' => true,
 					'amt' => 0,
@@ -735,6 +735,65 @@ class PersonalMessage implements ActionInterface, Routable
 		Profile::$member->setupContext(['pm_prefs']);
 	}
 
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = self::buildActionRoute($params);
+
+		if (isset($params['f'])) {
+			$route[] = 'folders';
+			$route[] = $params['f'];
+			unset($params['f']);
+		}
+
+		if (isset($params['l'])) {
+			$route[] = 'labels';
+			$route[] = $params['l'];
+			unset($params['l']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params['action'] = array_shift($route);
+
+		if (!empty($route) && isset(self::$subactions[reset($route)])) {
+			$params['sa'] = array_shift($route);
+		}
+
+		if (!empty($route) && reset($route) === 'folders') {
+			array_shift($route);
+			$params['f'] = array_shift($route);
+		}
+
+		if (!empty($route) && reset($route) === 'labels') {
+			array_shift($route);
+			$params['l'] = array_shift($route);
+		}
+
+		return $params;
+	}
+
 	/******************
 	 * Internal methods
 	 ******************/
@@ -746,6 +805,11 @@ class PersonalMessage implements ActionInterface, Routable
 	{
 		Lang::load('PersonalMessage+Drafts');
 		Theme::loadTemplate(isset($_REQUEST['xml']) ? 'Xml' : 'PersonalMessage');
+
+		if (!isset($_REQUEST['sa']) && ($_REQUEST['f'] ?? '') === 'drafts') {
+			$_REQUEST['sa'] = 'showpmdrafts';
+			unset($_REQUEST['f']);
+		}
 
 		if (!empty($_REQUEST['sa']) && isset(self::$subactions[$_REQUEST['sa']])) {
 			$this->subaction = $_REQUEST['sa'];
