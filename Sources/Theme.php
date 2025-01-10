@@ -1202,8 +1202,6 @@ class Theme
 			$current_action = 'signup';
 		} elseif (Utils::$context['current_action'] == 'login2' || (User::$me->is_guest && Utils::$context['current_action'] == 'reminder')) {
 			$current_action = 'login';
-		} elseif (Utils::$context['current_action'] == 'groups' && Utils::$context['allow_moderation_center'] && User::$me->mod_cache['gq'] != '0=1') {
-			$current_action = 'moderate';
 		}
 
 		// There are certain exceptions to the above where we don't want anything on the menu highlighted.
