@@ -544,6 +544,16 @@ class Main implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return isset($_GET['area']) && !in_array($_GET['area'], ['popup', 'alerts_popup', 'download', 'dlattach']);
+	}
+
+	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.
 	 *

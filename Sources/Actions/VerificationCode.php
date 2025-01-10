@@ -66,6 +66,16 @@ class VerificationCode implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Do the job.
 	 */
 	public function execute(): void

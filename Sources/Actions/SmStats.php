@@ -43,6 +43,16 @@ class SmStats implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Sends stats to simplemachines.org when requested, but only if enabled!
 	 *
 	 * - Called by simplemachines.org.

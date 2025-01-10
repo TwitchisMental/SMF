@@ -62,6 +62,16 @@ class AttachmentDownload implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Does the job.
 	 */
 	public function execute(): void

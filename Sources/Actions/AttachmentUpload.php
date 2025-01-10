@@ -109,6 +109,16 @@ class AttachmentUpload implements ActionInterface
 	protected $_sa = false;
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Attachments constructor.
 	 *
 	 * Sets up some initial information - the message ID, board, current attachment upload dir, etc.

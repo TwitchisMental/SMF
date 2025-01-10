@@ -263,6 +263,16 @@ class PersonalMessage implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return isset($_GET['sa']) && $_GET['sa'] != 'popup';
+	}
+
+	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.
 	 *

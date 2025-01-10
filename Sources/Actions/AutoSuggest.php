@@ -78,6 +78,16 @@ class AutoSuggest implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Dispatcher to whichever method is necessary.
 	 */
 	public function execute(): void

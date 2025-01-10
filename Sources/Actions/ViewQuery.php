@@ -39,6 +39,16 @@ class ViewQuery implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Show the database queries for debugging.
 	 *
 	 * - Toggles the session variable 'view_queries'.

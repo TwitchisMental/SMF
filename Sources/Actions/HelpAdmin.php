@@ -48,6 +48,16 @@ class HelpAdmin implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Show some of the more detailed help to give the admin an idea...
 	 * It shows a popup for administrative or user help.
 	 * It uses the help parameter to decide what string to display and where to get

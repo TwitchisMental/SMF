@@ -252,6 +252,16 @@ class Feed implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.
 	 *

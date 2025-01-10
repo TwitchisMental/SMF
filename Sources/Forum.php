@@ -162,24 +162,10 @@ class Forum
 	 */
 	public static array $unlogged_actions = [
 		'about:unknown' => true,
+		'calendar' => ['sa' => ['clock']],
 		'clock' => true,
-		'dlattach' => true,
-		'findmember' => true,
-		'helpadmin' => true,
 		'jsoption' => true,
-		'likes' => true,
 		'modifycat' => true,
-		'pm' => ['sa' => ['popup']],
-		'profile' => ['area' => ['popup', 'alerts_popup', 'download', 'dlattach']],
-		'requestmembers' => true,
-		'smstats' => true,
-		'suggest' => true,
-		'uploadAttach' => true,
-		'verificationcode' => true,
-		'viewquery' => true,
-		'viewsmfile' => true,
-		'xmlhttp' => true,
-		'.xml' => true,
 	];
 
 	/**
@@ -418,7 +404,7 @@ class Forum
 		}
 
 		// Don't log if this is an attachment, avatar, toggle of editor buttons, theme option, XML feed, popup, etc.
-		if (!QueryString::isFilteredRequest(self::$unlogged_actions, 'action') || self::$current_action?->canBeLogged() !== false) {
+		if (self::$current_action?->canBeLogged() === true || (self::$current_action === null && !QueryString::isFilteredRequest(self::$unlogged_actions, 'action'))) {
 			// Log this user as online.
 			User::$me->logOnline();
 

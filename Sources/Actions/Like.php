@@ -191,6 +191,16 @@ class Like implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this action can be logged in the online log.
+	 *
+	 * @return bool
+	 */
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
+	/**
 	 * The main handler.
 	 *
 	 * Verifies permissions (whether the user can see the content in question),
