@@ -554,6 +554,16 @@ class Main implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this is a simple action.
+	 *
+	 * @return bool
+	 */
+	public function isSimpleAction(): bool
+	{
+		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']);
+	}
+
+	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.
 	 *

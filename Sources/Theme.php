@@ -66,11 +66,7 @@ class Theme
 	 *
 	 * Actions that do not require loading the index template.
 	 */
-	public array $simpleActions = [
-		'findmember',
-		'helpadmin',
-		'printpage',
-	];
+ 	public array $simpleActions = [];
 
 	/**
 	 * @var array
@@ -78,9 +74,7 @@ class Theme
 	 * Areas that do not require loading the index template.
 	 * Parent action => array of areas
 	 */
-	public array $simpleAreas = [
-		'profile' => ['popup', 'alerts_popup'],
-	];
+	public array $simpleAreas = [];
 
 	/**
 	 * @var array
@@ -88,10 +82,7 @@ class Theme
 	 * Subactions that do not require loading the index template.
 	 * Parent action => array of subactions
 	 */
-	public array $simpleSubActions = [
-		'pm' => ['popup'],
-		'signup' => ['usernamecheck'],
-	];
+	public array $simpleSubActions = [];
 
 	/**
 	 * @var array

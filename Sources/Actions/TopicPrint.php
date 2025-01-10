@@ -45,6 +45,16 @@ class TopicPrint implements ActionInterface
 	 ****************/
 
 	/**
+	 * Determines whether this is a simple action.
+	 *
+	 * @return bool
+	 */
+	public function isSimpleAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Format a topic to be printer friendly.
 	 * Must be called with a topic specified.
 	 * Accessed via ?action=printpage.

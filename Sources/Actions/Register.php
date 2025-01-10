@@ -82,6 +82,16 @@ class Register implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this is a simple action.
+	 *
+	 * @return bool
+	 */
+	public function isSimpleAction(): bool
+	{
+		return isset($_GET['sa']) && $_GET['sa'] == 'usernamecheck';
+	}
+
+	/**
 	 * Dispatcher to whichever sub-action method is necessary.
 	 */
 	public function execute(): void

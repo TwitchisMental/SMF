@@ -58,6 +58,16 @@ class HelpAdmin implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this is a simple action.
+	 *
+	 * @return bool
+	 */
+	public function isSimpleAction(): bool
+	{
+		return true;
+	}
+
+	/**
 	 * Show some of the more detailed help to give the admin an idea...
 	 * It shows a popup for administrative or user help.
 	 * It uses the help parameter to decide what string to display and where to get

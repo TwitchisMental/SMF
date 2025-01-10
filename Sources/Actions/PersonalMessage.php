@@ -273,6 +273,16 @@ class PersonalMessage implements ActionInterface
 	}
 
 	/**
+	 * Determines whether this is a simple action.
+	 *
+	 * @return bool
+	 */
+	public function isSimpleAction(): bool
+	{
+		return isset($_GET['sa']) && $_GET['sa'] == 'popup';
+	}
+
+	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.
 	 *
