@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\ErrorHandler;
@@ -34,7 +33,6 @@ use SMF\Utils;
  */
 class HelpAdmin implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 
 	/****************
@@ -172,6 +170,42 @@ class HelpAdmin implements ActionInterface, Routable
 		// Don't show any template layers, just the popup sub template.
 		Utils::$context['template_layers'] = [];
 		Utils::$context['sub_template'] = 'popup';
+	}
+
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route[] = $params['action'];
+		$route[] = $params['help'];
+		unset($params['action'], $params['help']);
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params['action'] = array_shift($route);
+		$params['help'] = array_shift($route);
+
+		return $params;
 	}
 }
 
