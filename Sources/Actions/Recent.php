@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Cache\CacheApi;
@@ -39,7 +39,7 @@ use SMF\Utils;
  */
 class Recent implements ActionInterface, Routable
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/*****************
