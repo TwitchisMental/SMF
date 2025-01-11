@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\Attachment;
 use SMF\Board;
@@ -40,7 +40,7 @@ use SMF\Utils;
  */
 class TopicPrint implements ActionInterface, Routable
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/****************

@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Cache\CacheApi;
@@ -44,7 +43,6 @@ use SMF\Utils;
  */
 class TopicMerge implements ActionInterface, Routable
 {
-	use ActionRouter;
 	use ActionTrait;
 	use BackwardCompatibility;
 
@@ -1047,6 +1045,37 @@ class TopicMerge implements ActionInterface, Routable
 		self::$obj->subaction = !empty($_GET['sa']) && $_GET['sa'] === 'merge' ? 'merge' : 'options';
 		self::$obj->topics = array_map('intval', $topics);
 		self::$obj->execute();
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		// This action gets unhappy with any routing more complex than just this.
+		$route[] = $params['action'];
+		unset($params['action']);
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params['action'] = array_shift($route);
+
+		return $params;
 	}
 
 	/******************
