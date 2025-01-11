@@ -478,7 +478,7 @@ class Poll implements \ArrayAccess
 			$this->formatted['buttons']['change_vote'] = [
 				'text' => 'poll_change_vote',
 				'image' => 'poll_change_vote.png',
-				'url' => Config::$scripturl . '?action=vote;topic=' . $this->topic . '.' . Utils::$context['start'] . ';poll=' . $this->id . ';' . Utils::$context['session_var'] . '=' . Utils::$context['session_id'],
+				'url' => Config::$scripturl . '?action=vote;topic=' . $this->topic . '.' . Utils::$context['start'] . ';' . Utils::$context['session_var'] . '=' . Utils::$context['session_id'],
 			];
 		}
 

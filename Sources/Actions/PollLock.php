@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\ErrorHandler;
 use SMF\Logging;
@@ -38,7 +38,7 @@ use SMF\Utils;
  */
 class PollLock implements ActionInterface, Routable
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/****************

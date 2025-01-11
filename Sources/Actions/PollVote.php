@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
@@ -41,7 +41,7 @@ use SMF\Utils;
  */
 class PollVote implements ActionInterface, Routable
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/****************
