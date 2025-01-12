@@ -88,6 +88,11 @@ class Login2 implements ActionInterface
 		return true;
 	}
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['ajax']);
+	}
+
 	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.

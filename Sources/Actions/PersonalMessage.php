@@ -279,7 +279,12 @@ class PersonalMessage implements ActionInterface
 	 */
 	public function isSimpleAction(): bool
 	{
-		return isset($_GET['sa']) && $_GET['sa'] == 'popup';
+		return isset($_GET['sa']) && $_GET['sa'] == 'popup' || isset($_REQUEST['preview']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['preview']) ? new OutputTypes\Xml : new OutputTypes\Html;
 	}
 
 	/**
@@ -752,10 +757,7 @@ class PersonalMessage implements ActionInterface
 	protected function __construct()
 	{
 		Lang::load('PersonalMessage+Drafts');
-
-		if (!isset($_REQUEST['xml'])) {
-			Theme::loadTemplate('PersonalMessage');
-		}
+		Theme::loadTemplate(isset($_REQUEST['xml']) ? 'Xml' : 'PersonalMessage');
 
 		if (!empty($_REQUEST['sa']) && isset(self::$subactions[$_REQUEST['sa']])) {
 			$this->subaction = $_REQUEST['sa'];

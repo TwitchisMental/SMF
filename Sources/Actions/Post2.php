@@ -103,6 +103,16 @@ class Post2 extends Post
 	 * Public methods
 	 ****************/
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['preview']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['preview']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
+
 	/**
 	 * Dispatcher to whichever sub-action method is necessary.
 	 */

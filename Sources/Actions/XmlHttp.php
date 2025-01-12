@@ -82,6 +82,16 @@ class XmlHttp implements ActionInterface
 		return false;
 	}
 
+	public function isSimpleAction(): bool
+	{
+		return true;
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return new OutputTypes\Xml;
+	}
+
 	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.

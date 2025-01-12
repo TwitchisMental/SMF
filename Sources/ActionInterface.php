@@ -57,11 +57,11 @@ interface ActionInterface
 	public function isSimpleAction(): bool;
 
 	/**
-	 * Determines whether this action requires XML mode to be enabled.
+	 * Gets the output type for this action.
 	 *
-	 * @return bool
+	 * @return OutputTypeInterface
 	 */
-	public function isXmlAction(): bool;
+	public function getOutputType(): OutputTypeInterface;
 
 	/**
 	 * Determines whether this action can be accessed without accepting

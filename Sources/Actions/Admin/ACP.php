@@ -717,6 +717,16 @@ class ACP implements ActionInterface
 	 * Public methods
 	 ****************/
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['preview']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['preview']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
+
 	/**
 	 * The main admin handling function.
 	 *

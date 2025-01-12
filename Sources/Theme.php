@@ -89,26 +89,14 @@ class Theme
 	 *
 	 * Extra URL params that ask for XML output instead of HTML.
 	 */
-	public array $extraParams = [
-		'preview',
-		'splitjs',
-	];
+	public array $extraParams = [];
 
 	/**
 	 * @var array
 	 *
 	 * Actions that specifically use XML output.
 	 */
-	public array $xmlActions = [
-		'quotefast',
-		'jsmodify',
-		'xmlhttp',
-		'post2',
-		'suggest',
-		'stats',
-		'notifytopic',
-		'notifyboard',
-	];
+	public array $xmlActions = [];
 
 	/**************************
 	 * Public static properties
@@ -1304,7 +1292,9 @@ class Theme
 			}
 		}
 
-		header('content-type: text/' . (isset($_REQUEST['xml']) ? 'xml' : 'html') . '; charset=' . (empty(Utils::$context['character_set']) ? 'ISO-8859-1' : Utils::$context['character_set']));
+		$content_type = Forum::getCurrentAction()?->getMimeType() ?? 'text/' . (isset($_REQUEST['xml']) ? 'xml' : 'html');
+
+		header('Content-Type: ' . $content_type . '; charset=' . (empty(Utils::$context['character_set']) ? 'ISO-8859-1' : Utils::$context['character_set']));
 
 		// We need to splice this in after the body layer.
 		if (Utils::$context['in_maintenance'] && User::$me->is_admin) {
@@ -2651,24 +2641,27 @@ class Theme
 		);
 
 		// See if there is any extra param to check.
-		$requiresXML = Forum::getCurrentAction()?->isXmlAction() === true;
+		$requires_xml = false;
 
 		foreach ($this->extraParams as $key => $extra) {
 			if (isset($_REQUEST[$extra])) {
-				$requiresXML = true;
+				$requires_xml = true;
+
+				break;
 			}
 		}
 
 		// Output is fully XML, so no need for the index template.
-		if (isset($_REQUEST['xml']) && (in_array(Utils::$context['current_action'], $this->xmlActions) || $requiresXML)) {
-			Lang::load('General+Modifications+ThemeStrings');
+		if (isset($_REQUEST['xml']) && (in_array(Utils::$context['current_action'], $this->xmlActions) || $requires_xml)) {
 			self::loadTemplate('Xml');
 			Utils::$context['template_layers'] = [];
 		}
 
+		// Attempt to load language files.
+		Lang::load('General+ThemeStrings+Modifications', '', false);
+
 		// These actions don't require the index template at all.
-		elseif (!empty(Utils::$context['simple_action'])) {
-			Lang::load('General+Modifications+ThemeStrings');
+		if (!empty(Utils::$context['simple_action'])) {
 			Utils::$context['template_layers'] = [];
 		} else {
 			// Custom templates to load, or just default?
@@ -2682,9 +2675,6 @@ class Theme
 			foreach ($templates as $template) {
 				self::loadTemplate($template);
 			}
-
-			// ...and attempt to load their associated language files.
-			Lang::load('General+ThemeStrings+Modifications', '', false);
 
 			// Custom template layers?
 			if (isset($this->settings['theme_layers'])) {

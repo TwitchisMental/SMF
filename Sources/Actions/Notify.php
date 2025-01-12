@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 namespace SMF\Actions;
 
+use SMF\ActionInterface;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -32,7 +33,7 @@ use SMF\Utils;
  *
  * Mods can add support for more notification types by extending this class.
  */
-abstract class Notify
+abstract class Notify implements ActionInterface
 {
 	use ActionTrait;
 
@@ -109,6 +110,16 @@ abstract class Notify
 	/****************
 	 * Public methods
 	 ****************/
+
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['xml']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['xml']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
 
 	/**
 	 * Dispatcher to whichever sub-action method is necessary.
@@ -481,6 +492,7 @@ abstract class Notify
 			],
 		];
 
+		Theme::loadTemplate('Xml');
 		Utils::$context['sub_template'] = 'generic_xml';
 	}
 

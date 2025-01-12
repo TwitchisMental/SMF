@@ -85,6 +85,16 @@ class TopicSplit implements ActionInterface
 	 * Public methods
 	 ****************/
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['xml']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['xml']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
+
 	/**
 	 * Splits a topic into two topics.
 	 *
@@ -104,9 +114,7 @@ class TopicSplit implements ActionInterface
 		User::$me->isAllowedTo('split_any');
 
 		// Load up the "dependencies" - the template and getMsgMemberID().
-		if (!isset($_REQUEST['xml'])) {
-			Theme::loadTemplate('SplitTopics');
-		}
+		Theme::loadTemplate(!isset($_REQUEST['xml']) ? 'Xml' : 'SplitTopics');
 
 		$call = method_exists($this, self::$subactions[$this->subaction]) ? [$this, self::$subactions[$this->subaction]] : Utils::getCallable(self::$subactions[$this->subaction]);
 

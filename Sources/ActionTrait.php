@@ -74,13 +74,13 @@ trait ActionTrait
 	}
 
 	/**
-	 * Determines whether this action requires XML mode to be enabled.
+	 * Gets the output type for this action.
 	 *
-	 * @return bool
+	 * @return OutputTypeInterface
 	 */
-	public function isXmlAction(): bool
+	public function getOutputType(): OutputTypeInterface
 	{
-		return false;
+		return new OutputTypes\Html;
 	}
 
 	/**

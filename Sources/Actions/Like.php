@@ -200,6 +200,16 @@ class Like implements ActionInterface
 		return false;
 	}
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['js']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['js']) ? new OutputTypes\Json : new OutputTypes\Html;
+	}
+
 	/**
 	 * The main handler.
 	 *

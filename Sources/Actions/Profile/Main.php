@@ -563,6 +563,11 @@ class Main implements ActionInterface
 		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']);
 	}
 
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
+
 	/**
 	 * Determines whether this action can be accessed without accepting
 	 * the registration agreement and privacy policy.

@@ -39,6 +39,16 @@ class Stats implements ActionInterface
 	 * Public methods
 	 ****************/
 
+	public function isSimpleAction(): bool
+	{
+		return isset($_REQUEST['xml']);
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return isset($_REQUEST['xml']) ? new OutputTypes\Xml : new OutputTypes\Html;
+	}
+
 	/**
 	 * Display some useful/interesting board statistics.
 	 *
@@ -83,6 +93,7 @@ class Stats implements ActionInterface
 				Utils::obExit(false);
 			}
 
+			Theme::loadTemplate('Xml');
 			Utils::$context['sub_template'] = 'stats';
 			Utils::$context['yearly'] = [];
 

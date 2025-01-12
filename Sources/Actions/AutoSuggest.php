@@ -87,6 +87,16 @@ class AutoSuggest implements ActionInterface
 		return false;
 	}
 
+	public function isSimpleAction(): bool
+	{
+		return true;
+	}
+
+	public function getOutputType(): OutputTypeInterface
+	{
+		return new OutputTypes\Xml;
+	}
+
 	/**
 	 * Dispatcher to whichever method is necessary.
 	 */
