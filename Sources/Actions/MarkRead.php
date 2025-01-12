@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\Board;
 use SMF\Config;
@@ -31,7 +31,7 @@ use SMF\Utils;
  */
 class MarkRead implements ActionInterface, Routable
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/*******************
@@ -424,6 +424,53 @@ class MarkRead implements ActionInterface, Routable
 				Utils::redirectexit('board=' . Board::$info->parent . '.0');
 			}
 		}
+	}
+
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		if (isset($params['sa'], $params['topic']) && $params['sa'] === 'topic') {
+			unset($params['sa']);
+		} elseif (isset($params['sa'], $params['board']) && $params['sa'] === 'board') {
+			unset($params['sa']);
+		}
+
+		if (isset($params['topic'])) {
+			extract(Topic::buildRoute($params));
+		} elseif (isset($params['board'])) {
+			extract(Board::buildRoute($params));
+		}
+
+		$route = array_merge($route ?? [], self::buildActionRoute($params));
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params = array_merge($params, self::parseActionRoute($route));
+
+		$params['sa'] = $params['sa'] ?? isset($params['topic']) ? 'topic' : (isset($params['board']) ? 'board' : null);
+
+		return $params;
 	}
 
 	/******************
