@@ -16,7 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
-use SMF\ActionRouter;
+use SMF\ActionSuffixRouter;
 use SMF\ActionTrait;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
@@ -38,7 +38,7 @@ use SMF\Utils;
  */
 abstract class Notify implements ActionInterface
 {
-	use ActionRouter;
+	use ActionSuffixRouter;
 	use ActionTrait;
 
 	/*****************
