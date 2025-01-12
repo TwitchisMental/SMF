@@ -44,11 +44,6 @@ class TopicPrint implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this is a simple action.
-	 *
-	 * @return bool
-	 */
 	public function isSimpleAction(): bool
 	{
 		return true;

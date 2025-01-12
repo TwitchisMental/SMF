@@ -68,21 +68,11 @@ class Login2 implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action allows access if guest access is restricted.
-	 *
-	 * @return bool True if access is allowed, false otherwise.
-	 */
 	public function isRestrictedGuestAccessAllowed(): bool
 	{
 		return true;
 	}
 
-	/**
-	 * Determines whether this action allows access in maintenance mode.
-	 *
-	 * @return bool True if access is allowed, false otherwise.
-	 */
 	public function canShowInMaintenanceMode(): bool
 	{
 		return true;
@@ -93,12 +83,6 @@ class Login2 implements ActionInterface
 		return isset($_REQUEST['ajax']);
 	}
 
-	/**
-	 * Determines whether this action can be accessed without accepting
-	 * the registration agreement and privacy policy.
-	 *
-	 * @return bool
-	 */
 	public function isAgreementAction(): bool
 	{
 		return true;

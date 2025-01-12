@@ -48,11 +48,6 @@ class RequestMembers implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action can be logged in the online log.
-	 *
-	 * @return bool
-	 */
 	public function canBeLogged(): bool
 	{
 		return false;

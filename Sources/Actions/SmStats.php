@@ -32,21 +32,11 @@ class SmStats implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action allows access if guest access is restricted.
-	 *
-	 * @return bool True if access is allowed, false otherwise.
-	 */
 	public function isRestrictedGuestAccessAllowed(): bool
 	{
 		return true;
 	}
 
-	/**
-	 * Determines whether this action can be logged in the online log.
-	 *
-	 * @return bool
-	 */
 	public function canBeLogged(): bool
 	{
 		return false;

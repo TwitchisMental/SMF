@@ -34,11 +34,6 @@ class Logout extends Login2
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action allows access in maintenance mode.
-	 *
-	 * @return bool True if access is allowed, false otherwise.
-	 */
 	public function canShowInMaintenanceMode(): bool
 	{
 		return false;

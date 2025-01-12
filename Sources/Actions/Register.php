@@ -71,21 +71,11 @@ class Register implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action allows access if guest access is restricted.
-	 *
-	 * @return bool True if access is allowed, false otherwise.
-	 */
 	public function isRestrictedGuestAccessAllowed(): bool
 	{
 		return true;
 	}
 
-	/**
-	 * Determines whether this is a simple action.
-	 *
-	 * @return bool
-	 */
 	public function isSimpleAction(): bool
 	{
 		return isset($_GET['sa']) && $_GET['sa'] == 'usernamecheck';

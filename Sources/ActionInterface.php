@@ -52,6 +52,8 @@ interface ActionInterface
 	/**
 	 * Determines whether this is a simple action.
 	 *
+	 * Simple actions don't require the index template at all.
+	 *
 	 * @return bool
 	 */
 	public function isSimpleAction(): bool;

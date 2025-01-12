@@ -262,21 +262,11 @@ class PersonalMessage implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action can be logged in the online log.
-	 *
-	 * @return bool
-	 */
 	public function canBeLogged(): bool
 	{
 		return isset($_GET['sa']) && $_GET['sa'] != 'popup';
 	}
 
-	/**
-	 * Determines whether this is a simple action.
-	 *
-	 * @return bool
-	 */
 	public function isSimpleAction(): bool
 	{
 		return isset($_GET['sa']) && $_GET['sa'] == 'popup' || isset($_REQUEST['preview']);
@@ -287,12 +277,6 @@ class PersonalMessage implements ActionInterface
 		return isset($_REQUEST['preview']) ? new OutputTypes\Xml : new OutputTypes\Html;
 	}
 
-	/**
-	 * Determines whether this action can be accessed without accepting
-	 * the registration agreement and privacy policy.
-	 *
-	 * @return bool
-	 */
 	public function isAgreementAction(): bool
 	{
 		return isset($_GET['sa']) && $_GET['sa'] == 'popup';

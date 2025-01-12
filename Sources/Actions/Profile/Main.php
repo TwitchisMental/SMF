@@ -543,21 +543,11 @@ class Main implements ActionInterface
 	 * Public methods
 	 ****************/
 
-	/**
-	 * Determines whether this action can be logged in the online log.
-	 *
-	 * @return bool
-	 */
 	public function canBeLogged(): bool
 	{
 		return isset($_GET['area']) && !in_array($_GET['area'], ['popup', 'alerts_popup', 'download', 'dlattach']);
 	}
 
-	/**
-	 * Determines whether this is a simple action.
-	 *
-	 * @return bool
-	 */
 	public function isSimpleAction(): bool
 	{
 		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']);
@@ -568,12 +558,6 @@ class Main implements ActionInterface
 		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']) ? new OutputTypes\Xml : new OutputTypes\Html;
 	}
 
-	/**
-	 * Determines whether this action can be accessed without accepting
-	 * the registration agreement and privacy policy.
-	 *
-	 * @return bool
-	 */
 	public function isAgreementAction(): bool
 	{
 		return isset($_GET['area']) && ($_GET['area'] == 'popup' || $_GET['area'] == 'alerts_popup');
