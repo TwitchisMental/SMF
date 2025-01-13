@@ -1294,6 +1294,23 @@ class SearchEngines implements ActionInterface
 			}
 		}
 
+		// If the last group is empty, add an explict allow rule to it.
+		for ($i = array_key_last($new_content); $i > 0; $i--) {
+			if (preg_match('/^((?:dis)?allow):/i', $new_content[$i])) {
+				break;
+			}
+
+			if (preg_match('/^user-agent:/i', $new_content[$i])) {
+				do {
+					$i++;
+				} while (!empty($new_content[$i]));
+
+				array_splice($new_content, $i, 0, ["Allow: *\n"]);
+
+				break;
+			}
+		}
+
 		// Append any new rules that haven't already been inserted.
 		foreach ($rules as $user_agent => $rule_parts) {
 			$new_content[] = "\n";
