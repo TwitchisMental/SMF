@@ -2415,7 +2415,7 @@ class Board implements \ArrayAccess
 
 			if (!empty($temp)) {
 				foreach ($temp as $key => $value) {
-					if ($key === 'cat') {
+					if ($key === 'cat' && !($value instanceof Category)) {
 						$this->{$key} = Category::init($value['id'], $value);
 					} else {
 						$this->{$key} = $value;
