@@ -2477,6 +2477,7 @@ class Utils
 
 				// Remove the "#" and ensure an instance exists.
 				$method = str_replace('#', '', $method);
+
 				if (empty(Utils::$context['instances'][$class]) || !(Utils::$context['instances'][$class] instanceof $class)) {
 					Utils::$context['instances'][$class] = new $class();
 
