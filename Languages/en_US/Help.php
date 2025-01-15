@@ -477,7 +477,7 @@ $helptxt['coppaType'] = 'If age restrictions are enabled, then this setting will
 $helptxt['coppaPost'] = 'The contact boxes are required so that forms granting permission for underage registration can be sent to the forum administrator. These details will be shown to all new minors, and are required for parent/guardian approval. At the very least a postal address or fax number must be provided.';
 
 $helptxt['allow_hideOnline'] = 'With this setting enabled all members will be able to hide their online status from other users (except administrators). Note that disabling this setting will not change any existing member’s status - it just stops them from hiding themselves in the future.';
-$helptxt['meta_keywords'] = 'These keywords are sent in the output of every page to indicate to search engines (etc) the key content of your site. They should be a comma separated list of words, and should not use HTML.';
+$helptxt['meta_keywords'] = 'These keywords are sent in the output of every page to indicate to search engines, etc., the key content of your site. They should be a comma separated list of words, and should not use HTML.<br><br>Nearly all modern search engines ignore keywords. Unless you have a specific reason to use them, you should leave this setting empty.';
 
 $helptxt['latest_themes'] = 'This area shows a few of the latest and most popular themes from <a href="https://www.simplemachines.org/" target="_blank" rel="noopener">www.simplemachines.org</a>. It may not show up properly if your computer cannot find <a href="https://www.simplemachines.org/" target="_blank" rel="noopener">www.simplemachines.org</a>, though.';
 

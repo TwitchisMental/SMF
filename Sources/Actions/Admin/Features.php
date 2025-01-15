@@ -1564,7 +1564,6 @@ class Features implements ActionInterface
 
 			// SEO stuff
 			['check', 'queryless_urls', 'subtext' => '<strong>' . Lang::$txt['queryless_urls_note'] . '</strong>'],
-			['text', 'meta_keywords', 'subtext' => Lang::$txt['meta_keywords_note'], 'size' => 50],
 			'',
 
 			// Time zone and formatting.

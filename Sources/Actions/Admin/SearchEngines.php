@@ -806,14 +806,21 @@ class SearchEngines implements ActionInterface
 			$post_input = '<br><span class="error">' . Lang::$txt['robots_txt_not_writable'] . '</span>';
 		}
 
-		$config_vars[] = [
-			'text',
-			'robots_txt',
-			'subtext' => Lang::$txt['robots_txt_info'],
-			'size' => 45,
-			'invalid' => $invalid ?? false,
-			'postinput' => $post_input ?? '',
-		];
+		$config_vars = array_merge($config_vars, [
+			[
+				'text',
+				'robots_txt',
+				'subtext' => Lang::$txt['robots_txt_info'],
+				'size' => 45,
+				'invalid' => $invalid ?? false,
+				'postinput' => $post_input ?? '',
+			],
+			[
+				'large_text',
+				'meta_keywords',
+				'subtext' => Lang::$txt['meta_keywords_note'],
+			],
+		]);
 
 		IntegrationHook::call('integrate_modify_search_engine_settings', [&$config_vars]);
 
