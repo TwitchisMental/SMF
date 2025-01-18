@@ -14,9 +14,12 @@ jobs:
     - name: Set current year environment variable
       run: echo "CURRENT_YEAR=$(date +'%Y')" >> $GITHUB_ENV
 
-    - name: Update year in index.php
+    - name: Update year in PHP files
       run: |
-        sed -i "s/define('SMF_SOFTWARE_YEAR', '[0-9]\{4\}');/define('SMF_SOFTWARE_YEAR', '${{ env.CURRENT_YEAR }}');/" index.php
+        for file in SSI.php proxy.php cron.php index.php other/*.php; do
+          sed -i "s/@copyright [0-9]\{4\}/@copyright ${{ env.CURRENT_YEAR }}/" $file
+          sed -i "s/define('SMF_SOFTWARE_YEAR', '[0-9]\{4\}');/define('SMF_SOFTWARE_YEAR', '${{ env.CURRENT_YEAR }}');/" $file
+        done
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
@@ -25,4 +28,4 @@ jobs:
         commit-message: Update year to ${{ env.CURRENT_YEAR }}
         branch: 3.0/update-year-${{ env.CURRENT_YEAR }}
         title: "[3.0] Update year to ${{ env.CURRENT_YEAR }}"
-        body: This commit updates `SMF_SOFTWARE_YEAR` to ${{ env.CURRENT_YEAR }} in `index.php`.
+        body: This commit updates `SMF_SOFTWARE_YEAR` to ${{ env.CURRENT_YEAR }}. This action was performed by a bot.
