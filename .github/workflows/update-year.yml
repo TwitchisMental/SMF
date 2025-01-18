@@ -14,7 +14,25 @@ jobs:
     - name: Set current year environment variable
       run: echo "CURRENT_YEAR=$(date +'%Y')" >> $GITHUB_ENV
 
-    - name: Update year in PHP files
+    - name: Check if version tag matches any pre-release
+      run: |
+        str=$(grep -oP "define\('SMF_VERSION', '[^']+" index.php)
+        re='[0-9]+\.[0-9]+ ?[A-Za-z]+';
+        if [[ $str =~ $re ]]; then
+          echo "PRE_RELEASE=true" >> $GITHUB_ENV
+        else
+          echo "PRE_RELEASE=false" >> $GITHUB_ENV
+        fi
+
+    - name: Update year in Sources/
+      if: env.PRE_RELEASE == 'true'
+      run: |
+        shopt -s globstar
+        for file in Sources/**/*.php Themes/default/*.php; do
+          sed -i "s/@copyright [0-9]\{4\}/@copyright ${{ env.CURRENT_YEAR }}/" $file
+        done
+
+    - name: Update year in PHP files 
       run: |
         for file in SSI.php proxy.php cron.php index.php other/*.php; do
           sed -i "s/@copyright [0-9]\{4\}/@copyright ${{ env.CURRENT_YEAR }}/" $file
