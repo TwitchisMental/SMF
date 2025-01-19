@@ -26,6 +26,8 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Msg;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Parser;
 use SMF\Profile;
 use SMF\Theme;

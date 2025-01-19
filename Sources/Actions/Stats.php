@@ -23,6 +23,8 @@ use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;

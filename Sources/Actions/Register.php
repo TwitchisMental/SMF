@@ -20,6 +20,8 @@ use SMF\ActionTrait;
 use SMF\Config;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Parser;
 use SMF\Profile;
 use SMF\SecurityToken;

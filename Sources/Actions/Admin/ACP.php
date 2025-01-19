@@ -27,6 +27,8 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Mail;
 use SMF\Menu;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Parser;
 use SMF\SecurityToken;
 use SMF\Theme;

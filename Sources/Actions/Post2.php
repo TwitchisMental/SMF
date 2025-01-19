@@ -30,6 +30,8 @@ use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Logging;
 use SMF\Msg;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Parser;
 use SMF\Poll;
 use SMF\Search\SearchApi;

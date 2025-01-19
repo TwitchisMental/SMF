@@ -29,6 +29,8 @@ use SMF\Lang;
 use SMF\Logging;
 use SMF\Mail;
 use SMF\Msg;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\PageIndex;
 use SMF\Parser;
 use SMF\Search\SearchApi;

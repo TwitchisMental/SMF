@@ -21,6 +21,8 @@ use SMF\Config;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Msg;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;

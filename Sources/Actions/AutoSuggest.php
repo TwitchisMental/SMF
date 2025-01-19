@@ -19,6 +19,8 @@ use SMF\ActionInterface;
 use SMF\ActionTrait;
 use SMF\Db\DatabaseApi as Db;
 use SMF\IntegrationHook;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;

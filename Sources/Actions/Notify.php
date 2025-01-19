@@ -21,6 +21,8 @@ use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\ErrorHandler;
 use SMF\Lang;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;

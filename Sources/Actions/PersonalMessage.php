@@ -25,6 +25,8 @@ use SMF\ErrorHandler;
 use SMF\IntegrationHook;
 use SMF\Lang;
 use SMF\Menu;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\PersonalMessage\{
 	Conversation,
 	DraftPM,

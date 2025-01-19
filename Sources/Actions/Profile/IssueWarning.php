@@ -23,6 +23,8 @@ use SMF\ErrorHandler;
 use SMF\ItemList;
 use SMF\Lang;
 use SMF\Msg;
+use SMF\OutputTypeInterface;
+use SMF\OutputTypes;
 use SMF\Parser;
 use SMF\PersonalMessage\PM;
 use SMF\Profile;
