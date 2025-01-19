@@ -2441,16 +2441,16 @@ class Utils
 	 * - Plain functions are validated as callable.
 	 * - Objects themselves are not accepted as callables.
 	 *
-	 * @param string|array $input Input to parse as a callable.
+	 * @param string|callable $input Input to parse as a callable.
 	 * @param bool|null $ignore_errors Optional. Whether to suppress errors if the callable is invalid. Defaults to the value of `Utils::$context['ignore_hook_errors']`.
 	 *
 	 * @return callable|false Returns the callable if valid, or false on failure.
 	 */
-	public static function getCallable(string|array $input, ?bool $ignore_errors = null): callable|false
+	public static function getCallable(string|callable $input, ?bool $ignore_errors = null): callable|false
 	{
 		$ignore_errors = $ignore_errors ?? !empty(Utils::$context['ignore_hook_errors']);
 
-		if (is_array($input)) {
+		if (!is_string($input)) {
 			return is_callable($input) ? $input : false;
 		}
 
