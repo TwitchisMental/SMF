@@ -2400,9 +2400,13 @@ class Utils
 				Theme::template_footer();
 
 				// Add $db_show_debug = true; to Settings.php if you want to show the debugging information.
-				// (since this is just debugging... it's okay that it's after </html>.)
-				if (!isset($_REQUEST['xml'])) {
-					Logging::displayDebug();
+				if (Forum::getCurrentAction()?->isSimpleAction() === false
+					|| (
+						Forum::getCurrentAction() === null
+						&& !isset($_REQUEST['xml'])
+					)
+				) {
+					DebugUtils::displayDebug();
 				}
 			}
 		}

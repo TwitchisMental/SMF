@@ -43,6 +43,11 @@ class ViewQuery implements ActionInterface
 		return false;
 	}
 
+	public function isSimpleAction(): bool
+	{
+		return true;
+	}
+
 	/**
 	 * Show the database queries for debugging.
 	 *
