@@ -280,6 +280,9 @@ class Forum
 		if (is_a($current_action, ActionInterface::class, true)) {
 			$action = call_user_func([$current_action, 'load']);
 			self::$current_action = $action;
+
+			// Perform operations on the action object before execute() is called.
+			IntegrationHook::call('integrate_init_action', [$action]);
 		}
 
 		$this->main();
