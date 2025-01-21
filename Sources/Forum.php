@@ -424,11 +424,11 @@ class Forum
 	/**
 	 * Resolves the appropriate action to execute based on the current request context.
 	 *
-	 * @return array|string|false Returns one of the following:
-	 *  - An array containing the file path and function name to call (e.g., `['file.php', 'function']`).
+	 * @return string|callable|false Returns one of the following:
+	 *  - A string representing a class implementing ActionInterface.
 	 *  - A callable string representing a static method (e.g., `'Class::method'`).
 	 */
-	protected function findAction(): array|string|false
+	protected function findAction(): string|callable|false
 	{
 		if (empty($_REQUEST['action'])) {
 			if (empty(Board::$info->id) && empty(Topic::$topic_id)) {
