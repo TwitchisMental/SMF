@@ -433,9 +433,9 @@ class Forum
 		if (empty($_REQUEST['action'])) {
 			if (empty(Board::$info->id) && empty(Topic::$topic_id)) {
 				if (!empty(Config::$modSettings['integrate_default_action'])) {
-					$default_action = explode(',', Config::$modSettings['integrate_default_action']);
+					$default_action = explode(',', Config::$modSettings['integrate_default_action'])[0];
 
-					return Utils::getCallable($default_action[0]);
+					return is_a($default_action, ActionInterface::class, true) ? $default_action : Utils::getCallable($default_action);
 				}
 
 				// Action and board are both empty... BoardIndex!
@@ -459,9 +459,9 @@ class Forum
 			}
 
 			if (!empty(Config::$modSettings['integrate_fallback_action'])) {
-				$fallback_action = explode(',', Config::$modSettings['integrate_fallback_action']);
+				$fallback_action = explode(',', Config::$modSettings['integrate_fallback_action'])[0];
 
-				return Utils::getCallable($fallback_action[0]);
+				return is_a($fallback_action, ActionInterface::class, true) ? $fallback_action : Utils::getCallable($fallback_action);
 			}
 		}
 
