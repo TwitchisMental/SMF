@@ -2406,7 +2406,7 @@ class Utils
 						&& !isset($_REQUEST['xml'])
 					)
 				) {
-					DebugUtils::displayDebug();
+					Logging::displayDebug();
 				}
 			}
 		}
