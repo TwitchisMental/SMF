@@ -784,7 +784,7 @@ class Boards implements ActionInterface
 	/**
 	 * Used to retrieve data for modifying a board category.
 	 */
-	public function modifyCat(): void
+	public static function modifyCat(): void
 	{
 		// Get some information about the boards and the cats.
 		Category::getTree();
@@ -930,6 +930,11 @@ class Boards implements ActionInterface
 	 */
 	protected function __construct()
 	{
+		// Special handling for modifycat.
+		if (($_REQUEST['action'] ?? '') === 'modifycat') {
+			self::modifyCat();
+		}
+
 		// Everything's gonna need this.
 		Lang::load('ManageBoards');
 
@@ -954,12 +959,6 @@ class Boards implements ActionInterface
 		// Default to sub action 'main' or 'settings' depending on permissions.
 		$this->subaction = isset($_REQUEST['sa']) && isset(self::$subactions[$_REQUEST['sa']]) ? $_REQUEST['sa'] : (User::$me->allowedTo('manage_boards') ? 'main' : 'settings');
 	}
-
-	/*************************
-	 * Internal static methods
-	 *************************/
-
-	// code...
 }
 
 ?>

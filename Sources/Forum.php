@@ -172,8 +172,9 @@ class Forum
 		'moderate' => [
 			'', Actions\Moderation\Main::class,
 		],
+		// Deprecated; is now a sub-action
 		'modifycat' => [
-			'', [Actions\Admin\Boards::class, 'modifyCat'],
+			'', Actions\Admin\Boards::class,
 		],
 		'movetopic' => [
 			'', Actions\TopicMove::class,
