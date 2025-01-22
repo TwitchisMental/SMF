@@ -446,7 +446,8 @@ class Forum
 	public function execute(): void
 	{
 		$this->init();
-		$current_action = $this->findAction();
+		$requested_action = $_REQUEST['action'] ?? null;
+		$current_action = $this->findAction($requested_action);
 
 		if (is_a($current_action, ActionInterface::class, true)) {
 			$action = call_user_func([$current_action, 'load']);
@@ -646,10 +647,10 @@ class Forum
 	 *  - A string representing a class implementing ActionInterface.
 	 *  - A callable string representing a static method (e.g., `'Class::method'`).
 	 */
-	protected function findAction(): string|callable|false
+	protected function findAction(?string $action): string|callable|false
 	{
 		// If no action was supplied, is there an implied action?
-		if (empty($_REQUEST['action'])) {
+		if (empty($action)) {
 			// Action and board are both empty... BoardIndex!
 			if (empty(Board::$info->id) && empty(Topic::$topic_id)) {
 				// ... unless someone else wants to do something different.
@@ -659,20 +660,20 @@ class Forum
 					return is_a($default_action, ActionInterface::class, true) ? $default_action : Utils::getCallable($default_action);
 				}
 
-				$_REQUEST['action'] = 'boardindex';
+				$action = 'boardindex';
 			}
 			// Topic is empty, and action is empty.... MessageIndex!
 			elseif (empty(Topic::$topic_id)) {
-				$_REQUEST['action'] = 'messageindex';
+				$action = 'messageindex';
 			}
 			// Board is not empty... topic is not empty... action is empty... Display!
 			else {
-				$_REQUEST['action'] = 'display';
+				$action = 'display';
 			}
 		}
 
 		// Still no valid action?
-		if (!isset(self::$actions[$_REQUEST['action']])) {
+		if (!isset(self::$actions[$action])) {
 			// Catch the action with the theme?
 			if (!empty(Theme::$current->settings['catch_action'])) {
 				return [Theme::class, 'wrapAction'];
@@ -695,12 +696,12 @@ class Forum
 		}
 
 		// Otherwise, it was set - so let's go to that action.
-		if (!empty(self::$actions[$_REQUEST['action']][0])) {
-			require_once Config::$sourcedir . '/' . self::$actions[$_REQUEST['action']][0];
+		if (!empty(self::$actions[$action][0])) {
+			require_once Config::$sourcedir . '/' . self::$actions[$action][0];
 		}
 
 		// Do the right thing.
-		return self::$actions[$_REQUEST['action']][1];
+		return self::$actions[$action][1];
 	}
 }
 
