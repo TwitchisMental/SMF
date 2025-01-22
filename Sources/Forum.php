@@ -56,90 +56,248 @@ class Forum
 	/**
 	 * @var array
 	 *
-	 * This array defines what file to load and what function to call for each
-	 * possible value of $_REQUEST['action'].
+	 * This array defines what file to load and what to call for each possible
+	 * value of $_REQUEST['action'].
 	 *
-	 * When calling an autoloading class, the file can be left empty.
+	 * Keys are action names as found in $_REQUEST['action'].
+	 *
+	 * Values are arrays containing two elements:
+	 *  - The relative path of a file to load. When calling an autoloading
+	 *    class, the file can be left empty.
+	 *  - A callable or a class that implements SMF\ActionInterface.
 	 *
 	 * Mod authors can add new actions to this via the integrate_actions hook.
 	 */
 	public static array $actions = [
-		'agreement' => ['', Actions\Agreement::class],
-		'acceptagreement' => ['', Actions\AgreementAccept::class],
-		'activate' => ['', Actions\Activate::class],
-		'admin' => ['', Actions\Admin\ACP::class],
-		'announce' => ['', Actions\Announce::class],
-		'attachapprove' => ['', Actions\AttachmentApprove::class],
-		'buddy' => ['', Actions\BuddyListToggle::class],
-		'calendar' => ['', Actions\Calendar::class],
-		'clock' => ['', Actions\Calendar::class], // Deprecated; is now a sub-action
-		'coppa' => ['', Actions\CoppaForm::class],
-		'credits' => ['', Actions\Credits::class],
-		'deletemsg' => ['', Actions\MsgDelete::class],
-		'dlattach' => ['', Actions\AttachmentDownload::class],
-		'editpoll' => ['', [Poll::class, 'edit']],
-		'editpoll2' => ['', [Poll::class, 'edit2']],
-		'groups' => ['', Actions\Groups::class],
-		'help' => ['', Actions\Help::class],
-		'helpadmin' => ['', Actions\HelpAdmin::class],
-		'jsmodify' => ['', Actions\JavaScriptModify::class],
-		'jsoption' => ['', [Theme::class, 'setJavaScript']],
-		'likes' => ['', Actions\Like::class],
-		'lock' => ['', [Topic::class, 'lock']],
-		'lockvoting' => ['', [Poll::class, 'lock']],
-		'login' => ['', Actions\Login::class],
-		'login2' => ['', Actions\Login2::class],
-		'logintfa' => ['', Actions\LoginTFA::class],
-		'logout' => ['', Actions\Logout::class],
-		'markasread' => ['', [Board::class, 'MarkRead']],
-		'mergetopics' => ['', Actions\TopicMerge::class],
-		'mlist' => ['', Actions\Memberlist::class],
-		'moderate' => ['', Actions\Moderation\Main::class],
-		'modifycat' => ['', [Actions\Admin\Boards::class, 'modifyCat']],
-		'movetopic' => ['', Actions\TopicMove::class],
-		'movetopic2' => ['', Actions\TopicMove2::class],
-		'notifyannouncements' => ['', Actions\NotifyAnnouncements::class],
-		'notifyboard' => ['', Actions\NotifyBoard::class],
-		'notifytopic' => ['', Actions\NotifyTopic::class],
-		'pm' => ['', Actions\PersonalMessage::class],
-		'post' => ['', Actions\Post::class],
-		'post2' => ['', Actions\Post2::class],
-		'printpage' => ['', Actions\TopicPrint::class],
-		'profile' => ['', Actions\Profile\Main::class],
-		'quotefast' => ['', Actions\QuoteFast::class],
-		'quickmod' => ['', Actions\QuickModeration::class],
-		'quickmod2' => ['', Actions\QuickModerationInTopic::class],
-		'recent' => ['', Actions\Recent::class],
-		'reminder' => ['', Actions\Reminder::class],
-		'removepoll' => ['', [Poll::class, 'remove']],
-		'removetopic2' => ['', Actions\TopicRemove::class],
-		'reporttm' => ['', Actions\ReportToMod::class],
-		'requestmembers' => ['', Actions\RequestMembers::class],
-		'restoretopic' => ['', Actions\TopicRestore::class],
-		'search' => ['', Actions\Search::class],
-		'search2' => ['', Actions\Search2::class],
-		'sendactivation' => ['', Actions\SendActivation::class],
-		'signup' => ['', Actions\Register::class],
-		'signup2' => ['', Actions\Register2::class],
-		'smstats' => ['', Actions\SmStats::class],
-		'suggest' => ['', Actions\AutoSuggest::class],
-		'splittopics' => ['', Actions\TopicSplit::class],
-		'stats' => ['', Actions\Stats::class],
-		'sticky' => ['', [Topic::class, 'sticky']],
-		'theme' => ['', [Theme::class, 'dispatch']],
-		'trackip' => ['', Actions\TrackIP::class],
-		'about:unknown' => ['', [Actions\Like::class, 'BookOfUnknown']],
-		'unread' => ['', Actions\Unread::class],
-		'unreadreplies' => ['', Actions\UnreadReplies::class],
-		'uploadAttach' => ['', Actions\AttachmentUpload::class],
-		'verificationcode' => ['', Actions\VerificationCode::class],
-		'viewprofile' => ['', Actions\Profile\Main::class],
-		'vote' => ['', [Poll::class, 'vote']],
-		'viewquery' => ['', Actions\ViewQuery::class],
-		'viewsmfile' => ['', Actions\DisplayAdminFile::class],
-		'who' => ['', Actions\Who::class],
-		'.xml' => ['', Actions\Feed::class],
-		'xmlhttp' => ['', Actions\XmlHttp::class],
+		'agreement' => [
+			'', Actions\Agreement::class,
+		],
+		'acceptagreement' => [
+			'', Actions\AgreementAccept::class,
+		],
+		'activate' => [
+			'', Actions\Activate::class,
+		],
+		'admin' => [
+			'', Actions\Admin\ACP::class,
+		],
+		'announce' => [
+			'', Actions\Announce::class,
+		],
+		'attachapprove' => [
+			'', Actions\AttachmentApprove::class,
+		],
+		'buddy' => [
+			'', Actions\BuddyListToggle::class,
+		],
+		'calendar' => [
+			'', Actions\Calendar::class,
+		],
+		// Deprecated; is now a sub-action
+		'clock' => [
+			'', Actions\Calendar::class,
+		],
+		'coppa' => [
+			'', Actions\CoppaForm::class,
+		],
+		'credits' => [
+			'', Actions\Credits::class,
+		],
+		'deletemsg' => [
+			'', Actions\MsgDelete::class,
+		],
+		'dlattach' => [
+			'', Actions\AttachmentDownload::class,
+		],
+		'editpoll' => [
+			'', [Poll::class, 'edit'],
+		],
+		'editpoll2' => [
+			'', [Poll::class, 'edit2'],
+		],
+		'groups' => [
+			'', Actions\Groups::class,
+		],
+		'help' => [
+			'', Actions\Help::class,
+		],
+		'helpadmin' => [
+			'', Actions\HelpAdmin::class,
+		],
+		'jsmodify' => [
+			'', Actions\JavaScriptModify::class,
+		],
+		'jsoption' => [
+			'', [Theme::class, 'setJavaScript'],
+		],
+		'likes' => [
+			'', Actions\Like::class,
+		],
+		'lock' => [
+			'', [Topic::class, 'lock'],
+		],
+		'lockvoting' => [
+			'', [Poll::class, 'lock'],
+		],
+		'login' => [
+			'', Actions\Login::class,
+		],
+		'login2' => [
+			'', Actions\Login2::class,
+		],
+		'logintfa' => [
+			'', Actions\LoginTFA::class,
+		],
+		'logout' => [
+			'', Actions\Logout::class,
+		],
+		'markasread' => [
+			'', [Board::class, 'MarkRead'],
+		],
+		'mergetopics' => [
+			'', Actions\TopicMerge::class,
+		],
+		'mlist' => [
+			'', Actions\Memberlist::class,
+		],
+		'moderate' => [
+			'', Actions\Moderation\Main::class,
+		],
+		'modifycat' => [
+			'', [Actions\Admin\Boards::class, 'modifyCat'],
+		],
+		'movetopic' => [
+			'', Actions\TopicMove::class,
+		],
+		'movetopic2' => [
+			'', Actions\TopicMove2::class,
+		],
+		'notifyannouncements' => [
+			'', Actions\NotifyAnnouncements::class,
+		],
+		'notifyboard' => [
+			'', Actions\NotifyBoard::class,
+		],
+		'notifytopic' => [
+			'', Actions\NotifyTopic::class,
+		],
+		'pm' => [
+			'', Actions\PersonalMessage::class,
+		],
+		'post' => [
+			'', Actions\Post::class,
+		],
+		'post2' => [
+			'', Actions\Post2::class,
+		],
+		'printpage' => [
+			'', Actions\TopicPrint::class,
+		],
+		'profile' => [
+			'', Actions\Profile\Main::class,
+		],
+		'quotefast' => [
+			'', Actions\QuoteFast::class,
+		],
+		'quickmod' => [
+			'', Actions\QuickModeration::class,
+		],
+		'quickmod2' => [
+			'', Actions\QuickModerationInTopic::class,
+		],
+		'recent' => [
+			'', Actions\Recent::class,
+		],
+		'reminder' => [
+			'', Actions\Reminder::class,
+		],
+		'removepoll' => [
+			'', [Poll::class, 'remove'],
+		],
+		'removetopic2' => [
+			'', Actions\TopicRemove::class,
+		],
+		'reporttm' => [
+			'', Actions\ReportToMod::class,
+		],
+		'requestmembers' => [
+			'', Actions\RequestMembers::class,
+		],
+		'restoretopic' => [
+			'', Actions\TopicRestore::class,
+		],
+		'search' => [
+			'', Actions\Search::class,
+		],
+		'search2' => [
+			'', Actions\Search2::class,
+		],
+		'sendactivation' => [
+			'', Actions\SendActivation::class,
+		],
+		'signup' => [
+			'', Actions\Register::class,
+		],
+		'signup2' => [
+			'', Actions\Register2::class,
+		],
+		'smstats' => [
+			'', Actions\SmStats::class,
+		],
+		'suggest' => [
+			'', Actions\AutoSuggest::class,
+		],
+		'splittopics' => [
+			'', Actions\TopicSplit::class,
+		],
+		'stats' => [
+			'', Actions\Stats::class,
+		],
+		'sticky' => [
+			'', [Topic::class, 'sticky'],
+		],
+		'theme' => [
+			'', [Theme::class, 'dispatch'],
+		],
+		'trackip' => [
+			'', Actions\TrackIP::class,
+		],
+		'about:unknown' => [
+			'', [Actions\Like::class, 'BookOfUnknown'],
+		],
+		'unread' => [
+			'', Actions\Unread::class,
+		],
+		'unreadreplies' => [
+			'', Actions\UnreadReplies::class,
+		],
+		'uploadAttach' => [
+			'', Actions\AttachmentUpload::class,
+		],
+		'verificationcode' => [
+			'', Actions\VerificationCode::class,
+		],
+		'viewprofile' => [
+			'', Actions\Profile\Main::class,
+		],
+		'vote' => [
+			'', [Poll::class, 'vote'],
+		],
+		'viewquery' => [
+			'', Actions\ViewQuery::class,
+		],
+		'viewsmfile' => [
+			'', Actions\DisplayAdminFile::class,
+		],
+		'who' => [
+			'', Actions\Who::class,
+		],
+		'.xml' => [
+			'', Actions\Feed::class,
+		],
+		'xmlhttp' => [
+			'', Actions\XmlHttp::class,
+		],
 	];
 
 	/**
