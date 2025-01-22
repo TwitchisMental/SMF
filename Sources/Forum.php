@@ -446,13 +446,32 @@ class Forum
 		$this->main();
 
 		// Is the forum in maintenance mode? (doesn't apply to administrators.)
-		if (!empty(Config::$maintenance) && !User::$me->allowedTo('admin_forum') && self::$current_action?->canShowInMaintenanceMode() === false) {
+		if (
+			!empty(Config::$maintenance)
+			&& !User::$me->allowedTo('admin_forum')
+			&& self::$current_action?->canShowInMaintenanceMode() === false
+		) {
 			// Don't even try it, sonny.
 			self::inMaintenance();
-		} elseif (empty(Config::$modSettings['allow_guestAccess']) && User::$me->is_guest && (self::$current_action?->isRestrictedGuestAccessAllowed() === false || (!isset($_REQUEST['action']) || !in_array($_REQUEST['action'], self::$guest_access_actions) && self::$current_action?->isRestrictedGuestAccessAllowed() === null))) {
-			// If guest access is off, a guest can only do one of a few actions.
+		}
+
+		// If guest access is off, a guest can only do one of a few actions.
+		if (
+			empty(Config::$modSettings['allow_guestAccess'])
+			&& User::$me->is_guest
+			&& (
+				self::$current_action?->isRestrictedGuestAccessAllowed() === false
+				|| (
+					!isset($_REQUEST['action'])
+					|| !in_array($_REQUEST['action'] ?? '', self::$guest_access_actions)
+					&& self::$current_action?->isRestrictedGuestAccessAllowed() === null
+				)
+			)
+		) {
 			User::$me->kickIfGuest(null, false);
-		} elseif (isset($action)) {
+		}
+
+		if (isset($action)) {
 			$action->execute();
 		} elseif (is_callable($current_action)) {
 			call_user_func($current_action);
@@ -588,8 +607,11 @@ class Forum
 	 */
 	protected function findAction(): string|callable|false
 	{
+		// If no action was supplied, is there an implied action?
 		if (empty($_REQUEST['action'])) {
+			// Action and board are both empty... BoardIndex!
 			if (empty(Board::$info->id) && empty(Topic::$topic_id)) {
+				// ... unless someone else wants to do something different.
 				if (!empty(Config::$modSettings['integrate_default_action'])) {
 					$default_action = explode(',', Config::$modSettings['integrate_default_action'])[0];
 
@@ -609,17 +631,26 @@ class Forum
 			return Actions\Display::class;
 		}
 
-		// Get the function and file to include - if it's not there, do the board index.
+		// Still no valid action?
 		if (!isset(self::$actions[$_REQUEST['action']])) {
 			// Catch the action with the theme?
 			if (!empty(Theme::$current->settings['catch_action'])) {
 				return [Theme::class, 'wrapAction'];
 			}
 
+			// Do we have a last-ditch fallback action?
 			if (!empty(Config::$modSettings['integrate_fallback_action'])) {
 				$fallback_action = explode(',', Config::$modSettings['integrate_fallback_action'])[0];
 
-				return is_a($fallback_action, ActionInterface::class, true) ? $fallback_action : Utils::getCallable($fallback_action);
+				if (is_a($fallback_action, ActionInterface::class, true)) {
+					return $fallback_action;
+				}
+
+				if (($fallback_action = Utils::getCallable($fallback_action)) !== false) {
+					return $fallback_action;
+				}
+
+				ErrorHandler::fatalLang('not_found', false, [], 404);
 			}
 		}
 
