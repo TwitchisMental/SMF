@@ -31,6 +31,11 @@ class Unknown implements ActionInterface
 	 * Mysterious methods
 	 ********************/
 
+	public function canBeLogged(): bool
+	{
+		return false;
+	}
+
 	/**
 	 * What's this? I dunno, what are you talking about? Never seen this before, nope. No sir.
 	 */

@@ -334,10 +334,8 @@ class Forum
 	 *    like index.php?action=pm;sa=send will be logged.
 	 */
 	public static array $unlogged_actions = [
-		'about:unknown' => true,
 		'calendar' => ['sa' => ['clock']],
 		'clock' => true,
-		'jsoption' => true,
 		'modifycat' => true,
 	];
 
