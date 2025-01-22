@@ -277,7 +277,7 @@ class Forum
 			'', Actions\TrackIP::class,
 		],
 		'about:unknown' => [
-			'', [Actions\Like::class, 'BookOfUnknown'],
+			'', Actions\Unknown::class,
 		],
 		'unread' => [
 			'', Actions\Unread::class,
