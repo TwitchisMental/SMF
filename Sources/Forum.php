@@ -87,6 +87,9 @@ class Forum
 		'attachapprove' => [
 			'', Actions\AttachmentApprove::class,
 		],
+		'boardindex' => [
+			'', Actions\BoardIndex::class,
+		],
 		'buddy' => [
 			'', Actions\BuddyListToggle::class,
 		],
@@ -105,6 +108,9 @@ class Forum
 		],
 		'deletemsg' => [
 			'', Actions\MsgDelete::class,
+		],
+		'display' => [
+			'', Actions\Display::class,
 		],
 		'dlattach' => [
 			'', Actions\AttachmentDownload::class,
@@ -156,6 +162,9 @@ class Forum
 		],
 		'mergetopics' => [
 			'', Actions\TopicMerge::class,
+		],
+		'messageindex' => [
+			'', Actions\MessageIndex::class,
 		],
 		'mlist' => [
 			'', Actions\Memberlist::class,
@@ -618,17 +627,16 @@ class Forum
 					return is_a($default_action, ActionInterface::class, true) ? $default_action : Utils::getCallable($default_action);
 				}
 
-				// Action and board are both empty... BoardIndex!
-				return Actions\BoardIndex::class;
+				$_REQUEST['action'] = 'boardindex';
 			}
-
-			if (empty(Topic::$topic_id)) {
-				// Topic is empty, and action is empty.... MessageIndex!
-				return Actions\MessageIndex::class;
+			// Topic is empty, and action is empty.... MessageIndex!
+			elseif (empty(Topic::$topic_id)) {
+				$_REQUEST['action'] = 'messageindex';
 			}
-
-			// Board is not empty... topic is not empty... action is empty.. Display!
-			return Actions\Display::class;
+			// Board is not empty... topic is not empty... action is empty... Display!
+			else {
+				$_REQUEST['action'] = 'display';
+			}
 		}
 
 		// Still no valid action?
