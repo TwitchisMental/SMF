@@ -36,7 +36,8 @@ use SMF\Db\DatabaseApi as Db;
  *
  *  1. Create a class that implements SMF\ActionInterface and uses SMF\ActionTrait.
  *     Put your code in its execute() method.
- *  2. Use the integrate_actions hook to add information about your
+ *  2. Either use the integrate_actions hook or call SMF\Forum:::addAction() from
+ *     the integrate_pre_load hook to add information about your
  *     action to SMF\Forum::$actions.
  *
  * Deprecations:
@@ -500,6 +501,34 @@ class Forum
 	/***********************
 	 * Public static methods
 	 ***********************/
+
+	/**
+	 * Adds a new action to the $actions array.
+	 *
+	 * This method allows you to add a new action to the forum's action
+	 * array, which maps URL actions to their corresponding handlers.
+	 *
+	 * @param string $action The action name as it appears in the URL (e.g., 'newaction').
+	 * @param string $file The file that contains the action's handler class. If using an autoloading class, this can be an empty string.
+	 * @param string|callable $handler The class name that implements ActionInterface or a callable handler.
+	 */
+	public static function addAction(string $action, string $file, string|callable $handler): void
+	{
+		self::$actions[$action] = [$file, $handler];
+	}
+
+	/**
+	 * Removes an action from the $actions array.
+	 *
+	 * This method allows you to remove an action from the forum's
+	 * action array, effectively disabling that action.
+	 *
+	 * @param string $action The action name to remove (e.g., 'oldaction').
+	 */
+	public static function removeAction(string $action): void
+	{
+		unset(self::$actions[$action]);
+	}
 
 	/**
 	 * Get the current action.
