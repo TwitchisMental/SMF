@@ -3503,7 +3503,7 @@ img.avatar {
 	align-items: flex-start;
 	font-weight: normal;
 }
-#reason::before {
+.lastedit.reason::before {
 	content: " - ";
 }
 .subject_title a {
