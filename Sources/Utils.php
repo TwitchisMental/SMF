@@ -922,7 +922,11 @@ class Utils
 
 		// Use optimized function for compatibility casefolding.
 		if ($form === 'kc_casefold') {
-			$string = (string) Unicode\Utf8String::create($string)->normalize('kc_casefold');
+			if ($case === 'fold') {
+				$string = (string) Unicode\Utf8String::create($string)->normalize('kc_casefold');
+			} else {
+				$string = (string) Unicode\Utf8String::create($string)->normalize('kc_casefold')->convertCase($case, $simple);
+			}
 		}
 		// Everything else.
 		else {
