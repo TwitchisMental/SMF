@@ -85,7 +85,7 @@ class Register implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return isset($_GET['sa']) && $_GET['sa'] == 'usernamecheck' ? new OutputTypes\Xml : new OutputTypes\Html;
+		return isset($_GET['sa']) && $_GET['sa'] == 'usernamecheck' ? new OutputTypes\Xml() : new OutputTypes\Html();
 	}
 
 	/**

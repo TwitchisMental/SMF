@@ -48,7 +48,7 @@ class Stats implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return isset($_REQUEST['xml']) ? new OutputTypes\Xml : new OutputTypes\Html;
+		return isset($_REQUEST['xml']) ? new OutputTypes\Xml() : new OutputTypes\Html();
 	}
 
 	/**

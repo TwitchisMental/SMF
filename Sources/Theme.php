@@ -66,7 +66,7 @@ class Theme
 	 *
 	 * Actions that do not require loading the index template.
 	 */
- 	public array $simpleActions = [];
+	public array $simpleActions = [];
 
 	/**
 	 * @var array
@@ -414,13 +414,14 @@ class Theme
 				ErrorHandler::fatalLang(
 					'theme_template_error',
 					'template',
-					['template_name' => $template_name, 'type' => 'sub']
+					['template_name' => $template_name, 'type' => 'sub'],
 				);
 			} elseif ($fatal !== 'ignore') {
 				$error_message = Lang::formatText(
 					Lang::$txt['theme_template_error'] ?? 'Unable to load the {template_name} sub-template.',
-					['template_name' => $template_name, 'type' => 'sub']
+					['template_name' => $template_name, 'type' => 'sub'],
 				);
+
 				die(ErrorHandler::log($error_message, 'template'));
 			}
 		}
@@ -2239,8 +2240,8 @@ class Theme
 		IntegrationHook::call('integrate_simple_actions', [&$this->simpleActions, &$this->simpleAreas, &$this->simpleSubActions, &$this->extraParams, &$this->xmlActions]);
 
 		Utils::$context['simple_action'] = (
-			Forum::getCurrentAction()?->isSimpleAction() === true)
-			|| (in_array(Utils::$context['current_action'], $this->simpleActions)
+			(Forum::getCurrentAction())?->isSimpleAction() === true
+			|| in_array(Utils::$context['current_action'], $this->simpleActions)
 			|| (
 				isset($this->simpleAreas[Utils::$context['current_action']], $_REQUEST['area'])
 				&& in_array($_REQUEST['area'], $this->simpleAreas[Utils::$context['current_action']])

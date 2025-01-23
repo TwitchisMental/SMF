@@ -86,7 +86,7 @@ class XmlHttp implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return new OutputTypes\Xml;
+		return new OutputTypes\Xml();
 	}
 
 	public function isAgreementAction(): bool
