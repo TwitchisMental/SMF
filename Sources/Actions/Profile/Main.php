@@ -557,7 +557,7 @@ class Main implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']) ? new OutputTypes\Xml : new OutputTypes\Html;
+		return isset($_GET['area']) && in_array($_GET['area'], ['popup', 'alerts_popup']) ? new OutputTypes\Xml() : new OutputTypes\Html();
 	}
 
 	public function isAgreementAction(): bool

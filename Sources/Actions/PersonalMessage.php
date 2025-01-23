@@ -276,7 +276,7 @@ class PersonalMessage implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return isset($_REQUEST['preview']) ? new OutputTypes\Xml : new OutputTypes\Html;
+		return isset($_REQUEST['preview']) ? new OutputTypes\Xml() : new OutputTypes\Html();
 	}
 
 	public function isAgreementAction(): bool

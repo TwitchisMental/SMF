@@ -56,7 +56,7 @@ class JavaScriptModify implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return new OutputTypes\Xml;
+		return new OutputTypes\Xml();
 	}
 
 	/**

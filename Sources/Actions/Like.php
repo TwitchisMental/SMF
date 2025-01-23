@@ -204,7 +204,7 @@ class Like implements ActionInterface
 
 	public function getOutputType(): OutputTypeInterface
 	{
-		return isset($_REQUEST['js']) ? new OutputTypes\Json : new OutputTypes\Html;
+		return isset($_REQUEST['js']) ? new OutputTypes\Json() : new OutputTypes\Html();
 	}
 
 	/**

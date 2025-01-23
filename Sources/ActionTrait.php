@@ -80,7 +80,7 @@ trait ActionTrait
 	 */
 	public function getOutputType(): OutputTypeInterface
 	{
-		return new OutputTypes\Html;
+		return new OutputTypes\Html();
 	}
 
 	/**
