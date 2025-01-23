@@ -999,11 +999,27 @@ class Utils
 	}
 
 	/**
+	 * Splits a string into its words, symbols, punctuation, and whitespace.
+	 *
+	 * E.g.: 'A red fox! 🦊' --> ['A', ' ', 'red', ' ', 'fox', '!', ' ', '🦊']
+	 *
+	 * @param string $string The string to split into semantic components.
+	 * @return array An array of strings.
+	 */
+	public static function semanticSplit(string $string): array
+	{
+		return Unicode\Utf8String::create($string)->semanticSplit();
+	}
+
+	/**
 	 * Extracts all the words in a string.
 	 *
-	 * Emoji characters count as words. Punctuation and other symbols do not.
+	 * Emoji characters count as words and are retained in the result.
+	 * Whitespace, punctuation, and other symbols are discarded.
 	 *
-	 * @param string $string The strings to extract words from.
+	 * E.g.: 'A red fox! 🦊' --> ['A', 'red', 'fox', '🦊']
+	 *
+	 * @param string $string The string to extract words from.
 	 * @param int $level See documentation for self:sanitizeChars().
 	 *      Default: 0.
 	 * @return array An array of strings.
