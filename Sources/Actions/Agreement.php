@@ -130,6 +130,41 @@ class Agreement implements ActionInterface, Routable
 		return empty(Theme::$current->options['policy_accepted']) || Config::$modSettings['policy_updated_' . $policy_lang] > Theme::$current->options['policy_accepted'];
 	}
 
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = self::buildActionRoute($params);
+
+		// Rename the action to avoid a naming conflict with the agreement.txt file.
+		$route[0] = 'termsofservice';
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		$params = array_merge($params, self::parseActionRoute($route));
+
+		// Change 'termsofservice' back to 'agreement'.
+		$params['action'] = 'agreement';
+
+		return $params;
+	}
+
 	/******************
 	 * Internal methods
 	 ******************/

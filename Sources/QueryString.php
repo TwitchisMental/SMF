@@ -110,6 +110,7 @@ class QueryString
 		'stats'					=> Actions\Stats::class,
 		'sticky'				=> Actions\TopicSticky::class,
 		'suggest'				=> Actions\AutoSuggest::class,
+		'termsofservice'		=> Actions\Agreement::class,
 		'themechooser'			=> Actions\ThemeChooser::class,
 		'topic'					=> Topic::class,
 		'topics'				=> Topic::class,
