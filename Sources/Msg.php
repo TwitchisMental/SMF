@@ -380,13 +380,8 @@ class Msg implements \ArrayAccess
 			// Is this user the message author?
 			$this->formatted['is_message_author'] = $this->id_member == User::$me->id && !User::$me->is_guest;
 
-			// Load the author's data, if not already loaded.
-			if (!empty($this->id_member) && !isset(User::$loaded[$this->id_member])) {
-				User::load($this->id_member);
-			}
-
-			// If it couldn't load, or the user was a guest.... someday may be done with a guest table.
-			if (empty($this->id_member) || !isset(User::$loaded[$this->id_member])) {
+			// If the user was a guest...
+			if (empty($this->id_member)) {
 				$this->formatted['member'] = [
 					'name' => $this->poster_name,
 					'username' => $this->poster_name,
@@ -398,7 +393,7 @@ class Msg implements \ArrayAccess
 					'is_guest' => true,
 				];
 			} else {
-				$this->formatted['member'] = User::$loaded[$this->id_member]->format(true);
+				$this->formatted['member'] = current(User::load($this->id_member))->format(true);
 
 				// Define this here to make things a bit more readable
 				$can_view_warning = User::$me->is_mod || User::$me->allowedTo('moderate_forum') || User::$me->allowedTo('view_warning_any') || ($this->id_member == User::$me->id && User::$me->allowedTo('view_warning_own'));
