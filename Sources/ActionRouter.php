@@ -145,7 +145,7 @@ trait ActionRouter
 		if (isset(Forum::$actions[$route[0]])) {
 			$params['action'] = array_shift($route);
 
-			if (!empty($route) && in_array($params['action'], ['admin', 'moderate', 'profile'])) {
+			if (!empty($route) && preg_match('/^SMF\\\\Actions\\\\.*\\\\/', self::class)) {
 				$params['area'] = array_shift($route);
 			}
 
