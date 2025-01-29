@@ -275,19 +275,25 @@ class Security
 			});
 
 			// Determine attachment upload directory path
-			$path = !empty(Config::$modSettings['currentAttachmentUploadDir'])
+			$path = (
+				!empty(Config::$modSettings['currentAttachmentUploadDir'])
 				? Config::$modSettings['attachmentUploadDir'][Config::$modSettings['currentAttachmentUploadDir']]
-				: Config::$modSettings['attachmentUploadDir'];
+				: Config::$modSettings['attachmentUploadDir']
+			);
 
 			// Secure directories
 			self::secureDirectory($path, true);
 			self::secureDirectory(Config::$cachedir);
 
 			// Check for required files
-			$agreement = !empty(Config::$modSettings['requireAgreement'])
-				&& !file_exists(Config::$languagesdir . '/en_US/agreement.txt');
-			$policy_agreement = !empty(Config::$modSettings['requirePolicyAgreement'])
-				&& empty(Config::$modSettings['policy_' . Lang::$default]);
+			$agreement = (
+				!empty(Config::$modSettings['requireAgreement'])
+				&& !file_exists(Config::$languagesdir . '/en_US/agreement.txt')
+			);
+			$policy_agreement = (
+				!empty(Config::$modSettings['requirePolicyAgreement'])
+				&& empty(Config::$modSettings['policy_' . Lang::$default]
+			);
 
 			// Compile warnings
 			$warnings = [];
