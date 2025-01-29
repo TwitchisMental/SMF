@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF;
 
 use SMF\Actions\Moderation\ReportedContent;
+use SMF\Cache\CacheApi;
 use SMF\Db\DatabaseApi as Db;
 use SMF\Search\SearchApi;
 
@@ -1712,6 +1713,14 @@ class Msg implements \ArrayAccess, Routable
 		// Update search api
 		if ($searchAPI->supportsMethod('postRemoved')) {
 			$searchAPI->postRemoved((int) $msgOptions['id']);
+		}
+
+		// If this is the first post of a topic, remove any cached slug string for the topic.
+		if (
+			!empty($topicOptions['id'])
+			&& ($msgOptions['id'] ?? NAN) === ($topicOptions['first_msg'] ?? NAN)
+		) {
+			CacheApi::put('slug_type-topic_id-' . $topicOptions['id'], null, 0);
 		}
 
 		// Anyone quoted or mentioned?

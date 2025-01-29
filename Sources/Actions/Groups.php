@@ -27,6 +27,7 @@ use SMF\PageIndex;
 use SMF\Parser;
 use SMF\Routable;
 use SMF\SecurityToken;
+use SMF\Slug;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -443,7 +444,20 @@ class Groups implements ActionInterface, Routable
 		unset($params['action']);
 
 		if (($params['sa'] ?? '') === 'members' && isset($params['group'])) {
-			$route[] = $params['group'];
+			if (isset(Slug::$known['group'][(int) $params['group']])) {
+				$slug = (string) Slug::$known['group'][(int) $params['group']];
+			} elseif (($slug = Slug::getCached('group', (int) $params['group'])) === '') {
+				$group = current(Group::load((int) $params['group']));
+
+				if ($group instanceof Group) {
+					$slug = (string) new Slug($group->name, 'group', $group->id);
+				} else {
+					$slug = '';
+				}
+			}
+
+			$route[] = $slug . (str_ends_with($slug, '-' . $params['group']) ? '' : ($slug !== '' ? '-' : '') . $params['group']);
+
 			unset($params['sa'], $params['group']);
 		}
 
@@ -463,7 +477,12 @@ class Groups implements ActionInterface, Routable
 
 		if (!empty($route)) {
 			$params['sa'] = 'members';
-			$params['group'] = preg_replace('/^\X*?(\d+)$/u', '$1', array_shift($route));
+
+			preg_match('/^(\X*?)(\d+)$/u', array_shift($route), $matches);
+
+			$params['group'] = $matches[2];
+
+			Slug::setRequested(rtrim($matches[1], '-'), 'group', (int) $params['group']);
 		}
 
 		return $params;

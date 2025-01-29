@@ -1885,7 +1885,19 @@ class Board implements \ArrayAccess, Routable
 				$params['board'] = substr($params['board'], 0, strrpos($params['board'], '.'));
 			}
 
-			$route[] = $params['board'];
+			if (isset(Slug::$known['board'][(int) $params['board']])) {
+				$slug = (string) Slug::$known['board'][(int) $params['board']];
+			} elseif (($slug = Slug::getCached('board', (int) $params['board'])) === '') {
+				$board = current(self::load((int) $params['board']));
+
+				if ($board instanceof self) {
+					$slug = (string) new Slug($board->name, 'board', $board->id, 60);
+				} else {
+					$slug = '';
+				}
+			}
+
+			$route[] = $slug . (str_ends_with($slug, '-' . $params['board']) ? '' : ($slug !== '' ? '-' : '') . $params['board']);
 
 			if (!empty($params['start'])) {
 				$route[] = $params['start'];
@@ -1910,13 +1922,17 @@ class Board implements \ArrayAccess, Routable
 			$params['action'] = 'messageindex';
 			array_shift($route);
 
-			$board = preg_replace('/^\X*?(\d+(?:\.\d+)?)$/u', '$1', array_shift($route));
+			preg_match('/^(\X*?)(\d+(?:\.\d+)?)$/u', array_shift($route), $matches);
+
+			$board = $matches[2];
 
 			if (str_contains($board, '.')) {
 				list($params['board'], $params['start']) = explode('.', $board);
 			} else {
 				$params['board'] = $board;
 			}
+
+			Slug::setRequested(rtrim($matches[1], '-'), 'board', (int) $params['board']);
 
 			// Either an action suffix or a start value.
 			// This accounts for both 'boards/ID/START' and '/boards/ID/ACTION'
@@ -2165,6 +2181,11 @@ class Board implements \ArrayAccess, Routable
 		// Plug this board into its category.
 		if (!empty($this->cat) && $this->child_level == 0) {
 			$this->cat->children[$this->id] = $this;
+		}
+
+		// Create the slug for this board.
+		if (isset($this->name)) {
+			Slug::create($this->name, 'board', $this->id, 60);
 		}
 	}
 

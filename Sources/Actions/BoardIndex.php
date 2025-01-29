@@ -27,6 +27,7 @@ use SMF\Lang;
 use SMF\Logging;
 use SMF\Msg;
 use SMF\Routable;
+use SMF\Slug;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -287,6 +288,7 @@ class BoardIndex implements ActionInterface, Routable
 			'm.id_msg',
 			'm.id_topic',
 			'm.subject',
+			'mf.subject AS topic_subject',
 			'COALESCE(m.poster_time, 0) AS poster_time',
 			'COALESCE(mem.id_member, 0) AS id_member',
 			'COALESCE(mem.member_name, m.poster_name) AS poster_name',
@@ -302,6 +304,8 @@ class BoardIndex implements ActionInterface, Routable
 
 		$joins = [
 			'LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = b.id_last_msg)',
+			'LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = m.id_topic)',
+			'LEFT JOIN {db_prefix}messages AS mf ON (mf.id_msg = t.id_first_msg)',
 			'LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = m.id_member)',
 		];
 
@@ -363,6 +367,15 @@ class BoardIndex implements ActionInterface, Routable
 		// Find all boards and categories, as well as related information.
 		foreach (Board::queryData($selects, $params, $joins, $where, $order) as $row_board) {
 			$row_board = array_filter($row_board, fn($prop) => !is_null($prop));
+
+			// Ensure the slug for the topic has been set.
+			if (
+				!empty($row_board['id_topic'])
+				&& ($row_board['topic_subject'] ?? '') !== ''
+				&& !isset(Slug::$known['topic'][(int) $row_board['id_topic']])
+			) {
+				Slug::create($row_board['topic_subject'], 'topic', (int) $row_board['id_topic']);
+			}
 
 			$parent = Board::$loaded[$row_board['id_parent']] ?? null;
 

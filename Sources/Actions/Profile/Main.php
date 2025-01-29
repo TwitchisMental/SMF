@@ -30,6 +30,7 @@ use SMF\Routable;
 use SMF\Sapi;
 use SMF\Security;
 use SMF\SecurityToken;
+use SMF\Slug;
 use SMF\Theme;
 use SMF\User;
 use SMF\Utils;
@@ -740,7 +741,21 @@ class Main implements ActionInterface, Routable
 
 		if (!empty($params['u'])) {
 			$route[] = 'members';
-			$route[] = $params['u'];
+
+			if (isset(Slug::$known['member'][(int) $params['u']])) {
+				$slug = (string) Slug::$known['member'][(int) $params['u']];
+			} elseif (($slug = Slug::getCached('member', (int) $params['u'])) === '') {
+				$member = current(User::load((int) $params['u']));
+
+				if ($member instanceof User) {
+					$slug = (string) new Slug($member->name, 'member', $member->id);
+				} else {
+					$slug = '';
+				}
+			}
+
+			$route[] = $slug . (str_ends_with($slug, '-' . $params['u']) ? '' : ($slug !== '' ? '-' : '') . $params['u']);
+
 			unset($params['action'], $params['u']);
 
 			if (isset($params['area'])) {
@@ -776,7 +791,12 @@ class Main implements ActionInterface, Routable
 		}
 
 		$params['action'] = 'profile';
-		$params['u'] = preg_replace('/^\X*?(\d+)$/u', '$1', $route[1] ?? User::$me->id);
+
+		preg_match('/^(\X*?)(\d+)$/u', $route[1] ?? User::$me->id, $matches);
+
+		$params['u'] = $matches[2];
+
+		Slug::setRequested(rtrim($matches[1], '-'), 'member', (int) $params['u']);
 
 		if (isset($route[2])) {
 			$params['area'] = $route[2];

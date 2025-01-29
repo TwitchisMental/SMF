@@ -375,9 +375,19 @@ class Topic implements \ArrayAccess, Routable
 	 */
 	public function __construct(int $id, array $props = [])
 	{
-		self::$loaded[$id] = $this;
 		$this->id = $id;
 		$this->set($props);
+
+		// If the topic is constructed before User::$me is set, the properties
+		// passed in $props are probably not what they will be later.
+		if (isset(User::$me)) {
+			self::$loaded[$id] = $this;
+		}
+
+		// Create the slug for this topic.
+		if (isset($this->subject)) {
+			Slug::create($this->subject, 'topic', $id);
+		}
 	}
 
 	/**
@@ -571,17 +581,19 @@ class Topic implements \ArrayAccess, Routable
 			$id = self::$topic_id;
 		}
 
-		if (!isset(self::$loaded[$id])) {
-			new self($id);
-
-			self::$loaded[$id]->loadTopicInfo();
-
-			if (!empty(self::$topic_id) && $id === self::$topic_id) {
-				self::$info = self::$loaded[$id];
-			}
+		if (isset(self::$loaded[$id])) {
+			$obj = self::$loaded[$id];
+		} else {
+			// The constructor will take care of adding the new instance to self::$loaded.
+			$obj = new self($id);
+			$obj->loadTopicInfo();
 		}
 
-		return self::$loaded[$id];
+		if (isset(self::$loaded[$id]) && !empty(self::$topic_id) && $id === self::$topic_id) {
+			self::$info = self::$loaded[$id];
+		}
+
+		return $obj;
 	}
 
 	/**
@@ -1461,7 +1473,20 @@ class Topic implements \ArrayAccess, Routable
 				$params['topic'] = substr($params['topic'], 0, strrpos($params['topic'], '.'));
 			}
 
-			$route[] = $params['topic'];
+			if (isset(Slug::$known['topic'][(int) $params['topic']])) {
+				$slug = (string) Slug::$known['topic'][(int) $params['topic']];
+			} elseif (($slug = Slug::getCached('topic', (int) $params['topic'])) === '') {
+				$topic = self::load((int) $params['topic']);
+				$msg = $topic instanceof self ? current(Msg::load($topic->id_first_msg)) : false;
+
+				if ($msg instanceof Msg) {
+					$slug = (string) new Slug($msg->subject, 'topic', $topic->id);
+				} else {
+					$slug = '';
+				}
+			}
+
+			$route[] = $slug . (str_ends_with($slug, '-' . $params['topic']) ? '' : ($slug !== '' ? '-' : '') . $params['topic']);
 
 			if (!empty($params['start'])) {
 				$route[] = $params['start'];
@@ -1486,13 +1511,17 @@ class Topic implements \ArrayAccess, Routable
 			$params['action'] = 'display';
 			array_shift($route);
 
-			$topic = preg_replace('/^\X*?(\d+(?:\.(?:new|msg\d+|from\d+|\d+))?)$/u', '$1', array_shift($route));
+			preg_match('/^(\X*?)(\d+(?:\.(?:new|msg\d+|from\d+|\d+))?)$/u', array_shift($route), $matches);
+
+			$topic = $matches[2];
 
 			if (str_contains($topic, '.')) {
 				list($params['topic'], $params['start']) = explode('.', $topic);
 			} else {
 				$params['topic'] = $topic;
 			}
+
+			Slug::setRequested(rtrim($matches[1], '-'), 'topic', (int) $params['topic']);
 
 			// Either an action suffix or a start value.
 			if (!empty($route)) {
@@ -1548,7 +1577,7 @@ class Topic implements \ArrayAccess, Routable
 		];
 
 		// What's new to this user?
-		if (User::$me->is_guest) {
+		if (!isset(User::$me) || User::$me->is_guest) {
 			$topic_selects[] = 't.id_last_msg + 1 AS new_from';
 		} else {
 			$topic_selects[] = 'COALESCE(lt.id_msg, lmr.id_msg, -1) + 1 AS new_from';
@@ -1591,7 +1620,13 @@ class Topic implements \ArrayAccess, Routable
 		$this->real_num_replies = $this->num_replies + (Config::$modSettings['postmod_active'] && User::$me->allowedTo('approve_posts') ? $this->unapproved_posts - ($this->is_approved ? 0 : 1) : 0);
 
 		// If this topic has unapproved posts, we need to work out how many posts the user can see, for page indexing.
-		if (Config::$modSettings['postmod_active'] && $this->unapproved_posts && !User::$me->is_guest && !User::$me->allowedTo('approve_posts')) {
+		if (
+			Config::$modSettings['postmod_active']
+			&& $this->unapproved_posts
+			&& isset(User::$me)
+			&& !User::$me->is_guest
+			&& !User::$me->allowedTo('approve_posts')
+		) {
 			$request = Db::$db->query(
 				'',
 				'SELECT COUNT(id_member) AS my_unapproved_posts
@@ -1608,14 +1643,16 @@ class Topic implements \ArrayAccess, Routable
 			Db::$db->free_result($request);
 
 			$this->total_visible_posts = $this->num_replies + $myUnapprovedPosts + ($this->is_approved ? 1 : 0);
-		} elseif (User::$me->is_guest) {
+		} elseif (!isset(User::$me) || User::$me->is_guest) {
 			$this->total_visible_posts = $this->num_replies + ($this->is_approved ? 1 : 0);
 		} else {
 			$this->total_visible_posts = $this->num_replies + $this->unapproved_posts + ($this->is_approved ? 1 : 0);
 		}
 
 		// Did this user start the topic or not?
-		User::$me->started = User::$me->id == $this->id_member_started && !User::$me->is_guest;
+		if (isset(User::$me)) {
+			User::$me->started = User::$me->id == $this->id_member_started && !User::$me->is_guest;
+		}
 	}
 }
 

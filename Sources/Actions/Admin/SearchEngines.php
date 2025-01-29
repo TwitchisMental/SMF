@@ -1206,7 +1206,7 @@ class SearchEngines implements ActionInterface
 					$boardpath . '/*.msg',
 					$boardpath . '/*.new',
 					$boardpath . '/*.from',
-					// Actions that always set Utils::$context['robot_no_index'] to true.
+					// Normal URLs of actions that always set Utils::$context['robot_no_index'] to true
 					$scriptpath . '?action=admin',
 					$scriptpath . '?action=credits',
 					$scriptpath . '?action=moderate',
@@ -1216,6 +1216,15 @@ class SearchEngines implements ActionInterface
 					$scriptpath . '?action=reporttm',
 					$scriptpath . '?action=search',
 					$scriptpath . '?action=who',
+					// Queryless URLs of actions that always set Utils::$context['robot_no_index'] to true
+					$boardpath . '/*/credits',
+					$boardpath . '/*/moderate',
+					$boardpath . '/*/post',
+					$boardpath . '/*/printpage',
+					$boardpath . '/*/reminder',
+					$boardpath . '/*/reporttm',
+					$boardpath . '/*/search',
+					$boardpath . '/*/who',
 				],
 			],
 		];

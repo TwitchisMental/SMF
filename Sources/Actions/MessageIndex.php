@@ -28,6 +28,7 @@ use SMF\Lang;
 use SMF\PageIndex;
 use SMF\Parser;
 use SMF\Routable;
+use SMF\Slug;
 use SMF\Theme;
 use SMF\Time;
 use SMF\User;
@@ -345,6 +346,15 @@ class MessageIndex implements ActionInterface, Routable
 		// Locked topics get special treatment as well.
 		if ($row['locked']) {
 			$colorClass .= ' locked';
+		}
+
+		// Ensure the slug for the topic has been set.
+		if (
+			!empty($row['id_topic'])
+			&& ($row['first_subject'] ?? '') !== ''
+			&& !isset(Slug::$known['topic'][(int) $row['id_topic']])
+		) {
+			Slug::create($row['first_subject'], 'topic', (int) $row['id_topic']);
 		}
 
 		// 'Print' the topic info.
