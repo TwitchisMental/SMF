@@ -292,7 +292,7 @@ class Security
 			);
 			$policy_agreement = (
 				!empty(Config::$modSettings['requirePolicyAgreement'])
-				&& empty(Config::$modSettings['policy_' . Lang::$default]
+				&& empty(Config::$modSettings['policy_' . Lang::$default])
 			);
 
 			// Compile warnings
