@@ -16,11 +16,10 @@ declare(strict_types=1);
 namespace SMF;
 
 use SMF\Cache\CacheApi;
+use SMF\Localization\AsciiTransliterator;
 
 /**
  * Creates slug strings for use in queryless URLs.
- *
- * @todo Implement ASCII slug option. Needs a library or CLDR data, plus an admin setting.
  */
 class Slug implements \Stringable
 {
@@ -288,41 +287,73 @@ class Slug implements \Stringable
 
 		$this->slug = preg_replace(self::$common_words_regex, ' ', $this->slug);
 
-		// Convert to lower case and decomposed form.
-		$this->slug = Utils::convertCase($this->slug, 'lower', false, 'd', true);
+		// Do we want an ASCII slug or a Unicode slug?
+		if (!empty(Config::$modSettings['use_ascii_slugs'])) {
+			// Transliterate.
+			$this->slug = AsciiTransliterator::toAscii($this->slug);
 
-		// Build the slug.
-		$this->slug = preg_replace(
-			[
-				// Remove apostrophes, quotation marks, etc., within words.
-				'/(?<=[\p{L}\p{M}\p{N}])["\'\p{Pi}\p{Pf}](?=[\p{L}\p{M}\p{N}])/u',
+			// Convert to lower case.
+			$this->slug = Utils::convertCase($this->slug, 'lower', false, 'c', true);
 
-				// Remove combining and enclosing marks.
-				'/[\p{Mn}\p{Me}]/u',
+			// Remove unwanted stuff and hyphenate.
+			$this->slug = preg_replace(
+				[
+					// Remove apostrophes and quotation marks within words.
+					'/\B["\']\B/',
 
-				// Replace all characters that aren't letters or numbers with hyphens.
-				// Note: ideographic characters count as letters.
-				'/[^\p{L}\p{N}]/u',
+					// Replace all characters that aren't letters or numbers with hyphens.
+					'/[^\p{L}\p{N}]/',
 
-				// Collapse runs of hyphens.
-				'/-+/',
+					// Collapse runs of hyphens.
+					'/-+/',
 
-				// Trim leading and trailing hyphens.
-				'/^-|-$/',
-			],
-			[
-				'',
-				'',
-				'-',
-				'-',
-				'',
-			],
-			// Remove all formatting characters, variation selectors, etc.
-			Utils::sanitizeChars($this->slug, 2, ''),
-		);
+					// Trim leading and trailing hyphens.
+					'/^-|-$/',
+				],
+				[
+					'',
+					'-',
+					'-',
+					'',
+				],
+				$this->slug,
+			);
+		} else {
+			// Convert to lower case and decomposed form.
+			$this->slug = Utils::convertCase($this->slug, 'lower', false, 'd', true);
 
-		// Convert back to composed form.
-		$this->slug = Utils::normalize($this->slug, 'c');
+			// Remove unwanted stuff and hyphenate.
+			$this->slug = preg_replace(
+				[
+					// Remove apostrophes, quotation marks, etc., within words.
+					'/(?<=[\p{L}\p{M}\p{N}])["\'\p{Pi}\p{Pf}](?=[\p{L}\p{M}\p{N}])/u',
+
+					// Remove combining and enclosing marks.
+					'/[\p{Mn}\p{Me}]/u',
+
+					// Replace all characters that aren't letters or numbers with hyphens.
+					// Note: ideographic characters count as letters.
+					'/[^\p{L}\p{N}]/u',
+
+					// Collapse runs of hyphens.
+					'/-+/',
+
+					// Trim leading and trailing hyphens.
+					'/^-|-$/',
+				],
+				[
+					'',
+					'',
+					'-',
+					'-',
+					'',
+				],
+				$this->slug,
+			);
+
+			// Convert back to composed form.
+			$this->slug = Utils::normalize($this->slug, 'c');
+		}
 
 		// Truncate to fit within the allowed length.
 		while (mb_strlen($this->slug) > $max_length) {

@@ -86,6 +86,7 @@ $txt['queryless_urls_note'] = 'Supported on Apache, Lighttpd, and LiteSpeed only
 $txt['hide_index_php'] = 'Hide index.php in URLs';
 $txt['hide_index_php_manual'] = 'You must manually configure your server software to support this option before enabling it.';
 $txt['queryless_hidden_index_htaccess'] = 'In order to enable both the option to use friendly URLs and the option to hide index.php in forum URLs at the same time, SMF needs to make changes to your .htaccess file, but the file is not writable. Please check its file permissions and try again.';
+$txt['use_ascii_slugs'] = 'Transliterate non-ASCII characters in friendly URLs.';
 $txt['enableReportPM'] = 'Enable reporting of personal messages';
 $txt['max_pm_recipients'] = 'Maximum number of recipients allowed in a personal message';
 $txt['max_pm_recipients_note'] = '(0 for no limit, admins are exempt)';

@@ -1584,6 +1584,7 @@ class Features implements ActionInterface
 				// Disable only if we know for sure that it won't work.
 				'disabled' => function_exists('apache_get_modules') && !in_array('mod_rewrite', apache_get_modules()),
 			],
+			['check', 'use_ascii_slugs'],
 			'',
 
 			// Time zone and formatting.
