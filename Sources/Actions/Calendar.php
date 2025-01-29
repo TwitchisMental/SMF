@@ -1626,6 +1626,19 @@ class Calendar implements ActionInterface, Routable
 		unset($params['action']);
 
 		if (isset($params['sa'], self::$subactions[$params['sa']])) {
+			if ($params['sa'] === 'post') {
+				if (isset($params['eventid'])) {
+					$route[] = 'events';
+					$route[] = $params['eventid'];
+					unset($params['eventid']);
+
+					if (isset($params['recurrenceid'])) {
+						$route[] = $params['recurrenceid'];
+						unset($params['recurrenceid']);
+					}
+				}
+			}
+
 			$route[] = $params['sa'];
 
 			if ($params['sa'] === 'clock') {
@@ -1647,6 +1660,10 @@ class Calendar implements ActionInterface, Routable
 			$route[] = sprintf('%02d', $params['month'] ?? 1);
 			$route[] = sprintf('%02d', $params['day'] ?? 1);
 			unset($params['year'], $params['month'], $params['day']);
+		} elseif (isset($params['event'])) {
+			$route[] = 'events';
+			$route[] = $params['event'];
+			unset($params['event']);
 		}
 
 		return ['route' => $route, 'params' => $params];
@@ -1665,23 +1682,37 @@ class Calendar implements ActionInterface, Routable
 			array_unshift($route, 'calendar');
 		}
 
-		$params['action'] = $route[0];
+		$params['action'] = array_shift($route);
 
-		if (isset($route[1])) {
-			if (in_array($route[1], self::$subactions)) {
-				$params['sa'] = $route[1];
+		if (!empty($route)) {
+			if (in_array($route[0], self::$subactions)) {
+				$params['sa'] = array_shift($route);
 
-				if ($params['sa'] === 'clock' && in_array($route[2] ?? null, ['bcd', 'rb', 'omfg'])) {
-					$params[$route[2]] = true;
+				if ($params['sa'] === 'clock' && in_array($route[0] ?? null, ['bcd', 'rb', 'omfg'])) {
+					$params[$route[0]] = true;
 				}
-			} elseif (is_numeric($route[1])) {
-				$params['year'] = (int) $route[1];
+			} elseif (is_numeric($route[0])) {
+				$params['year'] = array_shift($route);
 
-				if (isset($route[2])) {
-					$params['month'] = (int) $route[2];
+				if (!empty($route)) {
+					$params['month'] = array_shift($route);
 
-					if (isset($route[3])) {
-						$params['day'] = (int) $route[3];
+					if (!empty($route)) {
+						$params['day'] = array_shift($route);
+					}
+				}
+			} elseif ($route[0] === 'events') {
+				array_shift($route);
+				$params['event'] = array_shift($route);
+
+				if (!empty($route)) {
+					if (!in_array($route[0], self::$subactions)) {
+						$params['recurrenceid'] = array_shift($route);
+					}
+
+					if (!empty($route) && in_array($route[0], self::$subactions)) {
+						$params['sa'] = array_shift($route);
+						$params['eventid'] = $params['event'];
 					}
 				}
 			}
