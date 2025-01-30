@@ -2424,11 +2424,15 @@ class Utils
 		}
 
 		// Remember this URL in case someone doesn't like sending HTTP_REFERER.
-		if (Forum::getCurrentAction()?->canBeLogged() === true
-			|| (
-				Forum::getCurrentAction() === null
-				&& !QueryString::isFilteredRequest(Forum::$unlogged_actions, 'action')
-				&& !isset($_REQUEST['xml'])
+		if (
+			isset($_SERVER['REQUEST_URL'])
+			&& (
+				Forum::getCurrentAction()?->canBeLogged() === true
+				|| (
+					Forum::getCurrentAction() === null
+					&& !QueryString::isFilteredRequest(Forum::$unlogged_actions, 'action')
+					&& !isset($_REQUEST['xml'])
+				)
 			)
 		) {
 			$_SESSION['old_url'] = $_SERVER['REQUEST_URL'];

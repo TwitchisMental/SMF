@@ -1615,9 +1615,9 @@ class Topic implements \ArrayAccess, Routable
 		// A few tweaks and extras.
 		$this->started_time = Time::create('@' . $this->started_timestamp)->format();
 		$this->unwatched = $this->unwatched ?? 0;
-		$this->is_poll = (bool) ($this->id_poll > 0 && Config::$modSettings['pollMode'] == '1' && User::$me->allowedTo('poll_view'));
+		$this->is_poll = (bool) ($this->id_poll > 0 && Config::$modSettings['pollMode'] == '1' && isset(User::$me) && User::$me->allowedTo('poll_view'));
 
-		$this->real_num_replies = $this->num_replies + (Config::$modSettings['postmod_active'] && User::$me->allowedTo('approve_posts') ? $this->unapproved_posts - ($this->is_approved ? 0 : 1) : 0);
+		$this->real_num_replies = $this->num_replies + (Config::$modSettings['postmod_active'] && isset(User::$me) && User::$me->allowedTo('approve_posts') ? $this->unapproved_posts - ($this->is_approved ? 0 : 1) : 0);
 
 		// If this topic has unapproved posts, we need to work out how many posts the user can see, for page indexing.
 		if (
