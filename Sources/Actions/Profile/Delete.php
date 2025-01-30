@@ -118,8 +118,7 @@ class Delete implements ActionInterface
 
 		// Deleting someone else's account.
 		if (!User::$me->is_owner) {
-			// Now, have you been naughty and need your posts deleting?
-			// @todo Should this check board permissions?
+			// Delete poll votes, if requested.
 			if (!empty($_POST['deleteVotes']) && User::$me->allowedTo('moderate_forum')) {
 				// First we find any polls that this user has voted in...
 				$polls_to_update = [];
@@ -159,58 +158,58 @@ class Delete implements ActionInterface
 						],
 					);
 				}
+			}
 
-				// Next, delete the posts, if requested.
-				if (in_array($_POST['remove_type'], ['posts', 'topics'])) {
-					$extra = empty($_POST['perma_delete']) ? ' AND t.id_board != {int:recycle_board}' : '';
+			// Next, delete the posts, if requested.
+			if (in_array($_POST['remove_type'], ['posts', 'topics']) && User::$me->allowedTo('moderate_forum')) {
+				$extra = empty($_POST['perma_delete']) ? ' AND t.id_board != {int:recycle_board}' : '';
 
-					$recycle_board = empty(Config::$modSettings['recycle_board']) ? 0 : Config::$modSettings['recycle_board'];
+				$recycle_board = empty(Config::$modSettings['recycle_board']) ? 0 : Config::$modSettings['recycle_board'];
 
-					// First off we delete any topics the member has started, if requested.
-					if ($_POST['remove_type'] == 'topics') {
-						// Fetch all topics started by this user.
-						$request = Db::$db->query(
-							'',
-							'SELECT t.id_topic
-							FROM {db_prefix}topics AS t
-							WHERE t.id_member_started = {int:selected_member}' . $extra,
-							[
-								'selected_member' => Profile::$member->id,
-								'recycle_board' => $recycle_board,
-							],
-						);
-						$topic_ids = Db::$db->fetch_all($request);
-						Db::$db->free_result($request);
-
-						// Actually remove the topics.
-						// Ignore recycling if we want to perma-delete things...
-						if (!empty($topic_ids)) {
-							Topic::remove($topic_ids, true, !empty($extra));
-						}
-					}
-
-					// Now delete the remaining messages.
+				// First off we delete any topics the member has started, if requested.
+				if ($_POST['remove_type'] == 'topics') {
+					// Fetch all topics started by this user.
 					$request = Db::$db->query(
 						'',
-						'SELECT m.id_msg
-						FROM {db_prefix}messages AS m
-							INNER JOIN {db_prefix}topics AS t ON (t.id_topic = m.id_topic
-								AND t.id_first_msg != m.id_msg)
-						WHERE m.id_member = {int:selected_member}' . $extra,
+						'SELECT t.id_topic
+						FROM {db_prefix}topics AS t
+						WHERE t.id_member_started = {int:selected_member}' . $extra,
 						[
 							'selected_member' => Profile::$member->id,
 							'recycle_board' => $recycle_board,
 						],
 					);
-
-					// This could take a while... but ya know it's gonna be worth it in the end.
-					while ($row = Db::$db->fetch_assoc($request)) {
-						Sapi::resetTimeout();
-
-						Msg::remove($row['id_msg']);
-					}
+					$topic_ids = Db::$db->fetch_all($request);
 					Db::$db->free_result($request);
+
+					// Actually remove the topics.
+					// Ignore recycling if we want to perma-delete things...
+					if (!empty($topic_ids)) {
+						Topic::remove($topic_ids, true, !empty($extra));
+					}
 				}
+
+				// Now delete the remaining messages.
+				$request = Db::$db->query(
+					'',
+					'SELECT m.id_msg
+					FROM {db_prefix}messages AS m
+						INNER JOIN {db_prefix}topics AS t ON (t.id_topic = m.id_topic
+							AND t.id_first_msg != m.id_msg)
+					WHERE m.id_member = {int:selected_member}' . $extra,
+					[
+						'selected_member' => Profile::$member->id,
+						'recycle_board' => $recycle_board,
+					],
+				);
+
+				// This could take a while... but ya know it's gonna be worth it in the end.
+				while ($row = Db::$db->fetch_assoc($request)) {
+					Sapi::resetTimeout();
+
+					Msg::remove($row['id_msg']);
+				}
+				Db::$db->free_result($request);
 			}
 
 			// Only delete this poor member's account if they are actually being booted out of camp.
