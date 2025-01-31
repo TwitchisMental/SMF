@@ -1173,8 +1173,15 @@ class Time extends \DateTime implements \ArrayAccess
 			$replacements['~\b' . $translated_word . '\b~iu'] = $word;
 		}
 
-		// Wrap the replacement strings in closures.
+		// Finalize.
 		foreach ($replacements as $pattern => $replacement) {
+			// Filter out empty patterns.
+			if (preg_match('/^~\s*~iu$/', $pattern)) {
+				unset($replacements[$pattern]);
+				continue;
+			}
+
+			// Wrap the replacement strings in closures.
 			$replacements[$pattern] = fn($matches) => $replacement;
 		}
 
