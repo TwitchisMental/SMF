@@ -2713,6 +2713,65 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 
 	/**
 	 * Begin
+	 * Config
+	 */
+	function reloadSettings()
+	{
+		return Config::reloadModSettings();
+	}
+
+	function updateSettings(array $change_array, bool $update = false)
+	{
+		return Config::updateModSettings($change_array, $update);
+	}
+
+	function get_auth_secret()
+	{
+		return Config::getAuthSecret();
+	}
+
+	function get_settings_defs()
+	{
+		return Config::getSettingsDefs();
+	}
+
+	function updateSettingsFile(array $config_vars, ?bool $keep_quotes = null, bool $rebuild = false)
+	{
+		return Config::updateSettingsFile($config_vars, $keep_quotes, $rebuild);
+	}
+
+	function safe_file_write(string $file, string $data, ?string $backup_file = null, ?int $mtime = null, bool $append = false)
+	{
+		return Config::safeFileWrite($file, $data, $backup_file, $mtime, $append);
+	}
+
+	function smf_var_export(mixed $var)
+	{
+		return Config::varExport($var);
+	}
+
+	function updateDbLastError(int $time)
+	{
+		return Config::updateDbLastError($time);
+	}
+
+	function sm_temp_dir()
+	{
+		return Config::getTempDir();
+	}
+
+	function smf_seed_generator()
+	{
+		return Config::generateSeed();
+	}
+
+	function check_cron()
+	{
+		return Config::checkCron();
+	}
+
+	/**
+	 * Begin
 	 * Db\DatabaseApi
 	 */
 	function loadDatabase(array $options = []): Db\DatabaseApi

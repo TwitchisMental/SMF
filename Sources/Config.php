@@ -984,18 +984,6 @@ class Config
 			$GLOBALS['modSettings'] = &self::$modSettings;
 			$GLOBALS['scripturl'] = &self::$scripturl;
 
-			eval('function reloadSettings() { return ' . __CLASS__ . '::reloadModSettings(); }');
-			eval('function updateSettings(...$args) { return ' . __CLASS__ . '::updateModSettings(...$args); }');
-			eval('function get_auth_secret() { return ' . __CLASS__ . '::getAuthSecret(); }');
-			eval('function get_settings_defs() { return ' . __CLASS__ . '::getSettingsDefs(); }');
-			eval('function updateSettingsFile(...$args) { return ' . __CLASS__ . '::updateSettingsFile(...$args); }');
-			eval('function safe_file_write(...$args) { return ' . __CLASS__ . '::safeFileWrite(...$args); }');
-			eval('function smf_var_export(...$args) { return ' . __CLASS__ . '::varExport(...$args); }');
-			eval('function updateDbLastError(...$args) { return ' . __CLASS__ . '::updateDbLastError(...$args); }');
-			eval('function sm_temp_dir() { return ' . __CLASS__ . '::getTempDir(); }');
-			eval('function smf_seed_generator() { return ' . __CLASS__ . '::generateSeed(); }');
-			eval('function check_cron() {return ' . __CLASS__ . '::checkCron(); }');
-
 			self::$exported = true;
 		}
 	}
