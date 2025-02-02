@@ -2711,63 +2711,184 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		return Cache\CacheApi::get($key, $ttl);
 	}
 
+	/**************
+	 * Begin Config
+	 **************/
+
 	/**
-	 * Begin
-	 * Config
+	 * Load the $modSettings array.
 	 */
 	function reloadSettings()
 	{
-		return Config::reloadModSettings();
+		return SMF\Config::reloadModSettings();
 	}
 
+	/**
+	 * Updates the settings table as well as $modSettings... only does one at a time if $update is true.
+	 *
+	 * - updates both the settings table and $modSettings array.
+	 * - all of changeArray's indexes and values are assumed to have escaped apostrophes (')!
+	 * - if a variable is already set to what you want to change it to, that
+	 *   variable will be skipped over; it would be unnecessary to reset.
+	 * - When use_update is true, UPDATEs will be used instead of REPLACE.
+	 * - when use_update is true, the value can be true or false to increment
+	 *  or decrement it, respectively.
+	 *
+	 * @param array $change_array An array of info about what we're changing in 'setting' => 'value' format
+	 * @param bool $update Whether to use an UPDATE query instead of a REPLACE query
+	 */
 	function updateSettings(array $change_array, bool $update = false)
 	{
-		return Config::updateModSettings($change_array, $update);
+		return SMF\Config::updateModSettings($change_array, $update);
 	}
 
+	/**
+	 * Gets, and if necessary creates, the authentication secret to use for cookies, tokens, etc.
+	 *
+	 * Note: Never use the $auth_secret variable directly. Always call this function instead.
+	 *
+	 * @return string The authentication secret.
+	 */
 	function get_auth_secret()
 	{
-		return Config::getAuthSecret();
+		return SMF\Config::getAuthSecret();
 	}
 
+	/**
+	 * Describes properties of all known Settings.php variables and other content.
+	 * Helper for updateSettingsFile(); also called by saveSettings().
+	 *
+	 * @return array Descriptions of all known Settings.php content
+	 */
 	function get_settings_defs()
 	{
-		return Config::getSettingsDefs();
+		return SMF\Config::getSettingsDefs();
 	}
 
+	/**
+	 * Update the Settings.php file.
+	 *
+	 * The most important function in this file for mod makers happens to be the
+	 * updateSettingsFile() function, but it shouldn't be used often anyway.
+	 *
+	 * - Updates the Settings.php file with the changes supplied in config_vars.
+	 *
+	 * - Expects config_vars to be an associative array, with the keys as the
+	 *   variable names in Settings.php, and the values the variable values.
+	 *
+	 * - Correctly formats the values using smf_var_export().
+	 *
+	 * - Restores standard formatting of the file, if $rebuild is true.
+	 *
+	 * - Checks for changes to db_last_error and passes those off to a separate
+	 *   handler.
+	 *
+	 * - Creates a backup file and will use it should the writing of the
+	 *   new settings file fail.
+	 *
+	 * - Tries to intelligently trim quotes and remove slashes from string values.
+	 *   This is done for backwards compatibility purposes (old versions of this
+	 *   function expected strings to have been manually escaped and quoted). This
+	 *   behaviour can be controlled by the $keep_quotes parameter.
+	 *
+	 * MOD AUTHORS: If you are adding a setting to Settings.php, you should use the
+	 * integrate_update_settings_file hook to define it in get_settings_defs().
+	 *
+	 * @param array $config_vars An array of one or more variables to update.
+	 * @param bool|null $keep_quotes Whether to strip slashes & trim quotes from string values. Defaults to auto-detection.
+	 * @param bool $rebuild If true, attempts to rebuild with standard format. Default false.
+	 * @return bool True on success, false on failure.
+	 */
 	function updateSettingsFile(array $config_vars, ?bool $keep_quotes = null, bool $rebuild = false)
 	{
-		return Config::updateSettingsFile($config_vars, $keep_quotes, $rebuild);
+		return SMF\Config::updateSettingsFile($config_vars, $keep_quotes, $rebuild);
 	}
 
+	/**
+	 * Writes data to a file, optionally making a backup, while avoiding race conditions.
+	 *
+	 * @param string $file The filepath of the file where the data should be written.
+	 * @param string $data The data to be written to $file.
+	 * @param string $backup_file The filepath where the backup should be saved. Default null.
+	 * @param int $mtime If modification time of $file is more recent than this Unix timestamp, the write operation will abort. Defaults to time that the script started execution.
+	 * @param bool $append If true, the data will be appended instead of overwriting the existing content of the file. Default false.
+	 * @return bool Whether the write operation succeeded or not.
+	 */
 	function safe_file_write(string $file, string $data, ?string $backup_file = null, ?int $mtime = null, bool $append = false)
 	{
-		return Config::safeFileWrite($file, $data, $backup_file, $mtime, $append);
+		return SMF\Config::safeFileWrite($file, $data, $backup_file, $mtime, $append);
 	}
 
+	/**
+	 * A wrapper around var_export whose output matches SMF coding conventions.
+	 *
+	 * @todo Add special handling for objects?
+	 *
+	 * @param mixed $var The variable to export
+	 * @return mixed A PHP-parseable representation of the variable's value
+	 */
 	function smf_var_export(mixed $var)
 	{
-		return Config::varExport($var);
+		return SMF\Config::varExport($var);
 	}
 
+	/**
+	 * Saves the time of the last db error for the error log
+	 * - Done separately from updateSettingsFile to avoid race conditions
+	 *   which can occur during a db error
+	 * - If it fails Settings.php will assume 0
+	 *
+	 * @param int $time The timestamp of the last DB error
+	 * @param bool True If we should update the current db_last_error context as well.  This may be useful in cases where the current context needs to know a error was logged since the last check.
+	 * @return bool True If we could succesfully put the file or not.
+	 */
 	function updateDbLastError(int $time)
 	{
-		return Config::updateDbLastError($time);
+		return SMF\Config::updateDbLastError($time);
 	}
 
+	/**
+	 * Locates the most appropriate temp directory.
+	 *
+	 * Systems using `open_basedir` restrictions may receive errors with
+	 * `sys_get_temp_dir()` due to misconfigurations on servers. Other
+	 * cases sys_temp_dir may not be set to a safe value. Additionally
+	 * `sys_get_temp_dir` may use a readonly directory. This attempts to
+	 * find a working temp directory that is accessible under the
+	 * restrictions and is writable to the web service account.
+	 *
+	 * Directories checked against `open_basedir`:
+	 *
+	 * - `sys_get_temp_dir()`
+	 * - `upload_tmp_dir`
+	 * - `session.save_path`
+	 * - `cachedir`
+	 *
+	 * @return string
+	 */
 	function sm_temp_dir()
 	{
-		return Config::getTempDir();
+		return SMF\Config::getTempDir();
 	}
 
+	/**
+	 * Generate a random seed and ensure it's stored in settings.
+	 */
 	function smf_seed_generator()
 	{
-		return Config::generateSeed();
+		return SMF\Config::generateSeed();
 	}
 
+	/**
+	 * Ensures SMF's scheduled tasks are being run as intended
+	 *
+	 * If the admin activated the cron_is_real_cron setting, but the cron job is
+	 * not running things at least once per day, we need to go back to SMF's default
+	 * behaviour using "web cron" JavaScript calls.
+	 */
 	function check_cron()
 	{
-		return Config::checkCron();
+		return SMF\Config::checkCron();
 	}
 
 	/**

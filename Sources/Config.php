@@ -240,12 +240,6 @@ class Config
 	 * @var string
 	 */
 	public static string $languagesdir;
-	/**
-	 * @var string
-	 *
-	 * Path to the tasks directory.
-	 */
-	public static string $tasksdir;
 
 	######### Modification Support #########
 	/**
@@ -946,9 +940,6 @@ class Config
 			self::$sourcedir = self::$boarddir . '/Sources';
 		}
 
-		// As of 3.0, this is no longer changeable.
-		self::$tasksdir = self::$sourcedir . '/Tasks';
-
 		if ((empty(self::$packagesdir) || !is_dir(realpath(self::$packagesdir))) && is_dir(self::$boarddir . '/Packages')) {
 			self::$packagesdir = self::$boarddir . '/Packages';
 		}
@@ -983,6 +974,9 @@ class Config
 
 			$GLOBALS['modSettings'] = &self::$modSettings;
 			$GLOBALS['scripturl'] = &self::$scripturl;
+
+			// The path to the tasks dir was a separate setting before 3.0.
+			$GLOBALS['tasksdir'] = self::$sourcedir . '/Tasks';
 
 			self::$exported = true;
 		}
