@@ -361,9 +361,21 @@ class MySQL extends DatabaseApi implements DatabaseApiInterface
 			}
 		}
 
-		// Inserting data as a single row can be done as a single array.
-		if (!is_array($data[array_rand($data)])) {
-			$data = [$data];
+		// Ensure that $data is a multidimensional array.
+		if (array_filter($data, fn($dataRow) => is_array($dataRow)) !== $data) {
+			// If backward compatibility mode is enabled, quietly clean up after
+			// old mods that did the wrong thing. Otherwise, trigger an error.
+			if (!empty(Config::$backward_compatibility)) {
+				$data = [$data];
+			} else {
+				$this->error_backtrace(
+					'Invalid data structure sent to the database.',
+					'',
+					E_USER_ERROR,
+					__FILE__,
+					__LINE__,
+				);
+			}
 		}
 
 		// Create the mold for a single row insert.
