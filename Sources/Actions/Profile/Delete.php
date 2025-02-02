@@ -66,6 +66,9 @@ class Delete implements ActionInterface
 		// Permissions for removing stuff...
 		Utils::$context['can_delete_posts'] = !User::$me->is_owner && User::$me->allowedTo('moderate_forum');
 
+		// Did the user request to be anonymized?
+		Utils::$context['should_anonymize'] = !empty(Config::$modSettings['always_anonymize_deleted_accounts']) || Profile::$member->is_activated % User::BANNED === User::REQUESTED_DELETE_ANONYMIZE;
+
 		// Show an extra option if recycling is enabled...
 		Utils::$context['show_perma_delete'] = !empty(Config::$modSettings['recycle_enable']) && !empty(Config::$modSettings['recycle_board']);
 
@@ -161,7 +164,11 @@ class Delete implements ActionInterface
 			}
 
 			// Next, delete the posts, if requested.
-			if (in_array($_POST['remove_type'], ['posts', 'topics']) && User::$me->allowedTo('moderate_forum')) {
+			if (
+				!empty($_POST['deletePosts'])
+				&& in_array($_POST['remove_type'] ?? '', ['posts', 'topics'])
+				&& User::$me->allowedTo('moderate_forum')
+			) {
 				$extra = empty($_POST['perma_delete']) ? ' AND t.id_board != {int:recycle_board}' : '';
 
 				$recycle_board = empty(Config::$modSettings['recycle_board']) ? 0 : Config::$modSettings['recycle_board'];
@@ -214,20 +221,25 @@ class Delete implements ActionInterface
 
 			// Only delete this poor member's account if they are actually being booted out of camp.
 			if (isset($_POST['deleteAccount'])) {
-				User::delete(Profile::$member->id);
+				User::delete(Profile::$member->id, false, !empty($_POST['anonymize']));
 			}
 		}
 		// Deleting their own account, but they need approval to delete.
 		elseif (!empty(Config::$modSettings['approveAccountDeletion']) && !User::$me->allowedTo('moderate_forum')) {
 			// Setup their account for deletion.
-			User::updateMemberData(Profile::$member->id, ['is_activated' => User::REQUESTED_DELETE]);
+			User::updateMemberData(
+				Profile::$member->id,
+				[
+					'is_activated' => (isset($_POST['anonymize']) || !empty(Config::$modSettings['always_anonymize_deleted_accounts']) ? User::REQUESTED_DELETE_ANONYMIZE : User::REQUESTED_DELETE) + (Profile::$member->is_banned ? User::BANNED : 0),
+				],
+			);
 
 			// Another account needs approval...
 			Config::updateModSettings(['unapprovedMembers' => true], true);
 		}
 		// Deleting their own account, and they don't need approval.
 		else {
-			User::delete(Profile::$member->id);
+			User::delete(Profile::$member->id, false, !empty($_POST['anonymize']));
 
 			Logout::call(true);
 

@@ -435,6 +435,10 @@ class ACP implements ActionInterface
 						'search' => [
 							'label' => 'mlist_search',
 						],
+						'settings' => [
+							'label' => 'settings',
+							'permission' => 'admin_forum',
+						],
 					],
 				],
 				'membergroups' => [

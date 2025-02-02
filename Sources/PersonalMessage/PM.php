@@ -1404,7 +1404,7 @@ class PM implements \ArrayAccess
 			if (
 				$row['is_activated'] >= User::BANNED
 				|| (
-					$row['is_activated'] == User::REQUESTED_DELETE
+					in_array((int) $row['is_activated'], [User::REQUESTED_DELETE, User::REQUESTED_DELETE_ANONYMIZE])
 					&& !User::$me->allowedTo('moderate_forum')
 				)
 			) {
