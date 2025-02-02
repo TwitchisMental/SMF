@@ -850,7 +850,7 @@ class Calendar implements ActionInterface
 		$high_date = (new \DateTimeImmutable($high_date . ' +1 day'))->format('Y-m-d');
 
 		foreach (Event::getOccurrencesInRange($low_date, $high_date, $use_permissions) as $occurrence) {
-			$cal_date = new Time($occurrence->start_date_local, $tz);
+			$cal_date = new Time($occurrence->start->format('Y-m-d'), $tz);
 
 			while (
 				$cal_date->getTimestamp() < $occurrence->end->getTimestamp()
