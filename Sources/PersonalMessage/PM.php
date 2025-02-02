@@ -1698,9 +1698,9 @@ class PM implements \ArrayAccess
 			// ...And update the statistics accordingly - now including unread messages!.
 			while ($row = Db::$db->fetch_assoc($request)) {
 				if ($row['is_read']) {
-					User::updateMemberData($row['id_member'], ['instant_messages' => $where == '' ? 0 : 'instant_messages - ' . $row['num_deleted_messages']]);
+					User::updateMemberData((int) $row['id_member'], ['instant_messages' => $where == '' ? 0 : 'instant_messages - ' . $row['num_deleted_messages']]);
 				} else {
-					User::updateMemberData($row['id_member'], ['instant_messages' => $where == '' ? 0 : 'instant_messages - ' . $row['num_deleted_messages'], 'unread_messages' => $where == '' ? 0 : 'unread_messages - ' . $row['num_deleted_messages']]);
+					User::updateMemberData((int) $row['id_member'], ['instant_messages' => $where == '' ? 0 : 'instant_messages - ' . $row['num_deleted_messages'], 'unread_messages' => $where == '' ? 0 : 'unread_messages - ' . $row['num_deleted_messages']]);
 				}
 
 				// If this is the current member we need to make their message count correct.
@@ -1935,7 +1935,7 @@ class PM implements \ArrayAccess
 
 			// Need to store all this.
 			CacheApi::put('labelCounts:' . $owner, Utils::$context['labels'], 720);
-			User::updateMemberData($owner, ['unread_messages' => $total_unread]);
+			User::updateMemberData((int) $owner, ['unread_messages' => $total_unread]);
 
 			// If it was for the current member, reflect this in User::$me as well.
 			if ($owner == User::$me->id) {
