@@ -158,14 +158,9 @@ class MySQL extends DatabaseApi implements DatabaseApiInterface
 			}
 		}
 
+		// Inject the values passed to this function.
 		if (empty($db_values['security_override']) && (!empty($db_values) || str_contains($db_string, '{db_prefix}'))) {
-			$this->temp_values = $db_values;
-			$this->temp_connection = $connection;
-
-			// Inject the values passed to this function.
-			$db_string = preg_replace_callback('~{([a-z_]+)(?::([a-zA-Z0-9_-]+))?}~', [$this, 'replacement__callback'], $db_string);
-
-			unset($this->temp_values, $this->temp_connection);
+			$db_string = $this->quote($db_string, $db_values, $connection);
 		}
 
 		// First, we clean strings out of the query, reduce whitespace, lowercase, and trim - so we can check it over.
