@@ -1200,7 +1200,7 @@ class ServerSideIncludes
 	}
 
 	/**
-	 * Get al members in the specified group
+	 * Get all members in the specified group
 	 *
 	 * Alias: ssi_fetchGroupMembers()
 	 *
