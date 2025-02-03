@@ -1428,17 +1428,6 @@ class Topic implements \ArrayAccess
 		Msg::updateLastMessages($updates);
 	}
 
-	/**
-	 * Backward compatibility wrapper for the getLikedMsgs method.
-	 *
-	 * @param int $topic The topic ID to fetch the info from.
-	 * @return array An array of IDs of messages in the specified topic that the current user likes
-	 */
-	public static function prepareLikesContext(int $topic): array
-	{
-		return self::load($topic)->getLikedMsgs();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

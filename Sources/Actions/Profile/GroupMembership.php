@@ -251,35 +251,6 @@ class GroupMembership implements ActionInterface
 		Profile::$member->new_data['id_group'] = $new_primary;
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Backward compatibility wrapper for the save method.
-	 *
-	 * @param int $memID The ID of the user.
-	 * @return string The type of change that was made.
-	 */
-	public static function groupMembership2(int $memID): string
-	{
-		$u = $_REQUEST['u'] ?? null;
-		$_REQUEST['u'] = $memID;
-
-		self::load();
-
-		$saving = Utils::$context['completed_save'];
-		Utils::$context['completed_save'] = true;
-
-		$_REQUEST['u'] = $u;
-
-		self::$obj->execute();
-
-		Utils::$context['completed_save'] = $saving;
-
-		return self::$obj->change_type;
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

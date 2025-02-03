@@ -1030,7 +1030,7 @@ class Utils
 	}
 
 	/**
-	 * Creates optimized regular expressions from an array of strings.
+	 * Creates optimized regular expressions from arrays of strings.
 	 *
 	 * An optimized regex built using this function will be much faster than a
 	 * simple regex built using `implode('|', $strings)` --- anywhere from

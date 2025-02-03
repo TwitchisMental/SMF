@@ -296,56 +296,6 @@ class Main implements ActionInterface
 		}
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Figures out which parts of the moderation center can be accessed by the
-	 * current user.
-	 *
-	 * Populates the following context variables:
-	 *  - can_moderate_boards
-	 *  - can_moderate_groups
-	 *  - can_moderate_approvals
-	 *  - can_moderate_users
-	 */
-	public static function checkAccessPermissions(): void
-	{
-		// No need to repeat these checks.
-		if (self::$access_checked) {
-			return;
-		}
-
-		Utils::$context['can_moderate_boards'] = User::$me->mod_cache['bq'] != '0=1';
-		Utils::$context['can_moderate_groups'] = User::$me->mod_cache['gq'] != '0=1';
-		Utils::$context['can_moderate_approvals'] = Config::$modSettings['postmod_active'] && !empty(User::$me->mod_cache['ap']);
-		Utils::$context['can_moderate_users'] = User::$me->allowedTo('moderate_forum');
-
-		// Everyone using this area must be allowed here!
-		if (!Utils::$context['can_moderate_boards'] && !Utils::$context['can_moderate_groups'] && !Utils::$context['can_moderate_approvals'] && !Utils::$context['can_moderate_users']) {
-			User::$me->isAllowedTo('access_mod_center');
-		}
-
-		self::$access_checked = true;
-	}
-
-	/**
-	 * Backward compatibility wrapper that either calls self::call() or calls
-	 * self::load()->createMenu(), depending on the value of $dont_call.
-	 *
-	 * @param bool $dont_call If true, just creates the menu and doesn't call
-	 *    the function for the appropriate mod area.
-	 */
-	public static function ModerationMain(bool $dont_call = false): void
-	{
-		if ($dont_call) {
-			self::load()->createMenu();
-		} else {
-			self::call();
-		}
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/
@@ -420,6 +370,40 @@ class Main implements ActionInterface
 		$this->moderation_areas['members']['areas']['userwatch']['enabled'] = Config::$modSettings['warning_settings'][0] == 1 && Utils::$context['can_moderate_boards'];
 
 		$this->moderation_areas['members']['areas']['reportedmembers']['enabled'] = Utils::$context['can_moderate_users'];
+	}
+
+	/*************************
+	 * Internal static methods
+	 *************************/
+
+	/**
+	 * Figures out which parts of the moderation center can be accessed by the
+	 * current user.
+	 *
+	 * Populates the following context variables:
+	 *  - can_moderate_boards
+	 *  - can_moderate_groups
+	 *  - can_moderate_approvals
+	 *  - can_moderate_users
+	 */
+	protected static function checkAccessPermissions(): void
+	{
+		// No need to repeat these checks.
+		if (self::$access_checked) {
+			return;
+		}
+
+		Utils::$context['can_moderate_boards'] = User::$me->mod_cache['bq'] != '0=1';
+		Utils::$context['can_moderate_groups'] = User::$me->mod_cache['gq'] != '0=1';
+		Utils::$context['can_moderate_approvals'] = Config::$modSettings['postmod_active'] && !empty(User::$me->mod_cache['ap']);
+		Utils::$context['can_moderate_users'] = User::$me->allowedTo('moderate_forum');
+
+		// Everyone using this area must be allowed here!
+		if (!Utils::$context['can_moderate_boards'] && !Utils::$context['can_moderate_groups'] && !Utils::$context['can_moderate_approvals'] && !Utils::$context['can_moderate_users']) {
+			User::$me->isAllowedTo('access_mod_center');
+		}
+
+		self::$access_checked = true;
 	}
 }
 

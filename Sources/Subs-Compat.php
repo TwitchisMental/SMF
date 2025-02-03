@@ -235,7 +235,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ManageAttachmentSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Attachments::manageAttachmentSettings($return_config);
+		return Actions\Admin\Attachments::subActionProvider(sa: 'attachments', return_config: $return_config);
 	}
 
 	/**
@@ -249,7 +249,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ManageAvatarSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Attachments::manageAvatarSettings($return_config);
+		return Actions\Admin\Attachments::subActionProvider(sa: 'avatars', return_config: $return_config);
 	}
 
 	/**
@@ -565,7 +565,16 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyBasicSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifyBasicSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::basicConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'basic';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
+
 	}
 
 	/**
@@ -579,7 +588,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyBBCSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifyBBCSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::bbcConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'bbc';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -591,7 +608,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyLayoutSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifyLayoutSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::layoutConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'layout';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -602,7 +627,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifySignatureSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifySignatureSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::sigConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'sig';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -630,7 +663,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyLikesSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifyLikesSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::likesConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'likes';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -642,7 +683,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyMentionsSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Features::modifyMentionsSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Features::mentionsConfigVars();
+		}
+
+		Actions\Admin\Features::load();
+		Actions\Admin\Features::$obj->subaction = 'mentions';
+		Actions\Admin\Features::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -776,11 +825,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	function ManageMail(): void
 	{
 		Actions\Admin\Mail::call();
-	}
-
-	function timeSince(int $time_diff): string
-	{
-		return Actions\Admin\Mail::timeSince($time_diff);
 	}
 
 	/**
@@ -1270,7 +1314,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyModSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Mods::subActionProvider(return_config: $return_config);
+		return Actions\Admin\Mods::subActionProvider(sa: 'general', return_config: $return_config);
 	}
 
 	/**************************
@@ -1385,11 +1429,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Actions\Admin\Permissions::call();
 	}
 
-	function getPermissions(): array
-	{
-		return Actions\Admin\Permissions::getPermissions();
-	}
-
 	/**
 	 * Set the permission level for a specific profile, group, or group for a profile.
 	 *
@@ -1478,11 +1517,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	function loadIllegalPermissions(): array
 	{
 		return Actions\Admin\Permissions::loadIllegalPermissions();
-	}
-
-	function buildHidden(): void
-	{
-		Actions\Admin\Permissions::buildHidden();
 	}
 
 	/**
@@ -1587,7 +1621,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyPostSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Posts::modifyPostSettings($return_config);
+		return Actions\Admin\Posts::subActionProvider(sa: 'posts', return_config: $return_config);
 	}
 
 	/**
@@ -1601,7 +1635,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyTopicSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Posts::modifyTopicSettings($return_config);
+		return Actions\Admin\Posts::subActionProvider(sa: 'topics', return_config: $return_config);
 	}
 
 	/**
@@ -1615,7 +1649,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyDraftSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Posts::modifyDraftSettings($return_config);
+		return Actions\Admin\Posts::subActionProvider(sa: 'drafts', return_config: $return_config);
 	}
 
 	/**********************************
@@ -1968,11 +2002,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Actions\Admin\Server::call();
 	}
 
-	function getLoadAverageDisabled(): bool
-	{
-		return Actions\Admin\Server::getLoadAverageDisabled();
-	}
-
 	/**
 	 * Helper function, it sets up the context for the manage server settings.
 	 * - The basic usage of the six numbered key fields are
@@ -2001,11 +2030,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Actions\Admin\Server::prepareServerSettingsContext($config_vars);
 	}
 
-	function checkSettingsFileWriteSafe(): bool
-	{
-		return Actions\Admin\Server::checkSettingsFileWriteSafe();
-	}
-
 	/**
 	 * General forum settings - forum name, maintenance mode, etc.
 	 * Practically, this shows an interface for the settings in Settings.php to be changed.
@@ -2020,7 +2044,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyGeneralSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyGeneralSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::generalConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'general';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2037,7 +2069,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyDatabaseSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyDatabaseSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::databaseConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'database';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2048,7 +2088,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyCookieSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyCookieSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::cookieConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'cookie';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2059,7 +2107,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyGeneralSecuritySettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyGeneralSecuritySettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::securityConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'security';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2070,7 +2126,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyCacheSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyCacheSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::cacheConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'cache';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2081,7 +2145,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyExportSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyExportSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::exportConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'export';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2092,7 +2164,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModifyLoadBalancingSettings(bool $return_config = false): ?array
 	{
-		return Actions\Admin\Server::modifyLoadBalancingSettings($return_config);
+		if (!empty($return_config)) {
+			return Actions\Admin\Server::loadBalancingConfigVars();
+		}
+
+		Actions\Admin\Server::load();
+		Actions\Admin\Server::$obj->subaction = 'loads';
+		Actions\Admin\Server::$obj->execute();
+
+		return null;
 	}
 
 	/**
@@ -2520,11 +2600,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Begin Actions\Moderation\Main
 	 *******************************/
 
-	function checkAccessPermissions(): void
-	{
-		Actions\Moderation\Main::checkAccessPermissions();
-	}
-
 	/**
 	 * Entry point for the moderation center.
 	 *
@@ -2533,7 +2608,11 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ModerationMain(bool $dont_call = false): void
 	{
-		Actions\Moderation\Main::ModerationMain($dont_call);
+		if ($dont_call) {
+			Actions\Moderation\Main::load()->createMenu();
+		} else {
+			Actions\Moderation\Main::call();
+		}
 	}
 
 	/********************************
@@ -2788,12 +2867,8 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function editBuddies(int $memID): void
 	{
-		Actions\Profile\BuddyIgnoreLists::subActionProvider(
-			memID: $memID,
-			sa: 'buddies',
-			loadSelfFirst: false,
-			loadProfile: true,
-		);
+		Profile::load($memID);
+		Actions\Profile\BuddyIgnoreLists::subActionProvider(sa: 'buddies');
 	}
 
 	/**
@@ -2803,12 +2878,8 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function editIgnoreList(int $memID): void
 	{
-		Actions\Profile\BuddyIgnoreLists::subActionProvider(
-			memID: $memID,
-			sa: 'ignore',
-			loadSelfFirst: false,
-			loadProfile: true,
-		);
+		Profile::load($memID);
+		Actions\Profile\BuddyIgnoreLists::subActionProvider(sa: 'ignore');
 	}
 
 	/******************************
@@ -2832,7 +2903,19 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function deleteAccount2(int $memID): void
 	{
-		Actions\Profile\Delete::deleteAccount2($memID);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Delete::load();
+
+		$saving = Utils::$context['completed_save'];
+		Utils::$context['completed_save'] = true;
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Delete::$obj->execute();
+
+		Utils::$context['completed_save'] = $saving;
 	}
 
 	/******************************
@@ -2935,15 +3018,30 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	/**
 	 * This function actually makes all the group changes
 	 *
-	 * @param array $profile_vars The profile variables
-	 * @param array $post_errors Any errors that have occurred
-	 * @param int $memID The ID of the member
+	 * Note: $profile_vars and $post_errors were unused even in 2.1.
+	 *
+	 * @param array $profile_vars The profile variables. (Ignored.)
+	 * @param array $post_errors Any errors that have occurred. (Ignored.)
+	 * @param int $memID The ID of the member.
 	 * @return string What type of change this is - 'primary' if changing the primary group, 'request' if requesting to join a group or 'free' if it's an open group
 	 */
 	function groupMembership2(array $profile_vars, array $post_errors, int $memID): string
 	{
-		// $profile_vars and $post_errors were unused even in 2.1.
-		return Actions\Profile\GroupMembership::groupMembership2($memID);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\GroupMembership::load();
+
+		$saving = Utils::$context['completed_save'];
+		Utils::$context['completed_save'] = true;
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\GroupMembership::$obj->execute();
+
+		Utils::$context['completed_save'] = $saving;
+
+		return Actions\Profile\GroupMembership::$obj->change_type;
 	}
 
 	/************************************
@@ -2972,10 +3070,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function issueWarning(int $memID): void
 	{
-		Actions\Profile\IssueWarning::subActionProvider(
-			memID: $memID,
-			updateRequest: true,
-		);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\IssueWarning::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\IssueWarning::$obj->execute();
 	}
 
 	/****************************
@@ -2987,9 +3089,11 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 *
 	 * @param array $post_errors Any errors that occurred
 	 */
-	function ModifyProfile(): void
+	function ModifyProfile(array $post_errors = []): void
 	{
-		Actions\Profile\Main::call();
+		Actions\Profile\Main::load();
+		Profile::$member->save_errors = $post_errors;
+		Actions\Profile\Main::$obj->execute();
 	}
 
 	/************************************
@@ -3014,12 +3118,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function alert_configuration(int $memID, bool $defaultSettings = false): void
 	{
-		Actions\Profile\Notification::subActionProvider(
-			sa: 'alerts',
-			memID: $memID,
-			loadProfile: true,
-			defaultSettings: $defaultSettings,
-		);
+		Actions\Profile\Notification::load();
+		Profile::load($memID);
+		Actions\Profile\Notification::$obj->subaction = 'alerts';
+		Actions\Profile\Notification::$obj->execute();
 	}
 
 	/**
@@ -3029,11 +3131,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function alert_markread(int $memID): void
 	{
-		Actions\Profile\Notification::subActionProvider(
-			sa: 'markread',
-			memID: $memID,
-			loadProfile: true,
-		);
+		Actions\Profile\Notification::load();
+		Profile::load($memID);
+		Actions\Profile\Notification::$obj->subaction = 'markread';
+		Actions\Profile\Notification::$obj->execute();
 	}
 
 	/**
@@ -3043,11 +3144,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function alert_notifications_topics(int $memID): void
 	{
-		Actions\Profile\Notification::subActionProvider(
-			sa: 'topics',
-			memID: $memID,
-			loadProfile: true,
-		);
+		Actions\Profile\Notification::load();
+		Profile::load($memID);
+		Actions\Profile\Notification::$obj->subaction = 'topics';
+		Actions\Profile\Notification::$obj->execute();
 	}
 
 	/**
@@ -3057,11 +3157,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function alert_notifications_boards(int $memID): void
 	{
-		Actions\Profile\Notification::subActionProvider(
-			sa: 'boards',
-			memID: $memID,
-			loadProfile: true,
-		);
+		Actions\Profile\Notification::load();
+		Profile::load($memID);
+		Actions\Profile\Notification::$obj->subaction = 'boards';
+		Actions\Profile\Notification::$obj->execute();
 	}
 
 	/**
@@ -3071,7 +3170,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function makeNotificationChanges(int $memID): void
 	{
-		Actions\Profile\Notification::makeNotificationChanges($memID);
+		Actions\Profile\Notification::load();
+		Profile::load($memID);
+		Actions\Profile\Notification::$obj->changeNotifications();
 	}
 
 	/********************************
@@ -3113,10 +3214,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showAlerts(int $memID): void
 	{
-		Actions\Profile\ShowAlerts::subActionProvider(
-			memID: $memID,
-			updateRequest: true,
-		);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ShowAlerts::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ShowAlerts::$obj->execute();
 	}
 
 	/***************************************
@@ -3130,10 +3235,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showPermissions(int $memID): void
 	{
-		Actions\Profile\ShowPermissions::subActionProvider(
-			memID: $memID,
-			updateRequest: true,
-		);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ShowPermissions::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ShowPermissions::$obj->execute();
 	}
 
 	/********************************
@@ -3149,7 +3258,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showPosts(int $memID): void
 	{
-		Actions\Profile\ShowPosts::subActionProvider(memID: $memID, updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ShowPosts::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ShowPosts::$obj->execute();
 	}
 
 	/**
@@ -3159,7 +3275,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showUnwatched(int $memID): void
 	{
-		Actions\Profile\ShowPosts::subActionProvider(memID: $memID, sa: 'unwatchedtopics', updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ShowPosts::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ShowPosts::$obj->subaction = 'unwatchedtopics';
+		Actions\Profile\ShowPosts::$obj->execute();
 	}
 
 	/**
@@ -3169,7 +3293,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showAttachments(int $memID): void
 	{
-		Actions\Profile\ShowPosts::subActionProvider(memID: $memID, sa: 'attach', updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ShowPosts::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ShowPosts::$obj->subaction = 'attach';
+		Actions\Profile\ShowPosts::$obj->execute();
 	}
 
 	/*********************************
@@ -3183,7 +3315,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function statPanel(int $memID): void
 	{
-		Actions\Profile\StatPanel::subActionProvider(memID: $memID, updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\StatPanel::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\StatPanel::$obj->execute();
 	}
 
 	/*******************************
@@ -3197,7 +3336,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function summary(int $memID): void
 	{
-		Actions\Profile\Summary::subActionProvider(memID: $memID, updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Summary::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Summary::$obj->execute();
 	}
 
 	/**********************************
@@ -3263,11 +3409,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function trackActivity(int $memID): void
 	{
-		Actions\Profile\Tracking::subActionProvider(
-			memID: $memID,
-			sa: 'activity',
-			updateRequest: true,
-		);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Tracking::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Tracking::$obj->subaction = 'activity';
+		Actions\Profile\Tracking::$obj->execute();
 	}
 
 	/**
@@ -3277,7 +3427,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function trackEdits(int $memID): void
 	{
-		Actions\Profile\Tracking::subActionProvider(memID: $memID, sa: 'edits', updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Tracking::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Tracking::$obj->subaction = 'edits';
+		Actions\Profile\Tracking::$obj->execute();
 	}
 
 	/**
@@ -3287,7 +3445,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function trackGroupReq(int $memID): void
 	{
-		Actions\Profile\Tracking::subActionProvider(memID: $memID, sa: 'groupreq', updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Tracking::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Tracking::$obj->subaction = 'groupreq';
+		Actions\Profile\Tracking::$obj->execute();
 	}
 
 	/**
@@ -3297,7 +3463,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function TrackLogins(int $memID): void
 	{
-		Actions\Profile\Tracking::subActionProvider(memID: $memID, sa: 'logins', updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\Tracking::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\Tracking::$obj->subaction = 'logins';
+		Actions\Profile\Tracking::$obj->execute();
 	}
 
 	/***********************************
@@ -3311,7 +3485,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function viewWarning(int $memID): void
 	{
-		Actions\Profile\ViewWarning::subActionProvider(memID: $memID, updateRequest: true);
+		$u = $_REQUEST['u'] ?? null;
+		$_REQUEST['u'] = $memID;
+
+		Actions\Profile\ViewWarning::load();
+
+		$_REQUEST['u'] = $u;
+
+		Actions\Profile\ViewWarning::$obj->execute();
 	}
 
 	/*************************
@@ -3453,7 +3634,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function AutoSuggest_Search_Member(): void
 	{
-		Actions\AutoSuggest::backCompatProvider(suggest_type: 'member');
+		Actions\AutoSuggest::load();
+		Actions\AutoSuggest::$obj->suggest_type = 'member';
+		Actions\AutoSuggest::$obj->execute();
 	}
 
 	/**
@@ -3463,7 +3646,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function AutoSuggest_Search_MemberGroups(): void
 	{
-		Actions\AutoSuggest::backCompatProvider(suggest_type: 'membergroups');
+		Actions\AutoSuggest::load();
+		Actions\AutoSuggest::$obj->suggest_type = 'membergroups';
+		Actions\AutoSuggest::$obj->execute();
 	}
 
 	/**
@@ -3473,7 +3658,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function AutoSuggest_Search_SMFVersions(): void
 	{
-		Actions\AutoSuggest::backCompatProvider(suggest_type: 'versions');
+		Actions\AutoSuggest::load();
+		Actions\AutoSuggest::$obj->suggest_type = 'versions';
+		Actions\AutoSuggest::$obj->execute();
 	}
 
 	/**************************
@@ -3489,11 +3676,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	function BoardIndex(): Actions\BoardIndex
 	{
 		return Actions\BoardIndex::load();
-	}
-
-	function call(): void
-	{
-		Actions\BoardIndex::call();
 	}
 
 	/**
@@ -3701,7 +3883,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadDatePicker(string $selector = 'input.date_input', string $date_format = ''): void
 	{
-		Actions\Calendar::loadDatePicker($selector, $date_format);
+		// SMF 3.0 no longer uses a date picker script.
 	}
 
 	/**
@@ -3712,7 +3894,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadTimePicker(string $selector = 'input.time_input', string $time_format = ''): void
 	{
-		Actions\Calendar::loadTimePicker($selector, $time_format);
+		// SMF 3.0 no longer uses a time picker script.
 	}
 
 	/**
@@ -3726,7 +3908,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadDatePair(string $container, string $date_class = '', string $time_class = ''): void
 	{
-		Actions\Calendar::loadDatePair($container, $date_class, $time_class);
+		// SMF 3.0 no longer uses a date pair script.
 	}
 
 	/**
@@ -3782,7 +3964,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function removeHolidays(array $holiday_ids): void
 	{
-		Actions\Calendar::removeHolidays($holiday_ids);
+		foreach ($holiday_ids as $holiday_id) {
+			Calendar\Holiday::remove($holiday_id);
+		}
 	}
 
 	/*************************
@@ -4078,11 +4262,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Actions\Login2::call();
 	}
 
-	function checkAjax(): void
-	{
-		Actions\Login2::checkAjax();
-	}
-
 	/**
 	 * This protects against brute force attacks on a member's password.
 	 * Importantly, even if the password was right we DON'T TELL THEM!
@@ -4137,6 +4316,18 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	function Logout(): void
 	{
 		Actions\Logout::call();
+	}
+
+	/************************
+	 * Begin Actions\MarkRead
+	 ************************/
+
+	/**
+	 * Mark one or more boards as read.
+	 */
+	function MarkRead(): void
+	{
+		Actions\MarkRead::call();
 	}
 
 	/**************************
@@ -4225,10 +4416,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		return Actions\MessageIndex::getBoardList($boardListOptions);
 	}
 
-	function buildTopicContext(array $row): void
-	{
-		Actions\MessageIndex::buildTopicContext($row);
-	}
 	/*************************
 	 * Begin Actions\MsgDelete
 	 *************************/
@@ -4506,11 +4693,13 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * - shows options for the editing and posting of calendar events and attachments, as well as the posting of polls.
 	 * - accessed from ?action=post.
 	 *
-	 * @param array $post_errors Holds any errors found while tyring to post
+	 * @param array $post_errors Holds any errors found while trying to post
 	 */
-	function Post(): void
+	function Post(array $post_errors = []): void
 	{
-		Actions\Post::call();
+		Actions\Post::load();
+		Actions\Post::$obj->errors = (array) $post_errors;
+		Actions\Post::$obj->execute();
 	}
 
 	/*********************
@@ -4606,7 +4795,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function Register(array $reg_errors = []): void
 	{
-		Actions\Register::register($reg_errors);
+		Actions\Register::load();
+		Actions\Register::$obj->subaction = 'show';
+		Actions\Register::$obj->errors = (array) $reg_errors;
+		Actions\Register::$obj->execute();
 	}
 
 	/*************************
@@ -4691,7 +4883,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function reportPost($msg, $reason): void
 	{
-		Actions\ReportToMod::reportPost($msg, $reason);
+		$_POST['msg'] = (int) $msg;
+		$_POST['comment'] = Utils::htmlspecialcharsDecode((string) $reason);
+
+		Actions\ReportToMod::load();
+		Actions\ReportToMod::$obj->subaction = 'submit';
+		Actions\ReportToMod::$obj->execute();
 	}
 
 	/**
@@ -4702,7 +4899,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function reportUser($id_member, $reason): void
 	{
-		Actions\ReportToMod::reportUser($id_member, $reason);
+		$_POST['u'] = (int) $id_member;
+		$_POST['comment'] = Utils::htmlspecialcharsDecode((string) $reason);
+
+		Actions\ReportToMod::load();
+		Actions\ReportToMod::$obj->subaction = 'submit';
+		Actions\ReportToMod::$obj->execute();
 	}
 
 	/******************************
@@ -4850,7 +5052,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function MergeExecute(array $topics = []): void
 	{
-		Actions\TopicMerge::mergeExecute($topics);
+		Actions\TopicMerge::load();
+		Actions\TopicMerge::$obj->subaction = !empty($_GET['sa']) && $_GET['sa'] === 'merge' ? 'merge' : 'options';
+		Actions\TopicMerge::$obj->topics = array_map('intval', $topics);
+		Actions\TopicMerge::$obj->execute();
 	}
 
 	/**
@@ -5074,8 +5279,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function TrackIP(int $memID = 0): void
 	{
-		// not profile but this method does everything we need it to do
-		Actions\TrackIP::subActionProvider(memID: $memID);
+		Actions\TrackIP::load();
+		Actions\TrackIP::$obj->memID = $memID;
+		Actions\TrackIP::$obj->execute();
 	}
 
 	/**********************
@@ -5213,7 +5419,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * @param bool $fallbackSMF Use the default SMF method if the accelerator fails.
 	 * @return object|false A object of $cacheAPI, or False on failure.
 	 */
-	function loadCacheAccelerator(string $overrideCache = '', bool $fallbackSMF = true): cache\CacheApi|false
+	function loadCacheAccelerator(string $overrideCache = '', bool $fallbackSMF = true): Cache\CacheApi|false
 	{
 		return Cache\CacheApi::load($overrideCache, $fallbackSMF);
 	}
@@ -5309,26 +5515,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Extend the database functionality. It calls the respective file's init
 	 * to add the implementations in that file to $smcFunc array.
 	 *
+	 * In SMF 3.0 this is a no-op.
+	 *
 	 * @param string $type Indicates which additional file to load. ('extra', 'packages')
 	 */
-	function db_extend()
-	{
-		Db\DatabaseApi::extend();
-	}
+	function db_extend(string $type): void {}
 
 	/**********************
 	 * Begin Graphics\Image
 	 **********************/
-
-	function getImageTypes(): array
-	{
-		return Image::getImageTypes();
-	}
-
-	function getSupportedFormats(): array
-	{
-		return Image::getSupportedFormats();
-	}
 
 	/**
 	 * See if we have enough memory to thumbnail an image
@@ -5372,6 +5567,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	/**
 	 * Gets the dimensions of an SVG image (specifically, of its viewport).
 	 *
+	 * If $filepath is not the path to a valid SVG file, the returned width and
+	 * height will both be null.
+	 *
 	 * See https://www.w3.org/TR/SVG11/coords.html#IntrinsicSizing
 	 *
 	 * @param string $filepath The path to the SVG file.
@@ -5379,7 +5577,13 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function getSvgSize(string $filepath): array
 	{
-		return Image::getSvgSize($filepath);
+		$image = new Image($filepath);
+
+		if ($image->mime_type !== 'image/svg+xml') {
+			return ['width' => null, 'height' => null];
+		}
+
+		return ['width' => $image->width, 'height' => $image->height];
 	}
 
 	/**
@@ -5394,7 +5598,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function createThumbnail(string $source, int $max_width, int $max_height): bool
 	{
-		return Image::makeThumbnail($source, $max_width, $max_height);
+		return ((new Image($source))->createThumbnail($max_width, $max_height) !== false);
 	}
 
 	/**
@@ -5409,7 +5613,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function reencodeImage(string $source, int $preferred_type = 0): bool
 	{
-		return Image::reencodeImage($source, $preferred_type);
+		return (new Image($source))->reencode($preferred_type);
 	}
 
 	/**
@@ -5422,7 +5626,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function checkImageContents(string $source, bool $extensive = false): bool
 	{
-		return Image::checkImageContents($source, $extensive);
+		return (new Image($source))->check($extensive);
 	}
 
 	/**
@@ -5433,7 +5637,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function checkSvgContents(string $source): bool
 	{
-		return Image::checkSvgContents($source);
+		return (new Image($source))->check();
 	}
 
 	/**
@@ -5456,13 +5660,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		int $max_height,
 		int $preferred_type = 0,
 	): bool {
-		return Image::resizeImageFile(
-			$source,
-			$destination,
-			$max_width,
-			$max_height,
-			$preferred_type,
-		);
+		return (new Image($source))->resize($destination, $max_width, $max_height, $preferred_type);
 	}
 
 	/**
@@ -5494,15 +5692,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		bool $force_resize = false,
 		int $preferred_type = 0,
 	): bool {
-		return Image::resizeImage(
-			$source,
-			$destination,
-			$src_width,
-			$src_height,
-			$max_width,
-			$max_height,
-			$preferred_type,
-		);
+		return (new Image($source))->resize($destination, $max_width, $max_height, $preferred_type);
 	}
 
 	/**********************************
@@ -5969,37 +6159,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		return PackageManager\SubsPackage::package_validate_send($sendData);
 	}
 
-	/*******************************
-	 * Begin PersonalMessage\DraftPM
-	 *******************************/
-
-	function showInEditor(int $member_id, $reply_to = false): bool
-	{
-		return PersonalMessage\DraftPM::showInEditor($member_id, $reply_to);
-	}
-
-	function showInProfile(int $memID = -1): void
-	{
-		PersonalMessage\DraftPM::showInProfile((int) $memID);
-	}
 	/**************************
 	 * Begin PersonalMessage\PM
 	 **************************/
-
-	function old(int $time): array
-	{
-		return PersonalMessage\PM::old($time);
-	}
-
-	function compose(): void
-	{
-		PersonalMessage\PM::compose();
-	}
-
-	function compose2(): bool
-	{
-		return PersonalMessage\PM::compose2();
-	}
 
 	/**
 	 * Sends an personal message from the specified person to the specified people
@@ -6048,21 +6210,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		PersonalMessage\PM::markRead($personal_messages, $label, $owner);
 	}
 
-	function getLatest(): int
-	{
-		return PersonalMessage\PM::getLatest();
-	}
-
-	function getRecent(string $sort = 'pm.id_pm', bool $descending = true, int $limit = 0, int $offset = 0): array
-	{
-		return PersonalMessage\PM::getRecent($sort, $descending, $limit, $offset);
-	}
-
-	function countSent(int $boundary = 0, bool $greater_than = false): int
-	{
-		return PersonalMessage\PM::countSent($boundary, $greater_than);
-	}
-
 	/**
 	 * An error in the message...
 	 *
@@ -6084,7 +6231,19 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function isAccessiblePM(int $pmID, string $folders = 'both'): bool
 	{
-		return PersonalMessage\PM::isAccessible($pmID, $folders);
+		if ($folders === 'in_or_outbox') {
+			$folders = 'both';
+		}
+
+		if ($folders === 'outbox') {
+			$folders = 'sent';
+		}
+
+		if (!isset(PersonalMessage\PM::$loaded[$pmID])) {
+			PersonalMessage\PM::load($pmID);
+		}
+
+		return PersonalMessage\PM::$loaded[$pmID]->canAccess($folders);
 	}
 
 	/****************************
@@ -6111,16 +6270,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		PersonalMessage\Rule::apply($all_messages);
 	}
 
-	function delete(array $ids): void
-	{
-		PersonalMessage\Rule::delete($ids);
-	}
-
-	function manage(): void
-	{
-		PersonalMessage\Rule::manage();
-	}
-
 	/************************
 	 * Begin Search\SearchApi
 	 ************************/
@@ -6141,6 +6290,8 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * In addition to filenames pattern.
 	 * It loads the search API classes if identified.
 	 * This function is used by EditSearchMethod to list all installed API implementations.
+	 *
+	 * @return array Info about the detected search APIs.
 	 */
 	function loadSearchAPIs(): array
 	{
@@ -6617,17 +6768,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		SMF\Attachment::prepareByMsg($msgIDs);
 	}
 
-	function createHash(string $input = ''): string
-	{
-		return SMF\Attachment::createHash($input);
-	}
-
-	function getFilePath(int $id): string
-	{
-		return SMF\Attachment::getFilePath($id);
-	}
-
 	/**
+	 * Backward compatibility only.
+	 *
+	 * New code should use Attachment::getFilePath() or Attachment::createHash()
+	 * to get whichever type of output is desired for a given situation.
+	 *
 	 * Get an attachment's encrypted filename. If $new is true, won't check for
 	 * file existence.
 	 *
@@ -6649,13 +6795,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		bool $new = false,
 		string $file_hash = '',
 	): string {
-		return SMF\Attachment::getAttachmentFilename(
-			$filename,
-			$attachment_id,
-			$dir,
-			$new,
-			$file_hash,
-		);
+		// Just make up a nice hash...
+		if ($new || empty($attachment_id)) {
+			return SMF\Attachment::createHash();
+		}
+
+		return SMF\Attachment::getFilePath($attachment_id);
 	}
 
 	/********************************
@@ -6776,17 +6921,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * - adds group id 3 if the user is a local moderator for the board they are in.
 	 * - prevents access if user is not in proper group nor a local moderator of the board.
 	 */
-	function loadBoard(array|int $ids = [], array $query_customizations = []): array
+	function loadBoard(): array
 	{
-		return SMF\Board::load($ids, $query_customizations);
-	}
-
-	/**
-	 * Mark one or more boards as read.
-	 */
-	function MarkRead(): void
-	{
-		SMF\Actions\MarkRead::call();
+		return SMF\Board::load();
 	}
 
 	/**
@@ -7133,16 +7270,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		bool $httponly = true,
 		?string $samesite = null,
 	): void {
-		SMF\Cookie::setcookie(
-			$name,
-			$value,
-			$expires,
-			$path,
-			$domain,
-			$secure,
-			$httponly,
-			$samesite,
-		);
+		$data = Utils::jsonDecode($value);
+		$cookie = new SMF\Cookie($name, $data, $expires, $domain, $path, $secure, $httponly, $samesite);
+		$cookie->set();
+
 	}
 
 	/*****************
@@ -7176,7 +7307,11 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ShowDrafts(int $member_id, int $reply_to = 0, int $draft_type = 0): bool
 	{
-		return SMF\Draft::showInEditor($member_id, $topic);
+		if ($draft_type === 1) {
+			return SMF\DraftPM::showInEditor($member_id, $reply_to);
+		}
+
+		return SMF\Draft::showInEditor($member_id, $reply_to);
 	}
 
 	/**
@@ -7189,6 +7324,10 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function showProfileDrafts(int $memID, int $draft_type = 0): void
 	{
+		if ($draft_type === 1) {
+			SMF\DraftPM::showInProfile($memID);
+		}
+
 		SMF\Draft::showInProfile($memID);
 	}
 
@@ -7345,7 +7484,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function insertEvent(array $eventOptions): void
 	{
-		SMF\Event::create($eventOptions);
+		SMF\Calendar\Event::create($eventOptions);
 	}
 
 	/**
@@ -7358,7 +7497,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function modifyEvent(int $event_id, array &$eventOptions): void
 	{
-		SMF\Event::modify($event_id, $eventOptions);
+		SMF\Calendar\Event::modify($event_id, $eventOptions);
 	}
 
 	/**
@@ -7368,46 +7507,14 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 *
 	 * @param int $event_id The ID of the event to remove
 	 */
-	function removeEvent(int $id): void
+	function removeEvent(int $event_id): void
 	{
-		SMF\Event::remove($id);
+		SMF\Calendar\Event::remove($event_id);
 	}
 
 	/*****************
 	 * Begin SMF\Group
 	 *****************/
-
-	function loadSimple(
-		int $include = SMF\Group::LOAD_NORMAL,
-		array $exclude = [SMF\Group::GUEST, SMF\Group::REGULAR, SMF\Group::MOD],
-	): array {
-		return SMF\Group::loadSimple($include, $exclude);
-	}
-
-	function loadAssignable(): array
-	{
-		return SMF\Group::loadAssignable();
-	}
-
-	function loadPermissionsBatch(array $group_ids, ?int $profile = null, bool $reload = false): array
-	{
-		return SMF\Group::loadPermissionsBatch($group_ids, $profile, $reload);
-	}
-
-	function countPermissionsBatch(array $group_ids, ?int $profile = null): array
-	{
-		return SMF\Group::countPermissionsBatch($group_ids, $profile);
-	}
-
-	function getPostGroups(): array
-	{
-		return SMF\Group::getPostGroups();
-	}
-
-	function getUnassignable(): array
-	{
-		return SMF\Group::getUnassignable();
-	}
 
 	/**
 	 * Retrieve a list of (visible) membergroups used by the cache.
@@ -7723,7 +7830,11 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function writeLog(bool $force = false): void
 	{
-		SMF\Logging::writeLog($force);
+		if (!isset(User::$me)) {
+			return;
+		}
+
+		User::$me->logOnline($force);
 	}
 
 	/**
@@ -8243,8 +8354,8 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		int $num_per_page,
 		bool $short_format = false,
 		bool $show_prevnext = true,
-	): SMF\PageIndex {
-		return SMF\PageIndex::load(
+	): string {
+		return (string) SMF\PageIndex::load(
 			$base_url,
 			$start,
 			$max_value,
@@ -8257,11 +8368,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	/****************
 	 * Begin SMF\Poll
 	 ****************/
-
-	function checkRemovePermission(SMF\Poll $poll): bool
-	{
-		return SMF\Poll::checkRemovePermission($poll);
-	}
 
 	/**
 	 * Allow the user to vote.
@@ -8344,12 +8450,13 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Begin SMF\Profile
 	 *******************/
 
-	function loadCustomFieldDefinitions(): void
-	{
-		SMF\Profile::loadCustomFieldDefinitions();
-	}
-
-	function validateSignature(string &$value): bool|string
+	/**
+	 * Validate the signature
+	 *
+	 * @param string &$value The new signature
+	 * @return bool|string True if the signature passes the checks, otherwise a string indicating what the problem is
+	 */
+	function profileValidateSignature(string &$value): bool|string
 	{
 		return SMF\Profile::validateSignature($value);
 	}
@@ -8671,7 +8778,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function KickGuest(): void
 	{
-		SMF\Security::kickGuest();
+		SMF\User::$me->kickIfGuest(null, false);
 	}
 
 	/*************************
@@ -9550,11 +9657,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Begin SMF\Time
 	 ****************/
 
-	function create(string $datetime = 'now', \DateTimeZone|string|null $timezone = null): SMF\TIme
-	{
-		return SMF\Time::create($datetime, $timezone);
-	}
-
 	/**
 	 * Replacement for strftime() that is compatible with PHP 8.1+.
 	 *
@@ -9836,7 +9938,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function prepareLikesContext(int $topic): array
 	{
-		return SMF\Topic::prepareLikesContext($topic);
+		return SMF\Topic::load($topic)->getLikedMsgs();
 	}
 
 	/***************
@@ -9874,25 +9976,23 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function parse_iri(string $iri, int $component = -1): string|int|array|null|bool
 	{
-		return (new SMF\Url($iri))->parse($component);
+		return SMF\Url::create($iri)->parse($component);
 	}
 
 	/**
 	 * A wrapper for `filter_var($url, FILTER_VALIDATE_URL)` that can handle URLs
 	 * with international characters (a.k.a. IRIs)
 	 *
-	 * @param string $iri The IRI to parse.
-	 * @param int $flags Optional flags for filter_var's third parameter.
-	 * @return self|bool A reference to an object for the IRI if it is valid,
-	 *    or false if the IRI is invalid.
+	 * @param string $iri The IRI to test.
+	 * @param int $flags Optional flags to pass to filter_var()
+	 * @return string|bool Either the original IRI, or false if the IRI was invalid.
 	 */
-	function validate_iri(string $iri, int $flags = 0): SMF\Url|bool
+	function validate_iri(string $iri, int $flags = 0): string|bool
 	{
-		$iri = new SMF\Url($iri);
-		$iri->validate($flags);
+		$iri = SMF\Url::create($iri);
+		$iri->validate();
 
-		// caste this because $urlInstance->url is a protected property, but casting to string returns it
-		return (string) $iri === '' ? false : $iri;
+		return (string) $iri === '' ? false : (string) $iri;
 	}
 
 	/**
@@ -9905,9 +10005,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * @param string $iri The IRI to sanitize.
 	 * @return string|bool The sanitized version of the IRI
 	 */
-	function sanitize_iri(string $iri): SMF\Url
+	function sanitize_iri(string $iri): string|bool
 	{
-		return (new SMF\Url($iri))->sanitize();
+		$iri = SMF\Url::create($iri);
+		$iri->sanitize();
+
+		return (string) $iri === '' ? false : (string) $iri;
 	}
 
 	/**
@@ -9920,9 +10023,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * @param string $iri The IRI to normalize.
 	 * @return string|bool The normalized version of the IRI.
 	 */
-	function normalize_iri(string $iri): SMF\Url
+	function normalize_iri(string $iri): string|bool
 	{
-		return (new SMF\Url($iri))->normalize();
+		$iri = SMF\Url::create($iri);
+		$iri->normalize();
+
+		return (string) $iri === '' ? false : (string) $iri;
 	}
 
 	/**
@@ -9934,9 +10040,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * @param string $iri A IRI that may or may not contain non-ASCII characters.
 	 * @return string|bool The URL version of the IRI.
 	 */
-	function iri_to_url(string $iri): SMF\Url
+	function iri_to_url(string $iri): string|bool
 	{
-		return (new SMF\Url($iri))->toAscii();
+		$iri = SMF\Url::create($iri);
+		$iri->toAscii();
+
+		return (string) $iri === '' ? false : (string) $iri;
 	}
 
 	/**
@@ -9948,9 +10057,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * @param string $url The pure ASCII version of a URL.
 	 * @return string|bool The UTF-8 version of the URL.
 	 */
-	function url_to_iri(string $url): SMF\Url
+	function url_to_iri(string $url): string|bool
 	{
-		return (new SMF\Url($url))->toUtf8();
+		$iri = SMF\Url::create($iri);
+		$iri->toUtf8();
+
+		return (string) $iri === '' ? false : (string) $iri;
 	}
 
 	/**
@@ -9964,7 +10076,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function get_proxied_url(string $url): SMF\Url
 	{
-		return (new SMF\Url($url))->proxied();
+		return (string) SMF\Url::create($url)->proxied();
 	}
 
 	/**
@@ -9976,12 +10088,21 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function ssl_cert_found(string $url): bool
 	{
-		return (new SMF\Url($url))->hasSSL();
+		return SMF\Url::create($url)->hasSSL();
 	}
 
-	function httpsRedirectActive(string $url): bool
+	/**
+	 * Check if the passed url has a redirect to https:// by querying headers.
+	 *
+	 * Returns true if a redirect was found & false if not.
+	 * Note that when force_ssl = 2, SMF issues its own redirect...  So if this
+	 * returns true, it may be caused by SMF, not necessarily an .htaccess redirect.
+	 *
+	 * @param string $url to check, in $boardurl format (no trailing slash).
+	 */
+	function https_redirect_active(string $url): bool
 	{
-		return (new SMF\Url($url))->redirectsToHttps();
+		return SMF\Url::create($url)->redirectsToHttps();
 	}
 
 	/****************
@@ -10243,7 +10364,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadMemberData($users = [], int $type = SMF\User::LOAD_BY_ID, ?string $dataset = null): array
 	{
-		return SMF\User::loadMemberData($users, $type, $dataset);
+		$loaded = SMF\User::load($users, $type, $dataset);
+
+		return array_map(fn($user) => $user->id, $loaded);
 	}
 
 	/**
@@ -10259,7 +10382,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadUserSettings(): void
 	{
-		SMF\User::loadUserSettings();
+		SMF\User::load();
 	}
 
 	/**
@@ -10267,7 +10390,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadPermissions(): void
 	{
-		SMF\User::loadMyPermissions();
+		SMF\User::$me->loadPermissions();
 	}
 
 	/**
@@ -10280,7 +10403,19 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function loadMemberContext(int $id, bool $display_custom_fields = false): bool|array
 	{
-		return SMF\User::loadMemberContext($id, $display_custom_fields);
+		// The old procedural version of this function returned false if asked
+		// to work on a guest. Since it is possible that old mods might rely on
+		// that behaviour, we replicate it here.
+		if (empty($id)) {
+			return false;
+		}
+
+		// If the user's data is not already loaded, load it now.
+		if (!isset(SMF\User::$loaded[$id])) {
+			SMF\User::load((array) $id, SMF\User::LOAD_BY_ID, 'profile');
+		}
+
+		return SMF\User::$loaded[$id]->format($display_custom_fields);
 	}
 
 	/**
@@ -10292,7 +10427,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function is_not_guest(string $message = ''): void
 	{
-		SMF\User::is_not_guest($message);
+		SMF\User::$me->kickIfGuest($message);
 	}
 
 	/**
@@ -10304,7 +10439,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function is_not_banned(bool $force_check = false): void
 	{
-		SMF\User::is_not_banned($force_check);
+		SMF\User::$me->kickIfBanned($force_check);
 	}
 
 	/**
@@ -10313,7 +10448,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function banPermissions(): void
 	{
-		SMF\User::banPermissions();
+		SMF\User::$me->adjustPermissions();
 	}
 
 	/**
@@ -10326,7 +10461,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function log_ban(array $ban_ids = [], ?string $email = null): void
 	{
-		SMF\User::log_ban($ban_ids, $email);
+		SMF\User::$me->logBan($ban_ids, $email);
 	}
 
 	/**
@@ -10341,7 +10476,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function validateSession(string $type = 'admin', bool $force = false): ?string
 	{
-		return SMF\User::sessionValidate($type, $force);
+		return SMF\User::$me->validateSession($type, $force);
 	}
 
 	/**
@@ -10359,7 +10494,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function checkSession(string $type = 'post', string $from_action = '', bool $is_fatal = true): string
 	{
-		return SMF\User::sessionCheck($type, $from_action, $is_fatal);
+		return SMF\User::$me->checkSession($type, $from_action, $is_fatal);
 	}
 
 	/**
@@ -10376,7 +10511,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function allowedTo(string|array $permission, int|array|null $boards = null, bool $any = false): bool
 	{
-		return SMF\User::hasPermission($permission, $boards, $any);
+		// You're never allowed to do something if your data hasn't been loaded yet!
+		if (!isset(SMF\User::$me)) {
+			return false;
+		}
+
+		return SMF\User::$me->allowedTo($permission, $boards, $any);
 	}
 
 	/**
@@ -10393,7 +10533,15 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function isAllowedTo(string|array $permission, int|array|null $boards = null, bool $any = false): bool
 	{
-		return SMF\User::mustHavePermission($permission, $boards, $any);
+		// You're never allowed to do something if your data hasn't been loaded yet!
+		if (!isset(SMF\User::$me)) {
+			return false;
+		}
+
+		SMF\User::$me->isAllowedTo($permission, $boards, $any);
+
+		// If we get here, the user is allowed.
+		return true;
 	}
 
 	/**
@@ -10410,7 +10558,12 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function boardsAllowedTo(string|array $permissions, bool $check_access = true, bool $simple = true): array
 	{
-		return SMF\User::hasPermissionInBoards($permissions, $check_access, $simple);
+		// You're never allowed to do something if your data hasn't been loaded yet!
+		if (!isset(SMF\User::$me)) {
+			return false;
+		}
+
+		return SMF\User::$me->boardsAllowedTo($permissions, $check_access, $simple);
 	}
 
 	/*****************
@@ -10550,7 +10703,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	}
 
 	/**
-	 * Creates optimized regular expressions from an array of strings.
+	 * Creates optimized regular expressions from arrays of strings.
 	 *
 	 * An optimized regex built using this function will be much faster than a
 	 * simple regex built using `implode('|', $strings)` --- anywhere from several
@@ -10700,11 +10853,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 */
 	function smf_json_decode(string $json, bool $associative = false, bool $should_log = true): mixed
 	{
-		// In older versions, we accepted a mixed $json and would return if it was not a string.
-		if (empty($json) || !is_string($json)) {
-			return $json;
-		}
-
 		return Utils::jsonDecode($json, $associative, 512, 0, $should_log);
 	}
 
@@ -10820,11 +10968,6 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 		Utils::obExit($header, $do_footer, $from_index, $from_fatal_error);
 	}
 
-	function getCallable(mixed $input, ?bool $ignore_errors = null): mixed
-	{
-		return Utils::getCallable($input, $ignore_errors);
-	}
-
 	/**
 	 * Receives a string and tries to figure it out if its a method or a function.
 	 * If a method is found, it looks for a "#" which indicates SMF should create a new instance of the given class.
@@ -10851,10 +10994,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Decode numeric html entities to their ascii or UTF8 equivalent character.
 	 *
 	 * Callback function for preg_replace_callback in subs-members
-	 * Uses capture group 2 in the supplied array
 	 * Does basic scan to ensure characters are inside a valid range
 	 *
-	 * @param array $matches An array of matches (relevant info should be the 3rd item)
+	 * @param array $matches An array of matches
 	 * @return string A fixed string
 	 */
 	function replaceEntities__callback(array $matches): string
@@ -10874,10 +11016,9 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Converts html entities to utf8 equivalents
 	 *
 	 * Callback function for preg_replace_callback
-	 * Uses capture group 1 in the supplied array
 	 * Does basic checks to keep characters inside a viewable range.
 	 *
-	 * @param array $matches An array of matches (relevant info should be the 2nd item in the array)
+	 * @param array $matches An array of matches
 	 * @return string The fixed string
 	 */
 	function fixchar__callback(array $matches): string
@@ -10891,7 +11032,7 @@ if (!empty(SMF\Config::$backward_compatibility)) {
 	 * Callback function used of preg_replace_callback in smcFunc $ent_checks, for example
 	 * strpos, strlen, substr etc
 	 *
-	 * @param array $matches An array of matches (relevant info should be the 3rd item in the array)
+	 * @param array $matches An array of matches
 	 * @return string The fixed string
 	 */
 	function entity_fix__callback(array $matches): string

@@ -355,23 +355,6 @@ class Register implements ActionInterface
 		Utils::$context['valid_username'] = empty($errors);
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Backward compatibility wrapper for show sub-action.
-	 *
-	 * @param array $reg_errors Holds information about any errors that occurred.
-	 */
-	public static function register(array $reg_errors = []): void
-	{
-		self::load();
-		self::$obj->subaction = 'show';
-		self::$obj->errors = (array) $reg_errors;
-		self::$obj->execute();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

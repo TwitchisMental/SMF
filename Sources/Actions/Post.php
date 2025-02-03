@@ -376,22 +376,6 @@ class Post implements ActionInterface
 		IntegrationHook::call('integrate_post_end');
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Backward compatibility wrapper.
-	 *
-	 * Needed to allow old mods to pass $post_errors as a function parameter.
-	 */
-	public static function post(array $post_errors = []): void
-	{
-		self::load();
-		self::$obj->errors = (array) $post_errors;
-		self::$obj->execute();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

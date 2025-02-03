@@ -615,14 +615,6 @@ class Security
 			}
 		}
 	}
-
-	/**
-	 * Backward compatibility wrapper for User::$me->kickIfGuest().
-	 */
-	public static function kickGuest(): void
-	{
-		User::$me->kickIfGuest(null, false);
-	}
 }
 
 ?>

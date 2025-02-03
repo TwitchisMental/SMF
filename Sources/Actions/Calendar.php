@@ -1612,18 +1612,6 @@ class Calendar implements ActionInterface
 		return (int) $poster;
 	}
 
-	/**
-	 * Backward compatibility wrapper for Holiday::remove().
-	 *
-	 * @param array $holiday_ids An array of IDs of holidays to delete.
-	 */
-	public static function removeHolidays(array $holiday_ids): void
-	{
-		foreach ($holiday_ids as $holiday_id) {
-			Holiday::remove($holiday_id);
-		}
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

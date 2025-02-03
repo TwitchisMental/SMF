@@ -711,20 +711,6 @@ class Main implements ActionInterface
 		}
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Backward compatibility wrapper.
-	 */
-	public static function modifyProfile(array $post_errors = []): void
-	{
-		self::load();
-		Profile::$member->save_errors = $post_errors;
-		self::$obj->execute();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

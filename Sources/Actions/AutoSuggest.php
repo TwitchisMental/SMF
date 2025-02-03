@@ -301,18 +301,6 @@ class AutoSuggest implements ActionInterface
 		return isset(self::$suggest_types[$suggest_type]) && (method_exists(__CLASS__, $suggest_type) || function_exists('AutoSuggest_Search_' . self::$suggest_types[$suggest_type]) || function_exists('AutoSuggest_Search_' . $suggest_type));
 	}
 
-	/**
-	 * Backward compatibility provider
-	 * @param null|string $suggest_type
-	 * @param bool $callHandler
-	 */
-	public static function backCompatProvider(?string $suggest_type = null): void
-	{
-		self::load();
-		self::$obj->suggest_type = $suggest_type;
-		self::$obj->execute();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

@@ -295,34 +295,6 @@ class ReportToMod implements ActionInterface
 		}
 	}
 
-	/**
-	 * Backward compatibility wrapper for the reportMsg() method.
-	 * In theory, no modifications should ever have called this, but...
-	 */
-	public static function reportPost(int $msg, string $reason): void
-	{
-		$_POST['msg'] = (int) $msg;
-		$_POST['comment'] = Utils::htmlspecialcharsDecode((string) $reason);
-
-		self::load();
-		self::$obj->subaction = 'submit';
-		self::$obj->execute();
-	}
-
-	/**
-	 * Backward compatibility wrapper for the reportMember() method.
-	 * In theory, no modifications should ever have called this, but...
-	 */
-	public static function reportUser(int $id_member, string $reason): void
-	{
-		$_POST['u'] = (int) $id_member;
-		$_POST['comment'] = Utils::htmlspecialcharsDecode((string) $reason);
-
-		self::load();
-		self::$obj->subaction = 'submit';
-		self::$obj->execute();
-	}
-
 	/******************
 	 * Internal methods
 	 ******************/

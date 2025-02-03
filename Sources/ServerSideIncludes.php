@@ -153,7 +153,6 @@ class ServerSideIncludes
 	 * This shuts down the SSI and shows the footer.
 	 *
 	 * Alias: ssi_shutdown()
-	 *
 	 */
 	public static function shutdown(): void
 	{
