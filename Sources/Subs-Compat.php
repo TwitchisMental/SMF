@@ -5494,15 +5494,7 @@ if (!function_exists('idn_to_ascii')) {
 if (!function_exists('array_is_list')) {
 	function array_is_list(array $array): bool
 	{
-		$i = -1;
-
-		foreach ($array as $k => $v) {
-			if (++$i !== $k) {
-				return false;
-			}
-		}
-
-		return true;
+		return array_keys($array) === range(0, count($array) - 1);
 	}
 }
 
