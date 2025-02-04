@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF\Actions\Admin;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\Actions\MessageIndex;
 use SMF\Actions\Notify;
 use SMF\ActionTrait;
@@ -30,6 +31,7 @@ use SMF\Menu;
 use SMF\OutputTypeInterface;
 use SMF\OutputTypes;
 use SMF\Parser;
+use SMF\Routable;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\Url;
@@ -39,8 +41,9 @@ use SMF\Utils;
 /**
  * This class, unpredictable as this might be, handles basic administration.
  */
-class ACP implements ActionInterface
+class ACP implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/*******************
@@ -1695,8 +1698,20 @@ class ACP implements ActionInterface
 		Db::$db->insert(
 			'replace',
 			'{db_prefix}themes',
-			['id_member' => 'int', 'id_theme' => 'int', 'variable' => 'string-255', 'value' => 'string-65534'],
-			[User::$me->id, 1, 'admin_preferences', Theme::$current->options['admin_preferences']],
+			[
+				'id_member' => 'int',
+				'id_theme' => 'int',
+				'variable' => 'string-255',
+				'value' => 'string-65534',
+			],
+			[
+				[
+					User::$me->id,
+					1,
+					'admin_preferences',
+					Theme::$current->options['admin_preferences'],
+				],
+			],
 			['id_member', 'id_theme', 'variable'],
 		);
 

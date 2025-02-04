@@ -1800,8 +1800,20 @@ function DeleteInstall()
 	Db::$db->insert(
 		'ignore',
 		'{db_prefix}log_activity',
-		['date' => 'date', 'topics' => 'int', 'posts' => 'int', 'registers' => 'int'],
-		[Time::strftime('%Y-%m-%d', time()), 1, 1, (!empty($incontext['member_id']) ? 1 : 0)],
+		[
+			'date' => 'date',
+			'topics' => 'int',
+			'posts' => 'int',
+			'registers' => 'int',
+		],
+		[
+			[
+				Time::strftime('%Y-%m-%d', time()),
+				1,
+				1,
+				!empty($incontext['member_id']) ? 1 : 0,
+			],
+		],
 		['date'],
 	);
 
@@ -1853,10 +1865,16 @@ function DeleteInstall()
 			'replace',
 			'{db_prefix}sessions',
 			[
-				'session_id' => 'string', 'last_update' => 'int', 'data' => 'string',
+				'session_id' => 'string',
+				'last_update' => 'int',
+				'data' => 'string',
 			],
 			[
-				session_id(), time(), 'USER_AGENT|s:' . strlen($_SERVER['HTTP_USER_AGENT']) . ':"' . $_SERVER['HTTP_USER_AGENT'] . '";admin_time|i:' . time() . ';',
+				[
+					session_id(),
+					time(),
+					'USER_AGENT|s:' . strlen($_SERVER['HTTP_USER_AGENT']) . ':"' . $_SERVER['HTTP_USER_AGENT'] . '";admin_time|i:' . time() . ';',
+				],
 			],
 			['session_id'],
 		);
