@@ -430,7 +430,7 @@ class ErrorLog implements ActionInterface
 			ErrorHandler::fatalLang('error_bad_line');
 		}
 
-		$file_data = explode('<br />', Parser::highlightPhpCode(Utils::htmlspecialchars(file_get_contents($file))));
+		$file_data = preg_split('~\R|<br(\s*/)?>~', Parser::highlightPhpCode(Utils::htmlspecialchars(file_get_contents($file))));
 
 		// We don't want to slice off too many so lets make sure we stop at the last one
 		$max = min($max, max(array_keys($file_data)));
