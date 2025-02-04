@@ -718,16 +718,6 @@ class Main implements ActionInterface, Routable
 	 ***********************/
 
 	/**
-	 * Backward compatibility wrapper.
-	 */
-	public static function modifyProfile(array $post_errors = []): void
-	{
-		self::load();
-		Profile::$member->save_errors = $post_errors;
-		self::$obj->execute();
-	}
-
-	/**
 	 * Builds a routing path based on URL query parameters.
 	 *
 	 * @param array $params URL query parameters.

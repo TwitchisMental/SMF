@@ -383,18 +383,6 @@ class Post implements ActionInterface, Routable
 	 ***********************/
 
 	/**
-	 * Backward compatibility wrapper.
-	 *
-	 * Needed to allow old mods to pass $post_errors as a function parameter.
-	 */
-	public static function post(array $post_errors = []): void
-	{
-		self::load();
-		self::$obj->errors = (array) $post_errors;
-		self::$obj->execute();
-	}
-
-	/**
 	 * Builds a routing path based on URL query parameters.
 	 *
 	 * @param array $params URL query parameters.

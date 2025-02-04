@@ -32,18 +32,6 @@ class Logging
 	 ***********************/
 
 	/**
-	 * Backward compatibility alias for User::$me->logOnline().
-	 */
-	public static function writeLog(bool $force = false): void
-	{
-		if (!isset(User::$me)) {
-			return;
-		}
-
-		User::$me->logOnline($force);
-	}
-
-	/**
 	 * This function logs an action to the database. It is a
 	 * thin wrapper around Logging::logActions().
 	 *

@@ -1034,20 +1034,6 @@ class TopicMerge implements ActionInterface, Routable
 	}
 
 	/**
-	 * Backward compatibility wrapper for the options and/or merge sub-actions.
-	 * (The old procedural function with this name did both.)
-	 *
-	 * @param array $topics The IDs of the topics to merge
-	 */
-	public static function mergeExecute(array $topics = []): void
-	{
-		self::load();
-		self::$obj->subaction = !empty($_GET['sa']) && $_GET['sa'] === 'merge' ? 'merge' : 'options';
-		self::$obj->topics = array_map('intval', $topics);
-		self::$obj->execute();
-	}
-
-	/**
 	 * Builds a routing path based on URL query parameters.
 	 *
 	 * @param array $params URL query parameters.

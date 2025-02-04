@@ -116,19 +116,6 @@ class Help implements ActionInterface, Routable
 		Utils::$context['sub_template'] = 'manual';
 	}
 
-	/***********************
-	 * Public static methods
-	 ***********************/
-
-	/**
-	 * Backward compatibility wrapper for the index sub-action.
-	 */
-	public static function HelpIndex(): void
-	{
-		self::load();
-		self::$obj->subaction = 'index';
-		self::$obj->execute();
-	}
 
 	/******************
 	 * Internal methods
