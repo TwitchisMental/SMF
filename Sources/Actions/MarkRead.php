@@ -259,10 +259,12 @@ class MarkRead implements ActionInterface
 				'unwatched' => 'int',
 			],
 			[
-				$earlyMsg,
-				User::$me->id,
-				Topic::$topic_id,
-				$topicinfo['unwatched'],
+				[
+					$earlyMsg,
+					User::$me->id,
+					Topic::$topic_id,
+					$topicinfo['unwatched'],
+				],
 			],
 			[
 				'id_member',

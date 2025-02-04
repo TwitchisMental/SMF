@@ -807,10 +807,18 @@ class Login2 implements ActionInterface
 				'insert',
 				'{db_prefix}member_logins',
 				[
-					'id_member' => 'int', 'time' => 'int', 'ip' => 'inet', 'ip2' => 'inet',
+					'id_member' => 'int',
+					'time' => 'int',
+					'ip' => 'inet',
+					'ip2' => 'inet',
 				],
 				[
-					User::$me->id, time(), User::$me->ip, User::$me->ip2,
+					[
+						User::$me->id,
+						time(),
+						User::$me->ip,
+						User::$me->ip2,
+					],
 				],
 				[
 					'id_member', 'time',

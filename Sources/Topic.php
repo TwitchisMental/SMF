@@ -1083,8 +1083,18 @@ class Topic implements \ArrayAccess
 			Db::$db->insert(
 				'replace',
 				'{db_prefix}log_boards',
-				['id_board' => 'int', 'id_member' => 'int', 'id_msg' => 'int'],
-				[$toBoard, User::$me->id, Config::$modSettings['maxMsgID']],
+				[
+					'id_board' => 'int',
+					'id_member' => 'int',
+					'id_msg' => 'int',
+				],
+				[
+					[
+						$toBoard,
+						User::$me->id,
+						Config::$modSettings['maxMsgID'],
+					],
+				],
 				['id_board', 'id_member'],
 			);
 		}

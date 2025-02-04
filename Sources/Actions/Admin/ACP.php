@@ -1695,8 +1695,20 @@ class ACP implements ActionInterface
 		Db::$db->insert(
 			'replace',
 			'{db_prefix}themes',
-			['id_member' => 'int', 'id_theme' => 'int', 'variable' => 'string-255', 'value' => 'string-65534'],
-			[User::$me->id, 1, 'admin_preferences', Theme::$current->options['admin_preferences']],
+			[
+				'id_member' => 'int',
+				'id_theme' => 'int',
+				'variable' => 'string-255',
+				'value' => 'string-65534',
+			],
+			[
+				[
+					User::$me->id,
+					1,
+					'admin_preferences',
+					Theme::$current->options['admin_preferences'],
+				],
+			],
 			['id_member', 'id_theme', 'variable'],
 		);
 

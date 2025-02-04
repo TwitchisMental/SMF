@@ -707,8 +707,18 @@ class MessageIndex implements ActionInterface
 			Db::$db->insert(
 				'replace',
 				'{db_prefix}log_boards',
-				['id_msg' => 'int', 'id_member' => 'int', 'id_board' => 'int'],
-				[Config::$modSettings['maxMsgID'], User::$me->id, Board::$info->id],
+				[
+					'id_msg' => 'int',
+					'id_member' => 'int',
+					'id_board' => 'int',
+				],
+				[
+					[
+						Config::$modSettings['maxMsgID'],
+						User::$me->id,
+						Board::$info->id,
+					],
+				],
 				['id_member', 'id_board'],
 			);
 

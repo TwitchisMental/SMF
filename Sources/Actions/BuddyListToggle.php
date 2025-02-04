@@ -81,14 +81,16 @@ class BuddyListToggle implements ActionInterface
 						'claimed_time' => 'int',
 					],
 					[
-						'SMF\\Tasks\\Buddy_Notify',
-						Utils::jsonEncode([
-							'receiver_id' => $this->userReceiver,
-							'id_member' => User::$me->id,
-							'member_name' => User::$me->username,
-							'time' => time(),
-						]),
-						0,
+						[
+							'SMF\\Tasks\\Buddy_Notify',
+							Utils::jsonEncode([
+								'receiver_id' => $this->userReceiver,
+								'id_member' => User::$me->id,
+								'member_name' => User::$me->username,
+								'time' => time(),
+							]),
+							0,
+						],
 					],
 					['id_task'],
 				);

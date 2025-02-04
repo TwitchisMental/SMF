@@ -104,10 +104,12 @@ class ThemeSetOption implements ActionInterface
 				'value' => 'string-65534',
 			],
 			[
-				Theme::$current->settings['theme_id'],
-				User::$me->id,
-				$_GET['var'],
-				is_array($_GET['val']) ? implode(',', $_GET['val']) : $_GET['val'],
+				[
+					Theme::$current->settings['theme_id'],
+					User::$me->id,
+					$_GET['var'],
+					is_array($_GET['val']) ? implode(',', $_GET['val']) : $_GET['val'],
+				],
 			],
 			[
 				'id_theme',
