@@ -2387,7 +2387,7 @@ function parse_sql($filename)
 	// Count the total number of steps within this file - for progress.
 	$file_steps = substr_count(implode('', $lines), '---#');
 	$upcontext['total_items'] = substr_count(implode('', $lines), '--- ');
-	$upcontext['debug_items'] = $file_substrsteps;
+	$upcontext['debug_items'] = $file_steps;
 	$upcontext['current_item_num'] = 0;
 	$upcontext['current_item_name'] = '';
 	$upcontext['current_debug_item_num'] = 0;
