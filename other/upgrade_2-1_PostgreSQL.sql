@@ -1271,7 +1271,7 @@ $step_progress['current'] = $_GET['a'];
 $limit = 10000;
 $is_done = false;
 
-$request = $smcFunc['db_query']('', '
+$request = Db::$db->query('', '
 	SELECT COUNT(*)
 	FROM {db_prefix}themes
 	WHERE variable = {string:auto_notify}',
@@ -1279,8 +1279,8 @@ $request = $smcFunc['db_query']('', '
 		'auto_notify' => 'auto_notify',
 	)
 );
-list($maxMembers) = $smcFunc['db_fetch_row']($request);
-$smcFunc['db_free_result']($request);
+list($maxMembers) = Db::$db->fetch_row($request);
+Db::$db->free_result($request);
 
 while (!$is_done)
 {
@@ -1288,7 +1288,7 @@ while (!$is_done)
 	$inserts = array();
 
 	// This setting is stored over in the themes table in 2.0...
-	$request = $smcFunc['db_query']('', '
+	$request = Db::$db->query('', '
 		SELECT id_member, value
 		FROM {db_prefix}themes
 		WHERE variable = {string:auto_notify}
@@ -1300,16 +1300,16 @@ while (!$is_done)
 			'limit' => $limit,
 		)
 	);
-	if ($smcFunc['db_num_rows']($request) != 0)
+	if (Db::$db->num_rows($request) != 0)
 	{
-		while ($row = $smcFunc['db_fetch_assoc']($request))
+		while ($row = Db::$db->fetch_assoc($request))
 		{
 			$inserts[] = array($row['id_member'], 'msg_auto_notify', !empty($row['value']) ? 1 : 0);
 		}
-		$smcFunc['db_free_result']($request);
+		Db::$db->free_result($request);
 	}
 
-	$smcFunc['db_insert']('ignore',
+	Db::$db->insert('ignore',
 		'{db_prefix}user_alerts_prefs',
 		array('id_member' => 'int', 'alert_pref' => 'string', 'alert_value' => 'string'),
 		$inserts,
