@@ -1655,6 +1655,7 @@ class Profile extends User implements \ArrayAccess
 
 		// Invalidate any cached data.
 		CacheApi::put('member_data-profile-' . $this->id, null, 0);
+		CacheApi::put('slug_type-member_id-' . $this->id, null, 0);
 	}
 
 	/**
@@ -2127,6 +2128,9 @@ class Profile extends User implements \ArrayAccess
 
 		// Is this the profile of the user himself or herself?
 		parent::$me->is_owner = $this->id === parent::$me->id;
+
+		// Create the slug for this member.
+		Slug::create($this->name, 'member', $this->id);
 
 		// Backward compatibility.
 		self::$cur_profile = &self::$member->data;

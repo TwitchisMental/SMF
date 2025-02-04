@@ -16,11 +16,13 @@ declare(strict_types=1);
 namespace SMF\Actions;
 
 use SMF\ActionInterface;
+use SMF\ActionRouter;
 use SMF\ActionTrait;
 use SMF\CacheApi;
 use SMF\Config;
 use SMF\Db\DatabaseApi as Db;
 use SMF\Lang;
+use SMF\Routable;
 use SMF\SecurityToken;
 use SMF\Theme;
 use SMF\User;
@@ -32,8 +34,9 @@ use SMF\Utils;
  * - uses the Themes template. (pick sub template.)
  * - accessed with ?action=themechooser.
  */
-class ThemeChooser implements ActionInterface
+class ThemeChooser implements ActionInterface, Routable
 {
+	use ActionRouter;
 	use ActionTrait;
 
 	/****************
@@ -351,6 +354,30 @@ class ThemeChooser implements ActionInterface
 		Utils::$context['page_title'] = Lang::$txt['theme_pick'];
 		Utils::$context['sub_template'] = 'pick';
 		SecurityToken::create('pick-th');
+	}
+
+	/***********************
+	 * Public static methods
+	 ***********************/
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route[] = $params['action'];
+		unset($params['action']);
+
+		if (isset($params['u']) && $params['u'] == User::$me->id) {
+			unset($params['u']);
+		}
+
+		return ['route' => $route, 'params' => $params];
 	}
 
 	/******************

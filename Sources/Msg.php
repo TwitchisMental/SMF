@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace SMF;
 
 use SMF\Actions\Moderation\ReportedContent;
+use SMF\Cache\CacheApi;
 use SMF\Db\DatabaseApi as Db;
 use SMF\Search\SearchApi;
 
@@ -26,7 +27,7 @@ use SMF\Search\SearchApi;
  * including sending emails, pms, blocking spam, preparsing posts, spell
  * checking, and the post box.
  */
-class Msg implements \ArrayAccess
+class Msg implements \ArrayAccess, Routable
 {
 	use ArrayAccessHelper;
 
@@ -380,13 +381,8 @@ class Msg implements \ArrayAccess
 			// Is this user the message author?
 			$this->formatted['is_message_author'] = $this->id_member == User::$me->id && !User::$me->is_guest;
 
-			// Load the author's data, if not already loaded.
-			if (!empty($this->id_member) && !isset(User::$loaded[$this->id_member])) {
-				User::load($this->id_member);
-			}
-
-			// If it couldn't load, or the user was a guest.... someday may be done with a guest table.
-			if (empty($this->id_member) || !isset(User::$loaded[$this->id_member])) {
+			// If the user was a guest...
+			if (empty($this->id_member)) {
 				$this->formatted['member'] = [
 					'name' => $this->poster_name,
 					'username' => $this->poster_name,
@@ -398,7 +394,7 @@ class Msg implements \ArrayAccess
 					'is_guest' => true,
 				];
 			} else {
-				$this->formatted['member'] = User::$loaded[$this->id_member]->format(true);
+				$this->formatted['member'] = current(User::load($this->id_member))->format(true);
 
 				// Define this here to make things a bit more readable
 				$can_view_warning = User::$me->is_mod || User::$me->allowedTo('moderate_forum') || User::$me->allowedTo('view_warning_any') || ($this->id_member == User::$me->id && User::$me->allowedTo('view_warning_own'));
@@ -1737,6 +1733,14 @@ class Msg implements \ArrayAccess
 			$searchAPI->postRemoved((int) $msgOptions['id']);
 		}
 
+		// If this is the first post of a topic, remove any cached slug string for the topic.
+		if (
+			!empty($topicOptions['id'])
+			&& ($msgOptions['id'] ?? NAN) === ($topicOptions['first_msg'] ?? NAN)
+		) {
+			CacheApi::put('slug_type-topic_id-' . $topicOptions['id'], null, 0);
+		}
+
 		// Anyone quoted or mentioned?
 		$quoted_members = Mentions::getQuotedMembers($msgOptions['body'], (int) $posterOptions['id']);
 		$quoted_modifications = Mentions::modifyMentions('quote', (int) $msgOptions['id'], $quoted_members, (int) $posterOptions['id']);
@@ -2900,6 +2904,44 @@ class Msg implements \ArrayAccess
 		}
 
 		return false;
+	}
+
+	/**
+	 * Builds a routing path based on URL query parameters.
+	 *
+	 * @param array $params URL query parameters.
+	 * @return array Contains two elements: ['route' => [], 'params' => []].
+	 *    The 'route' element contains the routing path. The 'params' element
+	 *    contains any $params that weren't incorporated into the route.
+	 */
+	public static function buildRoute(array $params): array
+	{
+		$route = [];
+
+		if (isset($params['msg'])) {
+			$route[] = 'msgs';
+			$route[] = $params['msg'];
+			unset($params['msg']);
+		}
+
+		return ['route' => $route, 'params' => $params];
+	}
+
+	/**
+	 * Parses a route to get URL query parameters.
+	 *
+	 * @param array $route Array of routing path components.
+	 * @param array $params Any existing URL query parameters.
+	 * @return array URL query parameters
+	 */
+	public static function parseRoute(array $route, array $params = []): array
+	{
+		if (count($route) >= 2) {
+			array_shift($route);
+			$params['msg'] = array_shift($route);
+		}
+
+		return $params;
 	}
 
 	/*************************
