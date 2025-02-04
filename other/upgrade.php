@@ -1504,7 +1504,9 @@ function UpgradeOptions()
 				'replace',
 				Config::$db_prefix . 'settings',
 				['variable' => 'string', 'value' => 'string'],
-				['enable_sm_stats', 1],
+				[
+					['enable_sm_stats', 1],
+				],
 				['variable'],
 			);
 		}
@@ -1889,7 +1891,9 @@ function DatabaseChanges()
 						'replace',
 						Config::$db_prefix . 'settings',
 						['variable' => 'string', 'value' => 'string'],
-						['smfVersion', $file[2]],
+						[
+							['smfVersion', $file[2]],
+						],
 						['variable'],
 					);
 
@@ -3187,7 +3191,9 @@ function ConvertUtf8()
 			'replace',
 			'{db_prefix}settings',
 			['variable' => 'string', 'value' => 'string'],
-			[['global_character_set', 'UTF-8']],
+			[
+				['global_character_set', 'UTF-8'],
+			],
 			['variable'],
 		);
 
@@ -3683,7 +3689,10 @@ function ConvertUtf8()
 		'replace',
 		'{db_prefix}settings',
 		['variable' => 'string', 'value' => 'string'],
-		[['global_character_set', 'UTF-8'], ['previousCharacterSet', $prev_charset]],
+		[
+			['global_character_set', 'UTF-8'],
+			['previousCharacterSet', $prev_charset],
+		],
 		['variable'],
 	);
 

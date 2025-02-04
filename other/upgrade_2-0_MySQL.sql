@@ -2805,7 +2805,7 @@ if (file_exists($GLOBALS['boarddir'] . '/Themes/babylon'))
 		Db::$db->insert('replace',
 			'{db_prefix}settings',
 			array('variable' => 'string', 'value' => 'string'),
-			array('knownThemes', $known_themes),
+			array(['knownThemes', $known_themes]),
 			array('variable')
 		);
 
@@ -2830,7 +2830,7 @@ if (file_exists($GLOBALS['boarddir'] . '/Themes/babylon'))
 			Db::$db->insert('replace',
 				'{db_prefix}settings',
 				array('variable' => 'string', 'value' => 'string'),
-				array('theme_guests', 0),
+				array(['theme_guests', 0]),
 				array('variable')
 			);
 		}
