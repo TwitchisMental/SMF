@@ -114,9 +114,11 @@ class Session implements \SessionHandlerInterface
 				'last_update' => 'int',
 			],
 			[
-				$session_id,
-				$data,
-				time(),
+				[
+					$session_id,
+					$data,
+					time(),
+				],
 			],
 			['session_id'],
 		);

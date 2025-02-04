@@ -545,8 +545,16 @@ class Logging
 				Db::$db->insert(
 					'ignore',
 					'{db_prefix}log_activity',
-					['date' => 'date', 'most_on' => 'int'],
-					[$date, $total_users_online],
+					[
+						'date' => 'date',
+						'most_on' => 'int',
+					],
+					[
+						[
+							$date,
+							$total_users_online,
+						],
+					],
 					['date'],
 				);
 			}

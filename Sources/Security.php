@@ -218,9 +218,11 @@ class Security
 				'log_type' => 'string',
 			],
 			[
-				User::$me->ip,
-				time(),
-				$error_type,
+				[
+					User::$me->ip,
+					time(),
+					$error_type,
+				],
 			],
 			['ip', 'log_type'],
 		);

@@ -2083,12 +2083,28 @@ function DeleteUpgrade()
 		'',
 		'{db_prefix}log_actions',
 		[
-			'log_time' => 'int', 'id_log' => 'int', 'id_member' => 'int', 'ip' => 'inet', 'action' => 'string',
-			'id_board' => 'int', 'id_topic' => 'int', 'id_msg' => 'int', 'extra' => 'string-65534',
+			'log_time' => 'int',
+			'id_log' => 'int',
+			'id_member' => 'int',
+			'ip' => 'inet',
+			'action' => 'string',
+			'id_board' => 'int',
+			'id_topic' => 'int',
+			'id_msg' => 'int',
+			'extra' => 'string-65534',
 		],
 		[
-			time(), 3, User::$me->id, User::$me->ip, 'upgrade',
-			0, 0, 0, json_encode(['version' => SMF_FULL_VERSION, 'member' => User::$me->id]),
+			[
+				time(),
+				3,
+				User::$me->id,
+				User::$me->ip,
+				'upgrade',
+				0,
+				0,
+				0,
+				json_encode(['version' => SMF_FULL_VERSION, 'member' => User::$me->id]),
+			],
 		],
 		['id_action'],
 	);
@@ -2126,9 +2142,11 @@ function addBackgroundTasks()
 			'claimed_time' => 'int',
 		],
 		[
-			'SMF\\Tasks\\UpdateSpoofDetectorNames',
-			json_encode(['last_member_id' => 0]),
-			0,
+			[
+				'SMF\\Tasks\\UpdateSpoofDetectorNames',
+				json_encode(['last_member_id' => 0]),
+				0,
+			],
 		],
 		['id_task'],
 	);
@@ -3293,8 +3311,16 @@ function ConvertUtf8()
 		Db::$db->insert(
 			'replace',
 			'{db_prefix}settings',
-			['variable' => 'string', 'value' => 'string'],
-			['db_search_index', ''],
+			[
+				'variable' => 'string',
+				'value' => 'string',
+			],
+			[
+				[
+					'db_search_index',
+					'',
+				],
+			],
 			['variable'],
 		);
 	}

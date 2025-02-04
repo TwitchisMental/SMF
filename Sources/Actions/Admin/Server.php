@@ -1425,8 +1425,16 @@ class Server implements ActionInterface
 				Db::$db->insert(
 					'replace',
 					'{db_prefix}settings',
-					['variable' => 'string', 'value' => 'string'],
-					['sm_stats_key', $ID[1]],
+					[
+						'variable' => 'string',
+						'value' => 'string',
+					],
+					[
+						[
+							'sm_stats_key',
+							$ID[1],
+						],
+					],
 					['variable'],
 				);
 

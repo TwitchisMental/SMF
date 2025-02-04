@@ -375,15 +375,17 @@ class GroupMembership implements ActionInterface
 				'act_reason' => 'string',
 			],
 			[
-				Profile::$member->id,
-				$new_group_id,
-				time(),
-				$_POST['reason'],
-				0,
-				0,
-				'',
-				0,
-				'',
+				[
+					Profile::$member->id,
+					$new_group_id,
+					time(),
+					$_POST['reason'],
+					0,
+					0,
+					'',
+					0,
+					'',
+				],
 			],
 			['id_request'],
 		);
@@ -408,9 +410,11 @@ class GroupMembership implements ActionInterface
 				'claimed_time' => 'int',
 			],
 			[
-				'SMF\\Tasks\\GroupReq_Notify',
-				$data,
-				0,
+				[
+					'SMF\\Tasks\\GroupReq_Notify',
+					$data,
+					0,
+				],
 			],
 			[],
 		);
