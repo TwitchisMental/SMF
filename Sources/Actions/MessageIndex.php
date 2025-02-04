@@ -357,6 +357,17 @@ class MessageIndex implements ActionInterface, Routable
 			Slug::create($row['first_subject'], 'topic', (int) $row['id_topic']);
 		}
 
+		// Ensure the slugs for the first and last posters have been set.
+		foreach (['first', 'last'] as $fl) {
+			if (
+				!empty($row[$fl . '_id_member'])
+				&& ($row[$fl . '_display_name'] ?? '') !== ''
+				&& !isset(Slug::$known['member'][(int) $row[$fl . '_id_member']])
+			) {
+				Slug::create($row[$fl . '_display_name'], 'member', (int) $row[$fl . '_id_member']);
+			}
+		}
+
 		// 'Print' the topic info.
 		Utils::$context['topics'][$row['id_topic']] = array_merge($row, [
 			'id' => $row['id_topic'],
