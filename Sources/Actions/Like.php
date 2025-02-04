@@ -487,10 +487,12 @@ class Like implements ActionInterface
 				'like_time' => 'int',
 			],
 			[
-				$content,
-				$type,
-				$user['id'],
-				$time,
+				[
+					$content,
+					$type,
+					$user['id'],
+					$time,
+				],
 			],
 			[
 				'content_id',
@@ -513,15 +515,17 @@ class Like implements ActionInterface
 					'claimed_time' => 'int',
 				],
 				[
-					'SMF\\Tasks\\Likes_Notify',
-					Utils::jsonEncode([
-						'content_id' => $content,
-						'content_type' => $type,
-						'sender_id' => $user['id'],
-						'sender_name' => $user['name'],
-						'time' => $time,
-					]),
-					0,
+					[
+						'SMF\\Tasks\\Likes_Notify',
+						Utils::jsonEncode([
+							'content_id' => $content,
+							'content_type' => $type,
+							'sender_id' => $user['id'],
+							'sender_name' => $user['name'],
+							'time' => $time,
+						]),
+						0,
+					],
 				],
 				['id_task'],
 			);

@@ -1421,8 +1421,24 @@ class User implements \ArrayAccess
 			Db::$db->insert(
 				$do_delete ? 'ignore' : 'replace',
 				'{db_prefix}log_online',
-				['session' => 'string', 'id_member' => 'int', 'id_spider' => 'int', 'log_time' => 'int', 'ip' => 'inet', 'url' => 'string'],
-				[$session_id, $this->id, empty($_SESSION['id_robot']) ? 0 : $_SESSION['id_robot'], time(), $this->ip, $encoded_get],
+				[
+					'session' => 'string',
+					'id_member' => 'int',
+					'id_spider' => 'int',
+					'log_time' => 'int',
+					'ip' => 'inet',
+					'url' => 'string',
+				],
+				[
+					[
+						$session_id,
+						$this->id,
+						empty($_SESSION['id_robot']) ? 0 : $_SESSION['id_robot'],
+						time(),
+						$this->ip,
+						$encoded_get,
+					],
+				],
 				['session'],
 			);
 		}
@@ -4284,8 +4300,18 @@ class User implements \ArrayAccess
 			Db::$db->insert(
 				'insert',
 				'{db_prefix}log_spider_hits',
-				['id_spider' => 'int', 'log_time' => 'int', 'url' => 'string'],
-				[$_SESSION['id_robot'], time(), $url],
+				[
+					'id_spider' => 'int',
+					'log_time' => 'int',
+					'url' => 'string',
+				],
+				[
+					[
+						$_SESSION['id_robot'],
+						time(),
+						$url,
+					],
+				],
 				[],
 			);
 		}

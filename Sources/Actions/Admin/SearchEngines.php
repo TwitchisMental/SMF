@@ -711,10 +711,16 @@ class SearchEngines implements ActionInterface
 					'insert',
 					'{db_prefix}spiders',
 					[
-						'spider_name' => 'string', 'user_agent' => 'string', 'ip_info' => 'string',
+						'spider_name' => 'string',
+						'user_agent' => 'string',
+						'ip_info' => 'string',
 					],
 					[
-						$_POST['spider_name'], $_POST['spider_agent'], $ips,
+						[
+							$_POST['spider_name'],
+							$_POST['spider_agent'],
+							$ips,
+						],
 					],
 					['id_spider'],
 				);

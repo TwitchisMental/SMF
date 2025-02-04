@@ -461,8 +461,18 @@ abstract class Notify implements ActionInterface
 			Db::$db->insert(
 				'ignore',
 				'{db_prefix}log_notify',
-				['id_member' => 'int', 'id_topic' => 'int', 'id_board' => 'int'],
-				[User::$me->id, $id_topic, $id_board],
+				[
+					'id_member' => 'int',
+					'id_topic' => 'int',
+					'id_board' => 'int',
+				],
+				[
+					[
+						User::$me->id,
+						$id_topic,
+						$id_board,
+					],
+				],
 				['id_member', 'id_topic', 'id_board'],
 			);
 		} else {

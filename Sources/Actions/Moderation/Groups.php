@@ -334,9 +334,11 @@ class Groups extends ViewGroups
 						'claimed_time' => 'int',
 					],
 					[
-						'SMF\\Tasks\\GroupAct_Notify',
-						$data,
-						0,
+						[
+							'SMF\\Tasks\\GroupAct_Notify',
+							$data,
+							0,
+						],
 					],
 					[],
 				);

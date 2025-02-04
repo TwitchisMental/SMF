@@ -110,8 +110,20 @@ class ThemeChooser implements ActionInterface
 					Db::$db->insert(
 						'replace',
 						'{db_prefix}themes',
-						['id_theme' => 'int', 'id_member' => 'int', 'variable' => 'string-255', 'value' => 'string-65534'],
-						[$id_theme, $_REQUEST['u'], 'theme_variant', $variant],
+						[
+							'id_theme' => 'int',
+							'id_member' => 'int',
+							'variable' => 'string-255',
+							'value' => 'string-65534',
+						],
+						[
+							[
+								$id_theme,
+								$_REQUEST['u'],
+								'theme_variant',
+								$variant,
+							],
+						],
 						['id_theme', 'id_member', 'variable'],
 					);
 					CacheApi::put('theme_settings-' . $id_theme . ':' . $_REQUEST['u'], null, 90);

@@ -557,8 +557,16 @@ class Mail
 			Db::$db->insert(
 				'replace',
 				'{db_prefix}settings',
-				['variable' => 'string', 'value' => 'string'],
-				['mail_failed_attempts', empty(Config::$modSettings['mail_failed_attempts']) ? 1 : ++Config::$modSettings['mail_failed_attempts']],
+				[
+					'variable' => 'string',
+					'value' => 'string',
+				],
+				[
+					[
+						'mail_failed_attempts',
+						empty(Config::$modSettings['mail_failed_attempts']) ? 1 : ++Config::$modSettings['mail_failed_attempts'],
+					],
+				],
 				['variable'],
 			);
 
@@ -1110,14 +1118,16 @@ class Mail
 				'claimed_time' => 'int',
 			],
 			[
-				'SMF\\Tasks\\Register_Notify',
-				Utils::jsonEncode([
-					'new_member_id' => $memberID,
-					'new_member_name' => $member_name,
-					'notify_type' => $type,
-					'time' => time(),
-				]),
-				0,
+				[
+					'SMF\\Tasks\\Register_Notify',
+					Utils::jsonEncode([
+						'new_member_id' => $memberID,
+						'new_member_name' => $member_name,
+						'notify_type' => $type,
+						'time' => time(),
+					]),
+					0,
+				],
 			],
 			['id_task'],
 		);
