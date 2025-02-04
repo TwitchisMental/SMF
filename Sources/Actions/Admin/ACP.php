@@ -1574,12 +1574,12 @@ class ACP implements ActionInterface, Routable
 
 		// Load all the files in the tasks directory.
 		if (!empty($versionOptions['include_tasks'])) {
-			$tasks_dir = dir(Config::$tasksdir);
+			$tasks_dir = dir(Config::$sourcedir . '/Tasks');
 
 			while ($entry = $tasks_dir->read()) {
-				if (str_ends_with($entry, '.php') && !is_dir(Config::$tasksdir . '/' . $entry) && $entry !== 'index.php') {
+				if (str_ends_with($entry, '.php') && !is_dir(Config::$sourcedir . '/Tasks/' . $entry) && $entry !== 'index.php') {
 					// Read the first 4k from the file.... enough for the header.
-					$fp = fopen(Config::$tasksdir . '/' . $entry, 'rb');
+					$fp = fopen(Config::$sourcedir . '/Tasks/' . $entry, 'rb');
 					$header = fread($fp, 4096);
 					fclose($fp);
 
