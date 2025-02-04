@@ -140,7 +140,7 @@ if (!isset(Config::$modSettings['allow_no_censored']))
 		SELECT value
 		FROM {$db_prefix}themes
 		WHERE variable='allow_no_censored'
-		AND id_theme = 1 OR id_theme = 'Config::$modSettings[theme_default]'
+		AND id_theme = 1 OR id_theme = " . Config::$modSettings['theme_default'] ?? '1' . "
 	");
 
 	// Is it set for either "default" or the one they've set as default?
