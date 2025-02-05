@@ -1310,7 +1310,7 @@ class Members implements ActionInterface
 	/**
 	 * Gets the configuration variables for this admin area.
 	 *
-	 * @return array $config_vars for the registration area.
+	 * @return array $config_vars for the member settings area.
 	 */
 	public static function getConfigVars(): array
 	{
