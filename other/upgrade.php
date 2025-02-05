@@ -4190,7 +4190,7 @@ function CleanupAgreements()
 		}
 
 		// Skip anything not agreements.
-		if (str_starts_with($entry, 'agreements.') || !str_ends_with($entry, '.txt')) {
+		if (!str_starts_with($entry, 'agreements.') || !str_ends_with($entry, '.txt')) {
 			continue;
 		}
 
