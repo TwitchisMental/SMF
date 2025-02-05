@@ -4065,7 +4065,7 @@ function serialize_to_json()
 
 function Cleanup()
 {
-	global $command_line, $upcontext, $support_js, $txt;
+	global $command_line, $upcontext, $support_js;
 
 	$upcontext['sub_template'] = isset($_GET['xml']) ? 'cleanup_xml' : 'cleanup';
 	$upcontext['page_title'] = Lang::$txt['upgrade_step_cleanup'];
@@ -4083,7 +4083,7 @@ function Cleanup()
 	$upcontext['steps_count'] = count($cleanupSteps);
 	$upcontext['cur_substep_num'] = ((int) $_GET['substep']) ?? 0;
 	$upcontext['cur_substep'] = $cleanupSteps[$upcontext['cur_substep_num']] ?? $cleanupSteps[0];
-	$upcontext['cur_substep_name'] = $txt['upgrade_step_cleanup_' . $upcontext['cur_substep']] ?? $txt['upgrade_step_cleanup'];
+	$upcontext['cur_substep_name'] = Lang::$txt['upgrade_step_cleanup_' . $upcontext['cur_substep']] ?? Lang::$txt['upgrade_step_cleanup'];
 	$upcontext['step_progress'] = (int) (($upcontext['cur_substep_num'] / $upcontext['steps_count']) * 100);
 
 	foreach ($cleanupSteps as $id => $substep) {
@@ -4099,7 +4099,7 @@ function Cleanup()
 	// Dubstep.
 	for ($substep = $upcontext['cur_substep_num']; $substep < $upcontext['steps_count']; $substep++) {
 		$upcontext['step_progress'] = (int) (($substep / $upcontext['steps_count']) * 100);
-		$upcontext['cur_substep_name'] = $txt['upgrade_step_cleanup_' . $cleanupSteps[$substep]] ?? $txt['upgrade_step_cleanup'];
+		$upcontext['cur_substep_name'] = Lang::$txt['upgrade_step_cleanup_' . $cleanupSteps[$substep]] ?? Lang::$txt['upgrade_step_cleanup'];
 		$upcontext['cur_substep_num'] = $substep + 1;
 
 		if ($command_line) {
