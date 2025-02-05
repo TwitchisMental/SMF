@@ -693,9 +693,9 @@ if (!isset(Config::$modSettings['cal_showholidays']) || !isset(Config::$modSetti
 		INSERT IGNORE INTO {$db_prefix}settings
 			(variable, value)
 		VALUES
-			('cal_showholidays', Config::$modSettings[cal_showholidays]),
-			('cal_showbdays', Config::$modSettings[cal_showbdays]),
-			('cal_showevents', Config::$modSettings[cal_showevents])");
+			('cal_showholidays', " . Config::$modSettings['cal_showholidays'] . "),
+			('cal_showbdays', " . Config::$modSettings['cal_showbdays'] . "),
+			('cal_showevents', " . Config::$modSettings['cal_showevents'] . ")");
 }
 
 ---}
@@ -734,7 +734,7 @@ if (empty(Config::$modSettings['signature_settings']))
 		INSERT IGNORE INTO {$db_prefix}settings
 			(variable, value)
 		VALUES
-			('signature_settings', 'Config::$modSettings[signature_settings]')");
+			('signature_settings', '" . Config::$modSettings['signature_settings'] . "')");
 
 	upgrade_query("
 		DELETE FROM {$db_prefix}settings
@@ -761,7 +761,7 @@ upgrade_query("
 	INSERT IGNORE INTO {$db_prefix}settings
 		(variable, value)
 	VALUES
-		('pm_spam_settings', 'Config::$modSettings[pm_spam_settings]')");
+		('pm_spam_settings', '" . Config::$modSettings['pm_spam_settings'] . "')");
 
 upgrade_query("
 	DELETE FROM {$db_prefix}settings
