@@ -1585,6 +1585,8 @@ class Themes implements ActionInterface
 	 */
 	protected function installDir(): array
 	{
+		$_REQUEST['theme_dir'] = rtrim($_REQUEST['theme_dir'], '\\/');
+
 		// Cannot use the theme dir as a theme dir.
 		if (!isset($_REQUEST['theme_dir']) || empty($_REQUEST['theme_dir']) || rtrim(realpath($_REQUEST['theme_dir']), '/\\') == realpath(Utils::$context['themedir'])) {
 			ErrorHandler::fatalLang('theme_install_invalid_dir', false);
