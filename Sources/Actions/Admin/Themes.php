@@ -2149,7 +2149,7 @@ class Themes implements ActionInterface
 					if (filetype($path . '/' . $object) == 'dir') {
 						$this->deltree($path . '/' . $object);
 					} else {
-						unlink($path . '/' . $object);
+						@unlink($path . '/' . $object);
 					}
 				}
 			}
@@ -2157,7 +2157,7 @@ class Themes implements ActionInterface
 
 		reset($objects);
 
-		return rmdir($path);
+		return @rmdir($path);
 	}
 
 	/**
